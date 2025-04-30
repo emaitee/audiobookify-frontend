@@ -14,6 +14,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { PlayerProvider } from "@/context/PlayerContext";
 import { MiniPlayer } from '../components/MiniPlayer';
 import { AnimatePresence } from 'framer-motion';
+import { ProfileProvider } from "@/context/ProfileContext";
 
 
 const geistSans = Geist({
@@ -46,8 +47,10 @@ const pathname = usePathname();
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
- <ClientAuthProvider>
- <PlayerProvider>
+      <ClientAuthProvider>
+      <ProfileProvider>
+      <PlayerProvider>
+
         <div className="bg-white min-h-screen relative text-black">
       {/* Header */}
       <Header showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
@@ -70,8 +73,9 @@ const pathname = usePathname();
       {/* Bottom Navigation */}
       <BottomNav />
     </div>
-    </PlayerProvider>
-    </ClientAuthProvider>
+      </PlayerProvider>
+      </ProfileProvider>
+      </ClientAuthProvider>
       </body>
     </html>
   );

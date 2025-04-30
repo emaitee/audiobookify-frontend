@@ -1,12 +1,7 @@
 'use client'
 import { useState, useRef, useEffect } from 'react';
 import { Plus, Upload, X, PlayCircle, Check, AlertTriangle, BarChart2, FileText, Download } from 'lucide-react';
-import { authApiHelper } from '../utils/api';
-
-// API service functions
-export const API_BASE_URL = 'http://localhost:8081/api';
-
-
+import { authApiHelper, API_BASE_URL } from '../utils/api';
 
 // API service for audiobooks
 const audioBookService = {

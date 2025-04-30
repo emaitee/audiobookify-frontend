@@ -2,7 +2,8 @@
 
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { API_BASE_URL } from '@/app/admin/page';
+import { API_BASE_URL } from '@/app/utils/api';
+
 
 type User = {
   email: string;
