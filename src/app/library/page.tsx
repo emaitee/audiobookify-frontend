@@ -153,10 +153,10 @@ const LibraryView = () => {
           { id: 'downloaded', label: 'Downloaded', icon: Download }
         ].map((filter) => (
           <button
-            key={filter.id}
-            onClick={() => setActiveFilter(filter.id)}
+            key={filter._id}
+            onClick={() => setActiveFilter(filter._id)}
             className={`px-4 py-1 rounded-full text-sm whitespace-nowrap flex items-center gap-1 ${
-              activeFilter === filter.id
+              activeFilter === filter._id
                 ? 'bg-blue-500 text-white'
                 : 'bg-gray-200 hover:bg-gray-300'
             }`}

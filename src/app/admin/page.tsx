@@ -568,7 +568,7 @@ const UploadModal = ({handleClose,uploadStep,fileInputRef,handleFileSelect,handl
               ) : (
                 <div className="space-y-3">
                   {episodes.map((episode, index) => (
-                    <div key={episode.id || index} className="border rounded-lg p-4 hover:bg-gray-50">
+                    <div key={episode._id || index} className="border rounded-lg p-4 hover:bg-gray-50">
                       <div className="flex justify-between items-center">
                         <div>
                           <h4 className="font-medium">{episode.title || `Episode ${episode.episodeNumber}`}</h4>
@@ -911,7 +911,7 @@ const AdminView = () => {
           const response = JSON.parse(xhr.responseText);
           
           const newUpload = {
-            id: response.id || `new-${Date.now()}`,
+            id: response._id || `new-${Date.now()}`,
             title: bookMetadata.title,
             author: bookMetadata.author,
             narrator: bookMetadata.narrator,
@@ -989,7 +989,7 @@ xhr.setRequestHeader('x-auth-token', token);
           
 //           // Add the new upload to the recent uploads list
 //           const newUpload = {
-//             id: response.id || `new-${Date.now()}`,
+//             id: response._id || `new-${Date.now()}`,
 //             title: bookMetadata.title,
 //             author: bookMetadata.author,
 //             narrator: bookMetadata.narrator,
@@ -1166,7 +1166,7 @@ const uploadNewEpisode = async (bookId, file) => {
 //               ) : (
 //                 <div className="space-y-3">
 //                   {episodes.map((episode, index) => (
-//                     <div key={episode.id || index} className="border rounded-lg p-4 hover:bg-gray-50">
+//                     <div key={episode._id || index} className="border rounded-lg p-4 hover:bg-gray-50">
 //                       <div className="flex justify-between items-center">
 //                         <div>
 //                           <h4 className="font-medium">{episode.title || `Episode ${episode.episodeNumber}`}</h4>
@@ -1240,11 +1240,11 @@ const uploadNewEpisode = async (bookId, file) => {
       await audioBookService.approveBook(id);
       
       // Update local state
-      const approvedItem = pendingApprovals.find(item => item.id === id);
+      const approvedItem = pendingApprovals.find(item => item._id === id);
       
       if (approvedItem) {
         // Remove from pending
-        setPendingApprovals(pendingApprovals.filter(item => item.id !== id));
+        setPendingApprovals(pendingApprovals.filter(item => item._id !== id));
         
         // Add to recent uploads with approved status
         const updatedItem = {
@@ -1270,11 +1270,11 @@ const uploadNewEpisode = async (bookId, file) => {
       await audioBookService.rejectBook(id, 'Rejected by admin');
       
       // Update local state
-      const rejectedItem = pendingApprovals.find(item => item.id === id);
+      const rejectedItem = pendingApprovals.find(item => item._id === id);
       
       if (rejectedItem) {
         // Remove from pending
-        setPendingApprovals(pendingApprovals.filter(item => item.id !== id));
+        setPendingApprovals(pendingApprovals.filter(item => item._id !== id));
         
         // Add to recent uploads with rejected status
         const updatedItem = {

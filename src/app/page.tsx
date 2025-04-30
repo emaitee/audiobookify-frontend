@@ -61,7 +61,7 @@ const EmptyState = ({ icon: Icon, title, description }) => (
 
 const BookCover = ({ book, size = "normal", onClick = null, showPlayButton = true }) => {
   const { currentBook, isPlaying } = usePlayer();
-  const isCurrent = currentBook?.id === book._id;
+  const isCurrent = currentBook?._id === book._id;
   
   const sizeClasses = {
     small: "h-40 rounded-lg",
@@ -112,7 +112,7 @@ const BookCover = ({ book, size = "normal", onClick = null, showPlayButton = tru
   );
 };
 
-const SectionHeader = ({ title, actionText, onAction }) => (
+const SectionHeader = ({ title, actionText, onAction }: { title: string; actionText: string; onAction: () => void }) => (
   <div className="flex justify-between items-center mb-5">
     <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
     <button 
@@ -126,7 +126,7 @@ const SectionHeader = ({ title, actionText, onAction }) => (
 );
 
 const HomeView = () => {
-  const { play, isPlaying, allBooks, setCurrentBook, currentBook } = usePlayer();
+  const { play, setCurrentBook, currentBook } = usePlayer();
   const [continueListening, setContinueListening] = useState<Book[]>([]);
   const [featuredBooks, setFeaturedBooks] = useState<Book[]>([]);
   const [recommendedBooks, setRecommendedBooks] = useState<Book[]>([]);
@@ -211,7 +211,7 @@ const HomeView = () => {
 
   const handlePlay = (book: Book) => {
     // Check if this is the currently playing book
-    if (currentBook?.id === book._id) {
+    if (currentBook?._id === book._id) {
       // Toggle play/pause for the current book
       play(currentBook);
       return;
@@ -228,7 +228,7 @@ const HomeView = () => {
       }
 
       play({
-        id: book._id,
+        _id: book._id,
         episodeId: episodeToPlay._id,
         title: `${book.title} - ${episodeToPlay.title}`,
         author: book.author,
@@ -237,11 +237,11 @@ const HomeView = () => {
         duration: episodeToPlay.duration,
         isSeries: true,
         episodeNumber: episodeToPlay.episodeNumber
-      });
+      }, episodeToPlay);
     } else {
       // Handle single audiobook
       play({
-        id: book._id,
+        _id: book._id,
         title: book.title,
         author: book.author,
         coverImage: book.coverImage,
@@ -252,7 +252,7 @@ const HomeView = () => {
   };
 
   const isCurrentBook = (book: Book) => {
-    return currentBook?.id === book._id;
+    return currentBook?._id === book._id;
   };
 
   const getBookStatusText = (book: Book) => {
@@ -322,33 +322,16 @@ const HomeView = () => {
         ) : continueListening.length > 0 ? (
           <div className="flex gap-6 overflow-x-auto pb-4 -mx-2 px-2">
             {continueListening.map(book => (
-              <div key={book._id} className="flex-shrink-0 w-64 group">
-                <BookCover 
-                  book={book} 
-                  size="large" 
-                  onClick={() => handlePlay(book)}
-                />
-                <div className="mt-3">
-                  <h3 className="font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors">{book.title}</h3>
-                  <p className="text-sm text-gray-600">{book.author}</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock size={14} className="mr-1 text-indigo-500" />
-                      {getBookStatusText(book)}
-                    </div>
-                    <button 
-                      className={`rounded-full p-2 ${
-                        isCurrentBook(book) && isPlaying 
-                          ? 'bg-indigo-100 text-indigo-700' 
-                          : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700'
-                      } transition-colors`}
-                      onClick={() => handlePlay(book)}
-                    >
-                      {isCurrentBook(book) && isPlaying ? <Pause size={16} /> : <Play size={16} />}
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <BookCard 
+              key={book._id}
+              book={book}
+              onClick={() => {
+                // console.log(currentBook?._id , book._id)
+                setCurrentBook(book);
+                handlePlay(book)
+              }}
+              isCurrent={currentBook?._id === book._id}
+            />
             ))}
           </div>
         ) : (
@@ -375,33 +358,17 @@ const HomeView = () => {
         ) : featuredBooks.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {featuredBooks.map(book => (
-              <div key={book._id} className="relative group">
-                <div className="aspect-[2/3] overflow-hidden rounded-xl shadow-md">
-                  <img 
-                    src={book.coverImage || '/default-book-cover.jpg'} 
-                    alt={book.title} 
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                  />
-                  {book.isSeries && (
-                    <div className="absolute top-3 left-3 bg-indigo-600 text-white text-xs px-2 py-1 rounded-md font-medium">
-                      Series
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-0 opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                    <h3 className="text-white font-semibold text-lg">{book.title}</h3>
-                    <p className="text-white/80 text-sm">{book.author}</p>
-                  </div>
-                  <button 
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white text-indigo-700 rounded-full p-4 shadow-lg"
-                    onClick={() => handlePlay(book)}
-                  >
-                    {isCurrentBook(book) && isPlaying ? <Pause size={20} /> : <Play size={20} />}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              <BookCard 
+              key={book._id}
+              book={book}
+              onClick={() => {
+                // console.log(currentBook?._id , book._id)
+                setCurrentBook(book);
+                handlePlay(book)
+              }}
+              isCurrent={currentBook?._id === book._id}
+            />))}
+            </div>
         ) : (
           <EmptyState
             icon={Book}
@@ -425,13 +392,18 @@ const HomeView = () => {
           </div>
         ) : recommendedBooks.length > 0 ? (
           <div className="flex gap-6 overflow-x-auto pb-4 -mx-2 px-2">
+            {/* {JSON.stringify(recommendedBooks[0])} */}
             {recommendedBooks.map(book => (
-                     <BookCard 
-                     key={book._id}
-                     book={book}
-                     onClick={() => setCurrentBook(book)}
-                     isCurrent={ currentBook?.id === book.id}
-                     />
+              <BookCard 
+                key={book._id}
+                book={book}
+                onClick={() => {
+                  // console.log(currentBook?._id , book._id)
+                  setCurrentBook(book);
+                  handlePlay(book)
+                }}
+                isCurrent={currentBook?._id === book._id}
+              />
             
               // <div key={book._id} className="flex-shrink-0 w-48 group">
               //   <BookCover 
@@ -491,7 +463,13 @@ const HomeView = () => {
   );
 };
 
-const BookCard = ({book={}, onClick, isCurrent}) => {
+interface BookCardProps {
+  book: Partial<Book>;
+  onClick: () => void;
+  isCurrent: boolean;
+}
+
+const BookCard = ({ book = {}, onClick, isCurrent }: BookCardProps) => {
   return (
     <div 
     onClick={onClick}

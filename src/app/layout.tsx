@@ -38,8 +38,8 @@ export default function RootLayout({
 }>) {
     const [showSidebar,setShowSidebar]=useState(false)
   
-    const pathname = usePathname();
-    const isNowPlayingPage = pathname === '/now-playing';
+const pathname = usePathname();
+  const isNowPlayingPage = pathname === '/now-playing';
   const router = useRouter()
   return (
     <html lang="en">

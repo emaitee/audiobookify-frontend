@@ -88,7 +88,7 @@ const handleSearchInput = (e: SearchInputEvent): void => {
         </button>
         <div className="flex items-center gap-2">
           <BookOpen className="text-blue-500" size={24} />
-          <h1 className="text-lg font-bold hidden sm:block">AudioBookify</h1>
+          <h1 className="text-lg font-bold hidden sm:block">AudioVerse</h1>
         </div>
       </div>
       <div className="flex-1 mx-4 relative">
@@ -119,7 +119,7 @@ const handleSearchInput = (e: SearchInputEvent): void => {
             <div className="max-h-64 overflow-y-auto">
               {featuredBooks.slice(0, 3).map(book => (
                 <div 
-                  key={book.id} 
+                  key={book._id} 
                   className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"
                   onClick={() => {
                     // playBook(book);
@@ -150,7 +150,7 @@ const handleSearchInput = (e: SearchInputEvent): void => {
 // <header className="sticky top-0 bg-white border-b p-4 flex justify-between items-center z-10">
 //         <div className="flex items-center gap-2">
 //           <BookOpen className="text-blue-500" size={24} />
-//           <h1 className="text-lg font-bold">AudioBookify</h1>
+//           <h1 className="text-lg font-bold">AudioVerse</h1>
 //         </div>
 //         <div className="flex-1 mx-4">
 //           <div className="relative">

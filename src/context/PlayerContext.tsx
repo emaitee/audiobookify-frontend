@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { authApiHelper } from '@/app/utils/api';
 
 interface Episode {
-  id: string;
+  _id: string;
   title: string;
   episodeNumber: number;
   audioFile: string;
@@ -12,7 +12,7 @@ interface Episode {
 }
 
 interface Book {
-  id: string;
+  _id: string;
   title: string;
   author: string;
   narrator: string;
@@ -78,13 +78,13 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       
       // If there's a current book being played, update it with fresh data
       if (currentBook) {
-        const updatedBook = data.books.find((b: Book) => b.id === currentBook.id);
+        const updatedBook = data.books.find((b: Book) => b._id === currentBook._id);
         if (updatedBook) {
           setCurrentBook(updatedBook);
           // Also update current episode if it exists
           if (currentEpisode) {
             const updatedEpisode = updatedBook.episodes?.find(
-              (ep: Episode) => ep.id === currentEpisode.id
+              (ep: Episode) => ep._id === currentEpisode._id
             );
             if (updatedEpisode) {
               setCurrentEpisode(updatedEpisode);
@@ -160,7 +160,9 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     if (!audioRef.current) return;
 
     // Find the book in our allBooks array to ensure we have the latest data
-    const freshBook = allBooks.find(b => b.id === book.id) || book;
+    const freshBook = allBooks.find(b => b._id === book._id) || book;
+
+    console.log(freshBook,'freshBookfreshBookfreshBook')
 
     // Determine which episode to play
     let playEpisode = episode;
@@ -227,7 +229,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     }
 
     // Find next book in library
-    const currentIndex = allBooks.findIndex(b => b.id === currentBook.id);
+    const currentIndex = allBooks.findIndex(b => b._id === currentBook._id);
     if (currentIndex < allBooks.length - 1) {
       const nextBook = allBooks[currentIndex + 1];
       play(nextBook);
@@ -255,7 +257,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     }
 
     // Find previous book in library
-    const currentIndex = allBooks.findIndex(b => b.id === currentBook.id);
+    const currentIndex = allBooks.findIndex(b => b._id === currentBook._id);
     if (currentIndex > 0) {
       const prevBook = allBooks[currentIndex - 1];
       play(prevBook);

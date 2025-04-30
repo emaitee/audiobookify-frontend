@@ -63,7 +63,7 @@ const SearchView = () => {
             <p className="text-sm text-gray-600">Showing results for "{searchQuery}"</p>
             <div className="grid grid-cols-2 gap-4">
               {searchResults.map(book => (
-                <div key={book.id} className="flex flex-col">
+                <div key={book._id} className="flex flex-col">
                   <div className="relative">
                     <img src={book.cover} alt={book.title} className="w-full h-48 object-cover rounded-lg shadow-md" />
                     <div className="absolute bottom-2 right-2 bg-white px-2 py-1 rounded-full text-xs font-medium">

@@ -79,7 +79,7 @@ const ProfileView = () => {
               <h3 className="text-lg font-medium mb-3">Recent Activity</h3>
               <div className="flex flex-col gap-3">
                 {recentActivity.map(activity => (
-                  <div key={activity.id} className="flex items-center p-3 bg-gray-50 rounded-lg">
+                  <div key={activity._id} className="flex items-center p-3 bg-gray-50 rounded-lg">
                     <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
                       {activity.type === 'finished' && <BookOpen size={18} />}
                       {activity.type === 'started' && <Play size={18} />}
@@ -166,7 +166,7 @@ const ProfileView = () => {
             
             <div className="grid grid-cols-2 gap-4">
               {[...featuredBooks, ...continueListing].slice(0, 6).map(book => (
-                <div key={book.id} className="flex flex-col">
+                <div key={book._id} className="flex flex-col">
                   <img src={book.cover} alt={book.title} className="w-full h-48 object-cover rounded-lg shadow-md" />
                   <h3 className="font-medium mt-2">{book.title}</h3>
                   <p className="text-sm text-gray-600">{book.author}</p>
