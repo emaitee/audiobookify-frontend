@@ -1,136 +1,199 @@
 'use client'
-import { useState, useRef } from 'react';
-import { Plus, Upload, X, PlayCircle, Check, AlertTriangle, BarChart2, FileText, Settings } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Plus, Upload, X, PlayCircle, Check, AlertTriangle, BarChart2, FileText, Download } from 'lucide-react';
+import { authApiHelper } from '../utils/api';
 
-const AdminView = () => {
-  const [activeTab, setActiveTab] = useState('uploads');
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [uploadingFile, setUploadingFile] = useState<File | null>(null);
-  const [bookMetadata, setBookMetadata] = useState({
-    title: '',
-    author: '',
-    narrator: '',
-    category: 'fiction',
-    description: ''
-  });
-  const [uploadStep, setUploadStep] = useState(1);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  
-  const pendingApprovals = [
-    { id: 'a1', title: "The Great Gatsby", author: "F. Scott Fitzgerald", narrator: "Jake Gyllenhaal", status: "pending", date: "Apr 25, 2025" },
-    { id: 'a2', title: "Pride and Prejudice", author: "Jane Austen", narrator: "Rosamund Pike", status: "pending", date: "Apr 24, 2025" },
-  ];
-  
-  const [recentUploads, setRecentUploads] = useState([
-    { id: 'b1', title: "The Alchemist", author: "Paulo Coelho", narrator: "Jeremy Irons", status: "approved", date: "Apr 23, 2025" },
-    { id: 'b2', title: "To Kill a Mockingbird", author: "Harper Lee", narrator: "Sissy Spacek", status: "approved", date: "Apr 22, 2025" },
-    { id: 'b3', title: "The Hobbit", author: "J.R.R. Tolkien", narrator: "Andy Serkis", status: "rejected", date: "Apr 21, 2025", reason: "Audio quality issues" },
-  ]);
-  
-  const audioStats = {
-    totalBooks: 1245,
-    totalHours: 8762,
-    pendingApprovals: 7,
-    activeUploads: 3
-  };
-  
-interface FileSelectEvent extends React.ChangeEvent<HTMLInputElement> {
-    target: HTMLInputElement & EventTarget & { files: FileList };
-}
+// API service functions
+export const API_BASE_URL = 'http://localhost:8081/api';
 
-const handleFileSelect = (e: FileSelectEvent) => {
-    const file = e.target.files[0];
-    if (file) {
-        setUploadingFile(file);
-        // Auto-fill title from filename (remove extension)
-        const fileName = file.name.replace(/\.[^/.]+$/, "");
-        setBookMetadata(prev => ({
-            ...prev,
-            title: fileName.replace(/_/g, ' ')
-        }));
-        setUploadStep(2);
+
+
+// API service for audiobooks
+const audioBookService = {
+  getRecentUploads: async (page = 1, limit = 10) => {
+    try {
+      const response = await authApiHelper.get(`/books-info/recent?page=${page}&limit=${limit}`);
+      if (!response.ok) throw new Error('Failed to fetch recent uploads');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching recent uploads:', error);
+      throw error;
     }
-};
+  },
 
-const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-            if (e.target?.result) {
-                setCoverPreview(e.target.result as string);
-            }
-        };
-        reader.readAsDataURL(file);
+  getPendingApprovals: async () => {
+    try {
+      const response = await authApiHelper.get(`/books-info/pending`);
+      if (!response.ok) throw new Error('Failed to fetch pending approvals');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching pending approvals:', error);
+      throw error;
     }
-};
-  
-  const simulateUpload = () => {
-    setUploadProgress(0);
-    setUploadStep(3);
-    
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            // Add the new upload to the recent uploads list
-            const newUpload = {
-              id: `new-${Date.now()}`,
-              title: bookMetadata.title,
-              author: bookMetadata.author,
-              narrator: bookMetadata.narrator,
-              status: "pending",
-              date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-            };
-            setRecentUploads(prev => [newUpload, ...prev]);
-            
-            // Reset state
-            setUploadStep(4);
-          }, 500);
-          return 100;
-        }
-        return prev + 2;
+  },
+
+  getStats: async () => {
+    try {
+      const response = await authApiHelper.get(`/stats`);
+      if (!response.ok) throw new Error('Failed to fetch statistics');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching statistics:', error);
+      throw error;
+    }
+  },
+
+  approveBook: async (id: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      const response = await authApiHelper.post(`/books/${id}/approve`);
+      if (!response.ok) throw new Error('Failed to approve book');
+      return await response.json();
+    } catch (error) {
+      console.error('Error approving book:', error);
+      throw error;
+    }
+  },
+
+  rejectBook: async (id: string, reason: string = 'Rejected by admin'): Promise<{ success: boolean; message: string }> => {
+    try {
+      const response = await authApiHelper.post(`/books/${id}/reject`, { reason });
+      if (!response.ok) throw new Error('Failed to reject book');
+      return await response.json();
+    } catch (error) {
+      console.error('Error rejecting book:', error);
+      throw error;
+    }
+  },
+
+  uploadBook: async (formData: FormData): Promise<{ success: boolean; id: string; message: string }> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/books/upload`, {
+        method: 'POST',
+        body: formData,
       });
-    }, 100);
-  };
-  
-  const handleClose = () => {
-    setShowUploadModal(false);
-    setUploadStep(1);
-    setUploadingFile(null);
-    setCoverPreview(null);
-    setBookMetadata({
-      title: '',
-      author: '',
-      narrator: '',
-      category: 'fiction',
-      description: ''
-    });
-    setUploadProgress(0);
-  };
-  
-  const handleFileUploadClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
+      if (!response.ok) throw new Error('Failed to upload book');
+      return await response.json();
+    } catch (error) {
+      console.error('Error uploading book:', error);
+      throw error;
     }
-  };
-  
-  const handleCoverUploadClick = () => {
-    if (coverInputRef.current) {
-      coverInputRef.current.click();
+  },
+
+  uploadEpisode: async (bookId: string, formData: FormData): Promise<{ success: boolean; id: string; message: string }> => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`${API_BASE_URL}/books/${bookId}/episodes`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'x-auth-token': token,
+        }
+      });
+      if (!response.ok) throw new Error('Failed to upload episode');
+      return await response.json();
+    } catch (error) {
+      console.error('Error uploading episode:', error);
+      throw error;
     }
-  };
-  
-  const categories = [
-    'Fiction', 'Non-Fiction', 'Fantasy', 'Mystery', 'Science Fiction', 
-    'Romance', 'Biography', 'Self-Help', 'Business', 'History'
-  ];
-  
-  const UploadModal = () => (
+  },
+
+  getBookEpisodes: async (bookId: string) => {
+    try {
+      const response = await authApiHelper.get(`/books/${bookId}/episodes`);
+      if (!response.ok) throw new Error('Failed to fetch episodes');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching episodes:', error);
+      throw error;
+    }
+  },
+
+//   uploadBook: async (formData: FormData): Promise<{ success: boolean; id: string; message: string }> => {
+//     try {
+//       const response = await fetch(`${API_BASE_URL}/books/upload`, {
+//         method: 'POST',
+//         body: formData,
+//       });
+//       if (!response.ok) throw new Error('Failed to upload book');
+//       return await response.json();
+//     } catch (error) {
+//       console.error('Error uploading book:', error);
+//       throw error;
+//     }
+//   },
+
+//   uploadEpisode: async (bookId: string, formData: FormData): Promise<{ success: boolean; id: string; message: string }> => {
+//     try {
+//       const response = await fetch(`${API_BASE_URL}/books/${bookId}/episodes`, {
+//         method: 'POST',
+//         body: formData,
+//       });
+//       if (!response.ok) throw new Error('Failed to upload episode');
+//       return await response.json();
+//     } catch (error) {
+//       console.error('Error uploading episode:', error);
+//       throw error;
+//     }
+//   },
+
+//   getBookEpisodes: async (bookId: string) => {
+//     try {
+//       const response = await authApiHelper.get(`/books/${bookId}/episodes`);
+//       if (!response.ok) throw new Error('Failed to fetch episodes');
+//       return await response.json();
+//     } catch (error) {
+//       console.error('Error fetching episodes:', error);
+//       throw error;
+//     }
+//   },
+
+  getAnalytics: async () => {
+    try {
+      const response = await authApiHelper.get(`/analytics`);
+      if (!response.ok) throw new Error('Failed to fetch analytics');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      throw error;
+    }
+  }
+};
+
+const UploadModal = ({handleClose,uploadStep,fileInputRef,handleFileSelect,handleFileUploadClick,
+    coverInputRef,handleCoverSelect,coverPreview,handleCoverUploadClick,
+    bookMetadata,setBookMetadata,categories,handleSeriesToggle,uploadingFile,
+    uploadProgress,setUploadStep,uploadAudiobook
+}: {
+    handleClose: () => void;
+    uploadStep: number;
+    fileInputRef: React.RefObject<HTMLInputElement>;
+    handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleFileUploadClick: () => void;
+    coverInputRef: React.RefObject<HTMLInputElement>;
+    handleCoverSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    coverPreview: string | null;
+    handleCoverUploadClick: () => void;
+    bookMetadata: {
+        title: string;
+        author: string;
+        narrator: string;
+        category: string;
+        description: string;
+        isSeries: boolean;
+        seriesInfo: {
+            totalEpisodes: number;
+            currentEpisode: number;
+            episodeTitle: string;
+        };
+    };
+    setBookMetadata: React.Dispatch<React.SetStateAction<typeof bookMetadata>>;
+    categories: string[];
+    handleSeriesToggle: (isSeries: boolean) => void;
+    uploadingFile: File | null;
+    uploadProgress: number;
+    setUploadStep: React.Dispatch<React.SetStateAction<number>>;
+    uploadAudiobook: () => Promise<void>;
+}) => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-20 p-4 text-black">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
         <div className="flex justify-between items-center mb-6">
@@ -226,7 +289,7 @@ const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
                     type="text" 
                     className="w-full p-2 border rounded"
                     value={bookMetadata.title}
-                    onChange={(e) => setBookMetadata({...bookMetadata, title: e.target.value})}
+                    onChange={(e) => setBookMetadata(prev => ({...prev, title: e.target.value}))}
                   />
                 </div>
                 
@@ -237,7 +300,7 @@ const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
                       type="text" 
                       className="w-full p-2 border rounded"
                       value={bookMetadata.author}
-                      onChange={(e) => setBookMetadata({...bookMetadata, author: e.target.value})}
+                      onChange={(e) => setBookMetadata(prev => ({...prev, author: e.target.value}))}
                     />
                   </div>
                   <div>
@@ -246,7 +309,7 @@ const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
                       type="text" 
                       className="w-full p-2 border rounded"
                       value={bookMetadata.narrator}
-                      onChange={(e) => setBookMetadata({...bookMetadata, narrator: e.target.value})}
+                      onChange={(e) => setBookMetadata(prev => ({...prev, narrator: e.target.value}))}
                     />
                   </div>
                 </div>
@@ -256,13 +319,79 @@ const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
                   <select 
                     className="w-full p-2 border rounded"
                     value={bookMetadata.category}
-                    onChange={(e) => setBookMetadata({...bookMetadata, category: e.target.value})}
+                    onChange={(e) => setBookMetadata(prev => ({...prev, category: e.target.value}))}
                   >
                     {categories.map(cat => (
                       <option key={cat} value={cat.toLowerCase()}>{cat}</option>
                     ))}
                   </select>
                 </div>
+                
+                <div className="flex items-center">
+                  <input 
+                    type="checkbox"
+                    id="isSeries"
+                    checked={bookMetadata.isSeries}
+                    onChange={(e) => handleSeriesToggle(e.target.checked)}
+                    className="rounded text-blue-500 mr-2"
+                  />
+                  <label htmlFor="isSeries" className="text-sm">This is a series with multiple episodes</label>
+                </div>
+                
+                {bookMetadata.isSeries && (
+                  <div className="space-y-3 bg-gray-50 p-3 rounded-lg">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Episode Title</label>
+                      <input 
+                        type="text" 
+                        className="w-full p-2 border rounded"
+                        value={bookMetadata.seriesInfo.episodeTitle}
+                        onChange={(e) => setBookMetadata({
+                          ...bookMetadata,
+                          seriesInfo: {
+                            ...bookMetadata.seriesInfo,
+                            episodeTitle: e.target.value
+                          }
+                        })}
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Episode Number</label>
+                        <input 
+                          type="number" 
+                          min="1"
+                          className="w-full p-2 border rounded"
+                          value={bookMetadata.seriesInfo.currentEpisode}
+                          onChange={(e) => setBookMetadata({
+                            ...bookMetadata,
+                            seriesInfo: {
+                              ...bookMetadata.seriesInfo,
+                              currentEpisode: parseInt(e.target.value) || 1
+                            }
+                          })}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Total Episodes</label>
+                        <input 
+                          type="number" 
+                          min="1"
+                          className="w-full p-2 border rounded"
+                          value={bookMetadata.seriesInfo.totalEpisodes}
+                          onChange={(e) => setBookMetadata({
+                            ...bookMetadata,
+                            seriesInfo: {
+                              ...bookMetadata.seriesInfo,
+                              totalEpisodes: parseInt(e.target.value) || 1
+                            }
+                          })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 <div>
                   <label className="block text-sm font-medium mb-1">Description</label>
@@ -323,6 +452,19 @@ const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
                   <div>
                     <span className="text-gray-500">Category:</span> {bookMetadata.category}
                   </div>
+                  {bookMetadata.isSeries && (
+                    <>
+                      <div>
+                        <span className="text-gray-500">Series:</span> Yes
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Episode:</span> {bookMetadata.seriesInfo.currentEpisode} of {bookMetadata.seriesInfo.totalEpisodes}
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Episode Title:</span> {bookMetadata.seriesInfo.episodeTitle}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -335,8 +477,15 @@ const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
               </div>
               <h4 className="text-xl font-medium mb-2">Upload Complete!</h4>
               <p className="text-gray-600 mb-6">
-                Your audiobook has been uploaded and is pending approval.
+                {bookMetadata.isSeries 
+                  ? `Your audiobook episode has been uploaded and is pending approval.`
+                  : `Your audiobook has been uploaded and is pending approval.`}
               </p>
+              {bookMetadata.isSeries && (
+                <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4">
+                  <p className="text-sm mb-2">You can upload more episodes for this series later.</p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -362,7 +511,7 @@ const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
             </button>
             <button 
               className="px-6 py-2 bg-blue-500 text-white rounded"
-              onClick={simulateUpload}
+              onClick={uploadAudiobook}
               disabled={!bookMetadata.title || !bookMetadata.author}
             >
               Start Upload
@@ -383,43 +532,832 @@ const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
       </div>
     </div>
   );
-  
-interface ApprovalItem {
-    id: string;
-    title: string;
-    author: string;
-    narrator: string;
-    status: string;
-    date: string;
-    reason?: string;
-}
 
-const handleApprove = (id: string) => {
-    const updatedPendingApprovals: ApprovalItem[] = pendingApprovals.filter(item => item.id !== id);
-    const approvedItem: ApprovalItem | undefined = pendingApprovals.find(item => item.id === id);
-    
-    if (approvedItem) {
-        approvedItem.status = 'approved';
-        approvedItem.date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        setRecentUploads([approvedItem, ...recentUploads]);
-    }
-};
-  
-interface RejectItem extends ApprovalItem {
-    reason?: string;
-}
+  const EpisodesModal = ({
+    selectedBook,handleCloseEpisodesModal,renderErrorState,
+    isLoading,episodes,bookMetadata,setBookMetadata,uploadNewEpisode,
+    isUploadingEpisode,
+  }) => (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-20 p-4 text-black">
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-semibold">
+            {selectedBook?.title} - Episodes
+          </h3>
+          <button 
+            className="text-gray-500 hover:text-gray-700"
+            onClick={handleCloseEpisodesModal}
+          >
+            <X size={20} />
+          </button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto mb-4">
+          {renderErrorState('episodes')}
+          {isLoading.episodes ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+              <p className="mt-2 text-gray-500">Loading episodes...</p>
+            </div>
+          ) : (
+            <>
+              {episodes.length === 0 ? (
+                <div className="text-center py-8 border rounded-lg bg-gray-50">
+                  <p className="text-gray-500">No episodes available</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {episodes.map((episode, index) => (
+                    <div key={episode.id || index} className="border rounded-lg p-4 hover:bg-gray-50">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="font-medium">{episode.title || `Episode ${episode.episodeNumber}`}</h4>
+                          <p className="text-sm text-gray-500">
+                            Episode {episode.episodeNumber} • {episode.duration || 'Unknown duration'}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            File: {episode.audioFile?.split('/').pop() || 'Unknown file'}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button className="text-blue-500 hover:text-blue-700">
+                            <PlayCircle size={18} />
+                          </button>
+                          <a 
+                            href={episode.audioFile} 
+                            download
+                            className="text-gray-500 hover:text-gray-700"
+                            title="Download episode"
+                          >
+                            <Download size={18} />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        
+        {selectedBook?.isSeries && (
+          <div className="border-t pt-4">
+            <h4 className="font-medium mb-3">Upload New Episode</h4>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Episode Title</label>
+                  <input 
+                    type="text"
+                    className="w-full p-2 border rounded"
+                    value={bookMetadata.seriesInfo.episodeTitle}
+                    onChange={(e) => setBookMetadata({
+                      ...bookMetadata,
+                      seriesInfo: {
+                        ...bookMetadata.seriesInfo,
+                        episodeTitle: e.target.value
+                      }
+                    })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Episode Number</label>
+                  <input 
+                    type="number"
+                    min="1"
+                    className="w-full p-2 border rounded"
+                    value={bookMetadata.seriesInfo.currentEpisode}
+                    onChange={(e) => setBookMetadata({
+                      ...bookMetadata,
+                      seriesInfo: {
+                        ...bookMetadata.seriesInfo,
+                        currentEpisode: parseInt(e.target.value) || 1
+                      }
+                    })}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <input 
+                  type="file" 
+                  id="episodeUpload"
+                  accept="audio/mp3,audio/mpeg" 
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (file && selectedBook) {
+                      try {
+                        await uploadNewEpisode(selectedBook._id, file);
+                        e.target.value = '';
+                      } catch (error) {
+                        alert(`Failed to upload episode: ${error.message}`);
+                      }
+                    }
+                  }}
+                />
+                <label 
+                  htmlFor="episodeUpload"
+                  className="px-4 py-2 bg-blue-500 text-white rounded flex items-center gap-2 cursor-pointer hover:bg-blue-600"
+                >
+                  <Upload size={16} />
+                  <span>Select Episode File</span>
+                </label>
+                {isUploadingEpisode && (
+                  <div className="text-sm text-gray-500 flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
+                    Uploading...
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-500">
+                MP3 format, max 500MB per episode
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
-const handleReject = (id: string) => {
-    const updatedPendingApprovals: ApprovalItem[] = pendingApprovals.filter(item => item.id !== id);
-    const rejectedItem: RejectItem | undefined = pendingApprovals.find(item => item.id === id);
-    
-    if (rejectedItem) {
-        rejectedItem.status = 'rejected';
-        rejectedItem.reason = 'Rejected by admin';
-        rejectedItem.date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        setRecentUploads([rejectedItem, ...recentUploads]);
+const AdminView = () => {
+  const [activeTab, setActiveTab] = useState('uploads');
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(null);
+  const [bookMetadata, setBookMetadata] = useState({
+    title: '',
+    author: '',
+    narrator: '',
+    category: 'fiction',
+    description: '',
+    isSeries: false,
+    seriesInfo: {
+      totalEpisodes: 1,
+      currentEpisode: 1,
+      episodeTitle: ''
     }
-};
+  });
+  const [uploadStep, setUploadStep] = useState(1);
+  const fileInputRef = useRef(null);
+  const coverInputRef = useRef(null);
+  const [coverPreview, setCoverPreview] = useState(null);
+  const [coverFile, setCoverFile] = useState(null);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [showEpisodesModal, setShowEpisodesModal] = useState(false);
+  const [episodes, setEpisodes] = useState([]);
+  const [isUploadingEpisode, setIsUploadingEpisode] = useState(false);
+  
+  // State for API data
+  const [pendingApprovals, setPendingApprovals] = useState([]);
+  const [recentUploads, setRecentUploads] = useState([]);
+  const [audioStats, setAudioStats] = useState({
+    totalBooks: 0,
+    totalHours: 0,
+    pendingApprovals: 0,
+    activeUploads: 0
+  });
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [isLoading, setIsLoading] = useState({
+    uploads: false,
+    approvals: false,
+    stats: false,
+    analytics: false,
+    episodes: false
+  });
+  const [error, setError] = useState({
+    uploads: null,
+    approvals: null,
+    stats: null,
+    analytics: null,
+    episodes: null
+  });
+  
+  // Fetch data when component mounts
+  useEffect(() => {
+    fetchStats();
+    fetchRecentUploads();
+  }, []);
+  
+  // Fetch data when tab changes
+  useEffect(() => {
+    if (activeTab === 'approvals' && pendingApprovals.length === 0) {
+      fetchPendingApprovals();
+    } else if (activeTab === 'analytics' && !analyticsData) {
+      fetchAnalytics();
+    }
+  }, [activeTab]);
+
+  // Fetch episodes when modal is shown
+  useEffect(() => {
+    if (showEpisodesModal && selectedBook) {
+      fetchEpisodes(selectedBook._id);
+    }
+  }, [showEpisodesModal, selectedBook]);
+
+  const fetchEpisodes = async (bookId) => {
+    setIsLoading(prev => ({ ...prev, episodes: true }));
+    setError(prev => ({ ...prev, episodes: null }));
+    try {
+      const data = await audioBookService.getBookEpisodes(bookId);
+      setEpisodes(data.episodes || []);
+    } catch (err) {
+      setError(prev => ({ ...prev, episodes: err.message }));
+    } finally {
+      setIsLoading(prev => ({ ...prev, episodes: false }));
+    }
+  };
+  
+  // Other fetch functions remain the same...
+  const fetchRecentUploads = async () => {
+    setIsLoading(prev => ({ ...prev, uploads: true }));
+    setError(prev => ({ ...prev, uploads: null }));
+    try {
+      const data = await audioBookService.getRecentUploads();
+      console.log(data.books,'tataxx')
+      setRecentUploads(data || []);
+    } catch (err) {
+      setError(prev => ({ ...prev, uploads: err.message }));
+    } finally {
+      setIsLoading(prev => ({ ...prev, uploads: false }));
+    }
+  };
+  
+  const fetchPendingApprovals = async () => {
+    setIsLoading(prev => ({ ...prev, approvals: true }));
+    setError(prev => ({ ...prev, approvals: null }));
+    try {
+      const data = await audioBookService.getPendingApprovals();
+      setPendingApprovals(data.books || []);
+    } catch (err) {
+      setError(prev => ({ ...prev, approvals: err.message }));
+    } finally {
+      setIsLoading(prev => ({ ...prev, approvals: false }));
+    }
+  };
+  
+  const fetchStats = async () => {
+    setIsLoading(prev => ({ ...prev, stats: true }));
+    setError(prev => ({ ...prev, stats: null }));
+    try {
+      const data = await audioBookService.getStats();
+      setAudioStats(data || {
+        totalBooks: 0,
+        totalHours: 0,
+        pendingApprovals: 0,
+        activeUploads: 0
+      });
+    } catch (err) {
+      setError(prev => ({ ...prev, stats: err.message }));
+    } finally {
+      setIsLoading(prev => ({ ...prev, stats: false }));
+    }
+  };
+  
+  const fetchAnalytics = async () => {
+    setIsLoading(prev => ({ ...prev, analytics: true }));
+    setError(prev => ({ ...prev, analytics: null }));
+    try {
+      const data = await audioBookService.getAnalytics();
+      setAnalyticsData(data || null);
+    } catch (err) {
+      setError(prev => ({ ...prev, analytics: err.message }));
+    } finally {
+      setIsLoading(prev => ({ ...prev, analytics: false }));
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setUploadingFile(file);
+      // Auto-fill title from filename (remove extension)
+      const fileName = file.name.replace(/\.[^/.]+$/, "");
+      setBookMetadata(prev => ({
+        ...prev,
+        title: fileName.replace(/_/g, ' '),
+        seriesInfo: {
+          ...prev.seriesInfo,
+          episodeTitle: `Episode ${prev.seriesInfo.currentEpisode}`
+        }
+      }));
+      setUploadStep(2);
+    }
+  };
+
+  const handleCoverSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCoverFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setCoverPreview(e.target.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSeriesToggle = (isSeries) => {
+    setBookMetadata(prev => ({
+      ...prev,
+      isSeries,
+      seriesInfo: {
+        ...prev.seriesInfo,
+        episodeTitle: isSeries ? `Episode ${prev.seriesInfo.currentEpisode}` : ''
+      }
+    }));
+  };
+
+  const uploadAudiobook = async () => {
+    setUploadProgress(0);
+    setUploadStep(3);
+    
+    // Create FormData to send files and metadata
+    const formData = new FormData();
+    formData.append('audioFile', uploadingFile);
+    if (coverFile) {
+      formData.append('coverImage', coverFile);
+    }
+    
+    // Add metadata
+    formData.append('title', bookMetadata.title);
+    formData.append('author', bookMetadata.author);
+    formData.append('narrator', bookMetadata.narrator);
+    formData.append('category', bookMetadata.category);
+    formData.append('description', bookMetadata.description);
+    formData.append('isSeries', String(bookMetadata.isSeries));
+    
+    if (bookMetadata.isSeries) {
+      formData.append('episodeTitle', bookMetadata.seriesInfo.episodeTitle);
+      formData.append('episodeNumber', String(bookMetadata.seriesInfo.currentEpisode));
+      formData.append('totalEpisodes', String(bookMetadata.seriesInfo.totalEpisodes));
+    }
+    
+    try {
+      const xhr = new XMLHttpRequest();
+      
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const progressPercent = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(progressPercent);
+        }
+      });
+      
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const response = JSON.parse(xhr.responseText);
+          
+          const newUpload = {
+            id: response.id || `new-${Date.now()}`,
+            title: bookMetadata.title,
+            author: bookMetadata.author,
+            narrator: bookMetadata.narrator,
+            status: "pending",
+            date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            isSeries: bookMetadata.isSeries,
+            seriesInfo: bookMetadata.isSeries ? bookMetadata.seriesInfo : null
+          };
+          
+          setRecentUploads(prev => [newUpload, ...prev]);
+          fetchStats();
+          setUploadStep(4);
+        } else {
+          throw new Error('Upload failed');
+        }
+      });
+      
+      xhr.addEventListener('error', () => {
+        throw new Error('Network error during upload');
+      });
+      
+      xhr.open('POST', `${API_BASE_URL}/books/upload`);
+      const token = localStorage.getItem('token');
+
+      // Set the Authorization header
+xhr.setRequestHeader('x-auth-token', token);
+
+      xhr.send(formData);
+      
+    } catch (error) {
+      console.error('Error uploading audiobook:', error);
+      alert(`Upload failed: ${error.message}`);
+      setUploadStep(2);
+    }
+  };
+
+//   const uploadAudiobook = async () => {
+//     setUploadProgress(0);
+//     setUploadStep(3);
+    
+//     // Create FormData to send files and metadata
+//     const formData = new FormData();
+//     formData.append('audioFile', uploadingFile);
+//     if (coverFile) {
+//       formData.append('coverImage', coverFile);
+//     }
+    
+//     // Add metadata
+//     formData.append('title', bookMetadata.title);
+//     formData.append('author', bookMetadata.author);
+//     formData.append('narrator', bookMetadata.narrator);
+//     formData.append('category', bookMetadata.category);
+//     formData.append('description', bookMetadata.description);
+//     formData.append('isSeries', String(bookMetadata.isSeries));
+    
+//     if (bookMetadata.isSeries) {
+//       formData.append('seriesInfo', JSON.stringify(bookMetadata.seriesInfo));
+//     }
+    
+//     try {
+//       // Create XMLHttpRequest to track upload progress
+//       const xhr = new XMLHttpRequest();
+      
+//       xhr.upload.addEventListener('progress', (event) => {
+//         if (event.lengthComputable) {
+//           const progressPercent = Math.round((event.loaded / event.total) * 100);
+//           setUploadProgress(progressPercent);
+//         }
+//       });
+      
+//       xhr.addEventListener('load', () => {
+//         if (xhr.status >= 200 && xhr.status < 300) {
+//           // Success - update UI and data
+//           const response = JSON.parse(xhr.responseText);
+          
+//           // Add the new upload to the recent uploads list
+//           const newUpload = {
+//             id: response.id || `new-${Date.now()}`,
+//             title: bookMetadata.title,
+//             author: bookMetadata.author,
+//             narrator: bookMetadata.narrator,
+//             status: "pending",
+//             date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+//             isSeries: bookMetadata.isSeries,
+//             seriesInfo: bookMetadata.isSeries ? bookMetadata.seriesInfo : null
+//           };
+          
+//           setRecentUploads(prev => [newUpload, ...prev]);
+          
+//           // Update stats
+//           fetchStats();
+          
+//           // Reset state
+//           setUploadStep(4);
+//         } else {
+//           // Error
+//           throw new Error('Upload failed');
+//         }
+//       });
+      
+//       xhr.addEventListener('error', () => {
+//         throw new Error('Network error during upload');
+//       });
+      
+//       xhr.open('POST', `${API_BASE_URL}/books/upload`);
+//       xhr.send(formData);
+      
+//     } catch (error) {
+//       console.error('Error uploading audiobook:', error);
+//       alert(`Upload failed: ${error.message}`);
+//       setUploadStep(2); // Go back to details step
+//     }
+//   };
+
+const uploadNewEpisode = async (bookId, file) => {
+    setIsUploadingEpisode(true);
+    
+    const formData = new FormData();
+    formData.append('audioFile', file);
+    formData.append('episodeTitle', bookMetadata.seriesInfo.episodeTitle);
+    formData.append('episodeNumber', String(bookMetadata.seriesInfo.currentEpisode));
+    
+    try {
+      const response = await audioBookService.uploadEpisode(bookId, formData);
+      if (response.success) {
+        await fetchEpisodes(bookId);
+        setBookMetadata(prev => ({
+          ...prev,
+          seriesInfo: {
+            ...prev.seriesInfo,
+            currentEpisode: prev.seriesInfo.currentEpisode + 1,
+            episodeTitle: `Episode ${prev.seriesInfo.currentEpisode + 1}`
+          }
+        }));
+      }
+      return response;
+    } catch (error) {
+      console.error('Error uploading episode:', error);
+      throw error;
+    } finally {
+      setIsUploadingEpisode(false);
+    }
+  };
+
+//   const uploadNewEpisode = async (bookId, file) => {
+//     setIsUploadingEpisode(true);
+    
+//     const formData = new FormData();
+//     formData.append('audioFile', file);
+//     formData.append('title', bookMetadata.seriesInfo.episodeTitle);
+//     formData.append('episodeNumber', String(bookMetadata.seriesInfo.currentEpisode));
+    
+//     try {
+//       const response = await audioBookService.uploadEpisode(bookId, formData);
+//       if (response.success) {
+//         // Refresh episodes list
+//         await fetchEpisodes(bookId);
+//         // Update the book's series info
+//         setBookMetadata(prev => ({
+//           ...prev,
+//           seriesInfo: {
+//             ...prev.seriesInfo,
+//             currentEpisode: prev.seriesInfo.currentEpisode + 1,
+//             episodeTitle: `Episode ${prev.seriesInfo.currentEpisode + 1}`
+//           }
+//         }));
+//       }
+//       return response;
+//     } catch (error) {
+//       console.error('Error uploading episode:', error);
+//       throw error;
+//     } finally {
+//       setIsUploadingEpisode(false);
+//     }
+//   };
+  
+  const handleClose = () => {
+    setShowUploadModal(false);
+    setUploadStep(1);
+    setUploadingFile(null);
+    setCoverPreview(null);
+    setCoverFile(null);
+    setBookMetadata({
+      title: '',
+      author: '',
+      narrator: '',
+      category: 'fiction',
+      description: '',
+      isSeries: false,
+      seriesInfo: {
+        totalEpisodes: 1,
+        currentEpisode: 1,
+        episodeTitle: ''
+      }
+    });
+    setUploadProgress(0);
+  };
+
+  const handleCloseEpisodesModal = () => {
+    setShowEpisodesModal(false);
+    setSelectedBook(null);
+    setEpisodes([]);
+  };
+  
+  const handleFileUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  
+  const handleCoverUploadClick = () => {
+    if (coverInputRef.current) {
+      coverInputRef.current.click();
+    }
+  };
+  
+  const categories = [
+    'Fiction', 'Non-Fiction', 'Fantasy', 'Mystery', 'Science Fiction', 
+    'Romance', 'Biography', 'Self-Help', 'Business', 'History'
+  ];
+  
+
+
+//   const EpisodesModal = () => (
+//     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-20 p-4 text-black">
+//       <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] flex flex-col">
+//         <div className="flex justify-between items-center mb-6">
+//           <h3 className="text-xl font-semibold">
+//             {selectedBook?.title} - Episodes
+//           </h3>
+//           <button 
+//             className="text-gray-500 hover:text-gray-700"
+//             onClick={handleCloseEpisodesModal}
+//           >
+//             <X size={20} />
+//           </button>
+//         </div>
+        
+//         <div className="flex-1 overflow-y-auto mb-4">
+//           {renderErrorState('episodes')}
+//           {isLoading.episodes ? (
+//             <div className="text-center py-8">
+//               <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+//               <p className="mt-2 text-gray-500">Loading episodes...</p>
+//             </div>
+//           ) : (
+//             <>
+//               {episodes.length === 0 ? (
+//                 <div className="text-center py-8 border rounded-lg bg-gray-50">
+//                   <p className="text-gray-500">No episodes available</p>
+//                 </div>
+//               ) : (
+//                 <div className="space-y-3">
+//                   {episodes.map((episode, index) => (
+//                     <div key={episode.id || index} className="border rounded-lg p-4 hover:bg-gray-50">
+//                       <div className="flex justify-between items-center">
+//                         <div>
+//                           <h4 className="font-medium">{episode.title || `Episode ${episode.episodeNumber}`}</h4>
+//                           <p className="text-sm text-gray-500">
+//                             Episode {episode.episodeNumber} • {episode.duration || 'Unknown duration'}
+//                           </p>
+//                         </div>
+//                         <div className="flex items-center gap-2">
+//                           <button className="text-blue-500 hover:text-blue-700">
+//                             <PlayCircle size={18} />
+//                           </button>
+//                           <button className="text-gray-500 hover:text-gray-700">
+//                             <Settings size={18} />
+//                           </button>
+//                         </div>
+//                       </div>
+//                     </div>
+//                   ))}
+//                 </div>
+//               )}
+//             </>
+//           )}
+//         </div>
+        
+//         {selectedBook?.isSeries && (
+//           <div className="border-t pt-4">
+//             <h4 className="font-medium mb-3">Upload New Episode</h4>
+//             <div className="flex items-center gap-3">
+//               <input 
+//                 type="file" 
+//                 id="episodeUpload"
+//                 accept="audio/mp3,audio/mpeg" 
+//                 className="hidden"
+//                 onChange={async (e) => {
+//                   const file = e.target.files[0];
+//                   if (file && selectedBook) {
+//                     try {
+//                       await uploadNewEpisode(selectedbook._id, file);
+//                       e.target.value = ''; // Reset file input
+//                     } catch (error) {
+//                       alert(`Failed to upload episode: ${error.message}`);
+//                     }
+//                   }
+//                 }}
+//               />
+//               <label 
+//                 htmlFor="episodeUpload"
+//                 className="px-4 py-2 bg-blue-500 text-white rounded flex items-center gap-2 cursor-pointer hover:bg-blue-600"
+//               >
+//                 <Upload size={16} />
+//                 <span>Select Episode File</span>
+//               </label>
+//               {isUploadingEpisode && (
+//                 <div className="text-sm text-gray-500 flex items-center">
+//                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
+//                   Uploading...
+//                 </div>
+//               )}
+//             </div>
+//             <p className="text-xs text-gray-500 mt-2">
+//               MP3 format, max 500MB per episode
+//             </p>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+
+  const handleApprove = async (id) => {
+    try {
+      await audioBookService.approveBook(id);
+      
+      // Update local state
+      const approvedItem = pendingApprovals.find(item => item.id === id);
+      
+      if (approvedItem) {
+        // Remove from pending
+        setPendingApprovals(pendingApprovals.filter(item => item.id !== id));
+        
+        // Add to recent uploads with approved status
+        const updatedItem = {
+          ...approvedItem,
+          status: 'approved',
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        };
+        
+        setRecentUploads(prev => [updatedItem, ...prev]);
+      }
+      
+      // Refresh stats
+      fetchStats();
+      
+    } catch (error) {
+      console.error('Error approving book:', error);
+      alert(`Failed to approve book: ${error.message}`);
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await audioBookService.rejectBook(id, 'Rejected by admin');
+      
+      // Update local state
+      const rejectedItem = pendingApprovals.find(item => item.id === id);
+      
+      if (rejectedItem) {
+        // Remove from pending
+        setPendingApprovals(pendingApprovals.filter(item => item.id !== id));
+        
+        // Add to recent uploads with rejected status
+        const updatedItem = {
+          ...rejectedItem,
+          status: 'rejected',
+          reason: 'Rejected by admin',
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        };
+        
+        setRecentUploads(prev => [updatedItem, ...prev]);
+      }
+      
+      // Refresh stats
+      fetchStats();
+      
+    } catch (error) {
+      console.error('Error rejecting book:', error);
+      alert(`Failed to reject book: ${error.message}`);
+    }
+  };
+
+  const handleViewEpisodes = (book) => {
+    setSelectedBook(book);
+    setShowEpisodesModal(true);
+  };
+
+  // Other existing functions remain the same...
+  const handleLoadMore = async () => {
+    setIsLoading(prev => ({ ...prev, uploads: true }));
+    try {
+      const nextPage = Math.floor(recentUploads.length / 10) + 1;
+      const data = await audioBookService.getRecentUploads(nextPage);
+      
+      if (data.books && data.books.length > 0) {
+        setRecentUploads(prev => [...prev, ...data.books]);
+      } else {
+        alert('No more books to load');
+      }
+    } catch (error) {
+      console.error('Error loading more books:', error);
+      setError(prev => ({ ...prev, uploads: error.message }));
+    } finally {
+      setIsLoading(prev => ({ ...prev, uploads: false }));
+    }
+  };
+  
+  const renderLoadingState = (key) => {
+    if (isLoading[key]) {
+      return (
+        <div className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+          <p className="mt-2 text-gray-500">Loading...</p>
+        </div>
+      );
+    }
+    return null;
+  };
+  
+  const renderErrorState = (key) => {
+    if (error[key]) {
+      return (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+          <div className="flex items-center gap-2">
+            <AlertTriangle size={20} />
+            <p>Error: {error[key]}</p>
+          </div>
+          <button 
+            className="mt-2 text-blue-500"
+            onClick={() => {
+              if (key === 'uploads') fetchRecentUploads();
+              if (key === 'approvals') fetchPendingApprovals();
+              if (key === 'stats') fetchStats();
+              if (key === 'analytics') fetchAnalytics();
+              if (key === 'episodes' && selectedBook) fetchEpisodes(selectedBook._id);
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+    return null;
+  };
   
   return (
     <div className="flex flex-col gap-6 pb-24">
@@ -434,24 +1372,27 @@ const handleReject = (id: string) => {
         </button>
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-gray-100 p-4 rounded-lg">
-          <h3 className="text-2xl font-bold">{audioStats.totalBooks}</h3>
-          <p className="text-sm text-gray-600">Total Books</p>
+      {renderErrorState('stats')}
+      {isLoading.stats ? renderLoadingState('stats') : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <h3 className="text-2xl font-bold">{audioStats.totalBooks || 0}</h3>
+            <p className="text-sm text-gray-600">Total Books</p>
+          </div>
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <h3 className="text-2xl font-bold">{audioStats.totalHours || 0}</h3>
+            <p className="text-sm text-gray-600">Hours of Content</p>
+          </div>
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <h3 className="text-2xl font-bold">{audioStats.pendingApprovals || 0}</h3>
+            <p className="text-sm text-gray-600">Pending Approvals</p>
+          </div>
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <h3 className="text-2xl font-bold">{audioStats.activeUploads || 0}</h3>
+            <p className="text-sm text-gray-600">Active Uploads</p>
+          </div>
         </div>
-        <div className="bg-gray-100 p-4 rounded-lg">
-          <h3 className="text-2xl font-bold">{audioStats.totalHours}</h3>
-          <p className="text-sm text-gray-600">Hours of Content</p>
-        </div>
-        <div className="bg-gray-100 p-4 rounded-lg">
-          <h3 className="text-2xl font-bold">{audioStats.pendingApprovals}</h3>
-          <p className="text-sm text-gray-600">Pending Approvals</p>
-        </div>
-        <div className="bg-gray-100 p-4 rounded-lg">
-          <h3 className="text-2xl font-bold">{audioStats.activeUploads}</h3>
-          <p className="text-sm text-gray-600">Active Uploads</p>
-        </div>
-      </div>
+      )}
       
       <div className="border-b flex">
         <button 
@@ -472,211 +1413,308 @@ const handleReject = (id: string) => {
         >
           Analytics
         </button>
+        <button 
+          className={`px-4 py-2 ${activeTab === 'settings' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-600'}`}
+          onClick={() => setActiveTab('settings')}
+        >
+          Settings
+        </button>
       </div>
       
       {activeTab === 'uploads' && (
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-medium">Recent Uploads</h2>
-            <button className="text-blue-500 text-sm">View All</button>
-          </div>
-          
-          <div className="flex flex-col gap-3">
-            {recentUploads.map(book => (
-              <div key={book.id} className="border rounded-lg p-4">
-                <div className="flex justify-between mb-2">
-                  <h3 className="font-medium">{book.title}</h3>
-                  <span className={`text-sm px-2 py-1 rounded-full ${
-                    book.status === 'approved' ? 'bg-green-100 text-green-800' : 
-                    book.status === 'rejected' ? 'bg-red-100 text-red-800' : 
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {book.status.charAt(0).toUpperCase() + book.status.slice(1)}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600">
-                  By {book.author} • Narrated by {book.narrator}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">Uploaded on {book.date}</p>
-                
-                {book.status === 'rejected' && book.reason && (
-                  <div className="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded">
-                    Rejection reason: {book.reason}
-                  </div>
-                )}
-                
-                <div className="flex gap-2 mt-3">
-                  <button className="text-sm text-blue-500">Edit</button>
-                  <button className="text-sm text-gray-500">View Details</button>
-                </div>
+        <div>
+          <h2 className="text-lg font-medium mb-4">Recent Uploads</h2>
+          {renderErrorState('uploads')}
+          {isLoading.uploads && recentUploads.length === 0 ? renderLoadingState('uploads') : (
+            <>
+              <div className="rounded-lg border overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-medium text-gray-500">Title</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-500">Author</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-500">Narrator</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-500">Status</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-500">Date</th>
+                      <th className="px-4 py-3 text-right font-medium text-gray-500">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {recentUploads.map((book) => (
+                      <tr key={book._id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          {book.title}
+                          {book.isSeries && (
+                            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                              Series
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">{book.author}</td>
+                        <td className="px-4 py-3">{book.narrator}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            book.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                            book.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {book.status.charAt(0).toUpperCase() + book.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">{book.date}</td>
+                        <td className="px-4 py-3 text-right">
+                          <button 
+                            className="text-blue-500 hover:text-blue-700 mr-2"
+                            onClick={() => book.isSeries ? handleViewEpisodes(book) : null}
+                            disabled={!book.isSeries}
+                            title={book.isSeries ? "View Episodes" : "Not a series"}
+                          >
+                            <PlayCircle size={18} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
-          </div>
-          
-          <button className="w-full py-2 border border-gray-300 rounded-lg text-gray-600">
-            Load More
-          </button>
+              
+              {recentUploads.length === 0 && (
+                <div className="text-center py-8 border rounded-lg bg-gray-50">
+                  <p className="text-gray-500">No uploads yet</p>
+                </div>
+              )}
+              
+              {recentUploads.length > 0 && (
+                <div className="mt-4 text-center">
+                  <button 
+                    className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+                    onClick={handleLoadMore}
+                    disabled={isLoading.uploads}
+                  >
+                    {isLoading.uploads ? 'Loading...' : 'Load More'}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
       
       {activeTab === 'approvals' && (
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-medium">Pending Approvals</h2>
-            <span className="bg-yellow-100 text-yellow-800 text-sm px-2 py-1 rounded-full">
-              {pendingApprovals.length} Pending
-            </span>
-          </div>
-          
-          <div className="flex flex-col gap-3">
-            {pendingApprovals.map(book => (
-              <div key={book.id} className="border rounded-lg p-4">
-                <h3 className="font-medium">{book.title}</h3>
-                <p className="text-sm text-gray-600">
-                  By {book.author} • Narrated by {book.narrator}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">Submitted on {book.date}</p>
-                
-                <div className="flex gap-2 mt-4">
-                  <button className="flex-1 py-2 bg-blue-500 text-white rounded-lg flex items-center justify-center gap-1">
-                    <PlayCircle size={16} />
-                    <span>Listen</span>
-                  </button>
-                  <button 
-                    className="flex-1 py-2 bg-green-500 text-white rounded-lg flex items-center justify-center gap-1"
-                    onClick={() => handleApprove(book.id)}
-                  >
-                    <Check size={16} />
-                    <span>Approve</span>
-                  </button>
-                  <button 
-                    className="flex-1 py-2 bg-red-500 text-white rounded-lg flex items-center justify-center gap-1"
-                    onClick={() => handleReject(book.id)}
-                  >
-                    <X size={16} />
-                    <span>Reject</span>
-                  </button>
-                </div>
+        <div>
+          <h2 className="text-lg font-medium mb-4">Pending Approvals</h2>
+          {renderErrorState('approvals')}
+          {isLoading.approvals && pendingApprovals.length === 0 ? renderLoadingState('approvals') : (
+            <>
+              <div className="rounded-lg border overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-medium text-gray-500">Title</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-500">Author</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-500">Narrator</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-500">Date</th>
+                      <th className="px-4 py-3 text-right font-medium text-gray-500">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {pendingApprovals.map((book) => (
+                      <tr key={book._id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          {book.title}
+                          {book.isSeries && (
+                            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                              Series
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">{book.author}</td>
+                        <td className="px-4 py-3">{book.narrator}</td>
+                        <td className="px-4 py-3">{book.date}</td>
+                        <td className="px-4 py-3 text-right">
+                          <button 
+                            className="text-green-500 hover:text-green-700 mr-3"
+                            onClick={() => handleApprove(book._id)}
+                          >
+                            <Check size={18} />
+                          </button>
+                          <button 
+                            className="text-red-500 hover:text-red-700"
+                            onClick={() => handleReject(book._id)}
+                          >
+                            <X size={18} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
-          </div>
-          
-          {pendingApprovals.length === 0 && (
-            <div className="mt-4 text-center text-gray-500 text-sm">
-              No more approvals pending
-            </div>
+              
+              {pendingApprovals.length === 0 && (
+                <div className="text-center py-8 border rounded-lg bg-gray-50">
+                  <p className="text-gray-500">No pending approvals</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
       
       {activeTab === 'analytics' && (
-        <div className="flex flex-col gap-6">
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-medium mb-4">Upload Statistics</h3>
-            <div className="h-64 bg-gray-100 flex items-end justify-around rounded p-4">
-              {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map((month, i) => (
-                <div key={month} className="flex flex-col items-center h-full justify-end">
-                  <div 
-                    className="w-12 bg-blue-500 rounded-t" 
-                    style={{ height: `${20 + (i * 10) + Math.floor(Math.random() * 35)}%` }}
-                  ></div>
-                  <span className="text-xs mt-2">{month}</span>
+        <div>
+          <h2 className="text-lg font-medium mb-4">Analytics Dashboard</h2>
+          {renderErrorState('analytics')}
+          {isLoading.analytics ? renderLoadingState('analytics') : (
+            <>
+              {analyticsData ? (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="border rounded-lg p-4">
+                      <h3 className="text-lg font-medium mb-4">Uploads by Category</h3>
+                      <div className="h-64">
+                        <div className="bg-gray-100 h-full flex items-center justify-center">
+                          <BarChart2 size={40} className="text-gray-400" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="border rounded-lg p-4">
+                      <h3 className="text-lg font-medium mb-4">Recent Activity</h3>
+                      <div className="space-y-4">
+                        {analyticsData?.recentActivity?.map((activity, index) => (
+                          <div key={index} className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                              {activity.type === 'upload' ? <Upload size={16} className="text-blue-500" /> : 
+                               activity.type === 'approve' ? <Check size={16} className="text-green-500" /> :
+                               <X size={16} className="text-red-500" />}
+                            </div>
+                            <div>
+                              <p className="text-sm">{activity.message}</p>
+                              <p className="text-xs text-gray-500">{activity.time}</p>
+                            </div>
+                          </div>
+                        ))}
+                        
+                        {(!analyticsData?.recentActivity || analyticsData?.recentActivity?.length === 0) && (
+                          <p className="text-gray-500 text-center py-4">No recent activity</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="border rounded-lg p-4">
+                    <h3 className="text-lg font-medium mb-4">Monthly Uploads</h3>
+                    <div className="h-64">
+                      <div className="bg-gray-100 h-full flex items-center justify-center">
+                        <BarChart2 size={40} className="text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
+              ) : (
+                <div className="text-center py-8 border rounded-lg bg-gray-50">
+                  <p className="text-gray-500">No analytics data available</p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+      
+      {activeTab === 'settings' && (
+        <div>
+          <h2 className="text-lg font-medium mb-4">Settings</h2>
+          
+          <div className="bg-white rounded-lg border p-6 space-y-6">
+            <div>
+              <h3 className="font-medium text-lg mb-4">General Settings</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">API Base URL</label>
+                  <input 
+                    type="text" 
+                    className="w-full md:w-1/2 p-2 border rounded"
+                    defaultValue={API_BASE_URL}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">The base URL for API requests</p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Upload Size Limit (MB)</label>
+                  <input 
+                    type="number" 
+                    className="w-full md:w-1/4 p-2 border rounded"
+                    defaultValue={500}
+                  />
+                </div>
+                
+                <div className="flex items-center">
+                  <input 
+                    type="checkbox"
+                    id="autoApprove"
+                    className="rounded text-blue-500" 
+                    defaultChecked={false}
+                  />
+                  <label htmlFor="autoApprove" className="ml-2 text-sm">Auto-approve uploads</label>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="font-medium text-lg mb-4">Email Notifications</h3>
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <input 
+                    type="checkbox"
+                    id="newUploadNotify"
+                    className="rounded text-blue-500" 
+                    defaultChecked={true}
+                  />
+                  <label htmlFor="newUploadNotify" className="ml-2 text-sm">Notify on new upload</label>
+                </div>
+                
+                <div className="flex items-center">
+                  <input 
+                    type="checkbox"
+                    id="approvalNotify"
+                    className="rounded text-blue-500" 
+                    defaultChecked={true}
+                  />
+                  <label htmlFor="approvalNotify" className="ml-2 text-sm">Notify when book is approved/rejected</label>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Admin Email</label>
+                  <input 
+                    type="email" 
+                    className="w-full md:w-1/2 p-2 border rounded"
+                    defaultValue="admin@example.com"
+                  />
+                </div>
+              </div>
             </div>
           </div>
           
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-medium mb-2">Popular Categories</h3>
-            <div className="space-y-3">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Fiction</span>
-                  <span>45%</span>
-                </div>
-                <div className="w-full bg-gray-200 h-2 rounded-full">
-                  <div className="bg-blue-500 h-2 rounded-full w-5/12"></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Non-Fiction</span>
-                  <span>30%</span>
-                </div>
-                <div className="w-full bg-gray-200 h-2 rounded-full">
-                  <div className="bg-blue-500 h-2 rounded-full w-3/12"></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Fantasy</span>
-                  <span>15%</span>
-                </div>
-                <div className="w-full bg-gray-200 h-2 rounded-full">
-                  <div className="bg-blue-500 h-2 rounded-full w-2/12"></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Mystery</span>
-                  <span>10%</span>
-                </div>
-                <div className="w-full bg-gray-200 h-2 rounded-full">
-                  <div className="bg-blue-500 h-2 rounded-full w-1/12"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-medium">Top Performing Books</h3>
-              <button className="text-blue-500 text-sm">See All</button>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <span className="font-bold text-lg">1</span>
-                <div>
-                  <h4 className="font-medium">The Great Gatsby</h4>
-                  <p className="text-sm text-gray-600">8,542 listens</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="font-bold text-lg">2</span>
-                <div>
-                  <h4 className="font-medium">To Kill a Mockingbird</h4>
-                  <p className="text-sm text-gray-600">7,129 listens</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="font-bold text-lg">3</span>
-                <div>
-                  <h4 className="font-medium">1984</h4>
-                  <p className="text-sm text-gray-600">6,751 listens</p>
-                </div>
-              </div>
-            </div>
+          <div className="mt-6 flex justify-end">
+            <button className="px-6 py-2 bg-blue-500 text-white rounded">
+              Save Settings
+            </button>
           </div>
         </div>
       )}
       
-      {showUploadModal && <UploadModal />}
-      
-      <div className="fixed bottom-20 right-4 shadow-lg bg-white rounded-lg p-4 border">
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="font-medium">Upload Guide</h4>
-          <button className="text-gray-400 hover:text-gray-600">
-            <X size={16} />
-          </button>
-        </div>
-        <ul className="text-sm space-y-1 list-disc pl-4">
-          <li>Audio files must be MP3 format</li>
-          <li>Maximum file size: 500MB</li>
-          <li>Include chapter markers</li>
-          <li>Cover image required (1400×1400)</li>
-        </ul>
-        <button className="text-blue-500 text-sm mt-2">View Full Requirements</button>
-      </div>
+      {showUploadModal && <UploadModal
+      handleClose={handleClose} uploadStep={uploadStep} fileInputRef={fileInputRef} handleFileSelect={handleFileSelect} handleFileUploadClick={handleFileUploadClick} 
+      coverInputRef={coverInputRef} handleCoverSelect={handleCoverSelect} coverPreview={coverPreview} handleCoverUploadClick={handleCoverUploadClick} 
+      bookMetadata={bookMetadata} setBookMetadata={setBookMetadata} categories={categories} handleSeriesToggle={handleSeriesToggle} uploadingFile={uploadingFile} 
+      uploadProgress={uploadProgress} setUploadStep={setUploadStep} uploadAudiobook={uploadAudiobook}
+       />}
+      {showEpisodesModal && <EpisodesModal 
+      selectedBook={selectedBook} handleCloseEpisodesModal={handleCloseEpisodesModal} renderErrorState={renderErrorState} 
+    isLoading={isLoading} episodes={episodes} bookMetadata={bookMetadata} setBookMetadata={setBookMetadata} uploadNewEpisode={uploadNewEpisode} 
+    isUploadingEpisode={isUploadingEpisode} 
+      />}
     </div>
   );
 };

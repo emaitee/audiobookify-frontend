@@ -2,6 +2,9 @@
 import React, { useState } from 'react'
 import { Search, User, BookOpen, Menu,X } from 'lucide-react';
 import { featuredBooks } from '@/app/page';
+import AuthModal from './AuthModal';
+import { useRouter } from 'next/navigation';
+// import AuthModal from './Auth';
 
 interface HeaderProps {
   showSidebar: boolean;
@@ -15,6 +18,17 @@ const Header: React.FC<HeaderProps> = ({ showSidebar, setShowSidebar }) => {
   const [showMiniPlayer, setShowMiniPlayer] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = () => {
+    setIsModalOpen(true);
+    // resetForms();
+  };
+  
+  const closeModal = () => {
+    setIsModalOpen(false);
+    // resetForms();
+  };
 
   // Function to play a book
 interface Book {
@@ -123,9 +137,11 @@ const handleSearchInput = (e: SearchInputEvent): void => {
           </div>
         )}
       </div>
-      <button className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
-        <User size={20} />
-      </button>
+      
+
+
+        <AuthModal />
+      {/* <AuthModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} openModal={openModal} closeModal={closeModal} /> */}
     </header>
   )};
 

@@ -9,7 +9,11 @@ import Player from "@/components/Player";
 import { useState } from "react";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
+import { ClientAuthProvider } from "@/components/ClientAuthProvider";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { PlayerProvider } from "@/context/PlayerContext";
+import { MiniPlayer } from '../components/MiniPlayer';
+import { AnimatePresence } from 'framer-motion';
 
 
 const geistSans = Geist({
@@ -32,66 +36,43 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-    const [isPlaying, setIsPlaying] = useState(false);
     const [showSidebar,setShowSidebar]=useState(false)
   
-  const pathname = usePathname()
+    const pathname = usePathname();
+    const isNowPlayingPage = pathname === '/now-playing';
   const router = useRouter()
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
-      <div className="bg-white min-h-screen text-black">
-      <div className="flex">
-        {/* Sidebar for desktop */}
-        <Sidebar showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
+ <ClientAuthProvider>
+ <PlayerProvider>
+        <div className="bg-white min-h-screen relative text-black">
+      {/* Header */}
+      <Header showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
+      
+      {/* Main Content */}
+      <main className="p-4">
 
-        {/* Main content area */}
-        <div className="flex-1">
-          {/* Header */}
-          <Header showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
-          
-          {/* Main content area */}
-          <main className="p-4 lg:p-6">
-            {children}
-          </main>
-        </div>
-      </div>
+        {children}
+
+        <AnimatePresence>
+              {!isNowPlayingPage && <MiniPlayer />}
+            </AnimatePresence>
+      </main>
       
-      {/* Bottom Navigation (Mobile only) */}
+      {/* Mini Player (when not in full player view) */}
+      {/* {pathname !== 'now-playing' && (
+        <Player  />
+      )} */}
+      
+      {/* Bottom Navigation */}
       <BottomNav />
-      
-      {/* Mini Player */}
-      {/* {showMiniPlayer && <MiniPlayer />} */}
-      
-      {/* Overlay when sidebar is open on mobile */}
-      {showSidebar && (
-        <div 
-          className="fixed inset-0 bg-black/30 z-10 lg:hidden"
-          onClick={() => setShowSidebar(false)}
-        ></div>
-      )}
     </div>
+    </PlayerProvider>
+    </ClientAuthProvider>
       </body>
     </html>
   );
 }
-  // {/* {children} */}
-  //       <div className="bg-white min-h-screen relative text-black">
-  //     {/* Header */}
-  //     <Header showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
-      
-  //     {/* Main Content */}
-  //     <main className="p-4">
-  //       {children}
-  //     </main>
-      
-  //     {/* Mini Player (when not in full player view) */}
-  //     {pathname !== 'player' && (
-  //       <Player isPlaying={isPlaying} setIsPlaying={setIsPlaying} />
-  //     )}
-      
-  //     {/* Bottom Navigation */}
-  //     <BottomNav />
-  //   </div>

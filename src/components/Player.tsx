@@ -1,36 +1,43 @@
 'use client'
+import { Play, Pause } from 'lucide-react';
+import { usePlayer } from '../context/PlayerContext';
 import { useRouter } from 'next/navigation';
-import React from 'react'
-import { Play, Pause, } from 'lucide-react';
 
-interface PlayerProps {
-  isPlaying: boolean;
-  setIsPlaying: (value: boolean) => void;
-}
+export default function Player() {
+  const router = useRouter();
+  const { currentBook, isPlaying, togglePlay, progress } = usePlayer();
 
-function Player({ isPlaying, setIsPlaying }: PlayerProps) {
-    const router = useRouter()
+  if (!currentBook) return null;
+
   return (
-<div 
-          className="fixed bottom-16 left-4 right-4 max-w-3xl mx-auto bg-white border rounded-lg shadow-lg p-3 flex items-center gap-3"
-          onClick={() => router.push('player')}
-        >
-          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtmKvVXY7v2epRmCPTFdvEmfNH8158b-XX0A&s" alt="Current book" className="w-12 h-12 rounded object-cover" />
-          <div className="flex-1">
-            <h3 className="font-medium text-sm">The Great Gatsby</h3>
-            <p className="text-xs text-gray-600">F. Scott Fitzgerald</p>
-          </div>
-          <button 
-            className="p-2 bg-blue-500 text-white rounded-full"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsPlaying(!isPlaying);
-            }}
-          >
-            {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-          </button>
+    <div 
+      className="fixed bottom-16 left-4 right-4 max-w-3xl mx-auto bg-white border rounded-lg shadow-lg p-3 flex items-center gap-3 cursor-pointer"
+      onClick={() => router.push('/now-playing')}
+    >
+      <img 
+        src={currentBook.coverImage} 
+        alt={currentBook.title} 
+        className="w-12 h-12 rounded object-cover" 
+      />
+      <div className="flex-1 min-w-0">
+        <h3 className="font-medium text-sm truncate">{currentBook.title}</h3>
+        <p className="text-xs text-gray-600 truncate">{currentBook.author}</p>
+        <div className="w-full bg-gray-200 h-1 rounded-full mt-1">
+          <div 
+            className="bg-blue-500 h-1 rounded-full" 
+            style={{ width: `${progress}%` }}
+          />
         </div>
-  )
+      </div>
+      <button 
+        className="p-2 bg-blue-500 text-white rounded-full flex-shrink-0"
+        onClick={(e) => {
+          e.stopPropagation();
+          togglePlay();
+        }}
+      >
+        {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+      </button>
+    </div>
+  );
 }
-
-export default Player
