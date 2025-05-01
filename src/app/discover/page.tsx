@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, JSX } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   ChevronRight, 
@@ -48,7 +48,7 @@ export default function DiscoverView() {
     const fetchDiscoverData = async () => {
       try {
         const response = await authApiHelper.get('/discover');
-        if (response.ok) {
+        if (response?.ok) {
           const data = await response.json();
           
           // Transform the data into collections with icons
