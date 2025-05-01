@@ -29,7 +29,7 @@ const LibraryView = () => {
       try {
         setLoading(true);
         const response = await authApiHelper.get('/users/library');
-        if (!response.ok) throw new Error('Failed to fetch library');
+        if (!response?.ok) throw new Error('Failed to fetch library');
         
         const data = await response.json();
         setBooks(data.map((book: any) => ({
@@ -59,7 +59,7 @@ const LibraryView = () => {
         matchesFilter = book.status === 'completed';
         break;
       case 'favorites':
-        matchesFilter = book.isFavorite;
+        matchesFilter = book.isFavorite ?? false;
         break;
       case 'downloaded':
         matchesFilter = book.status === 'downloaded';
@@ -77,13 +77,22 @@ const LibraryView = () => {
   const toggleFavorite = async (bookId: string) => {
     try {
       const book = books.find(b => b._id === bookId);
-      const endpoint = book?.isFavorite 
-        ? `/users/favorites/${bookId}`
-        : `/users/library/${bookId}/favorite`;
-      const method = book?.isFavorite ? 'DELETE' : 'POST';
+      let favoritesEndpoint = `/users/favorites/${bookId}`
+      let libraryEndpoint = `/users/library/${bookId}/favorite`
+      // const endpoint = book?.isFavorite 
+      //   ? `/users/favorites/${bookId}`
+      //   : `/users/library/${bookId}/favorite`;
+      // const method = book?.isFavorite ? 'DELETE' : 'POST';
 
-      const response = await authApiHelper.request(endpoint, { method });
-      if (!response.ok) throw new Error('Failed to update favorite status');
+      let response;
+      if ( book?.isFavorite ) {
+        response = await authApiHelper.delete(favoritesEndpoint)
+      } else {
+        response = await authApiHelper.post(libraryEndpoint)
+      }
+
+      // const response = await authApiHelper.request(endpoint, { method });
+      if (!response?.ok) throw new Error('Failed to update favorite status');
       
       setBooks(books.map(book => 
         book._id === bookId 
@@ -96,7 +105,19 @@ const LibraryView = () => {
     }
   };
 
-  const DisplayEmptyState = ({ icon: Icon, title, description, actionText, onAction }) => {
+  const DisplayEmptyState = ({ 
+    icon: Icon, 
+    title, 
+    description, 
+    actionText, 
+    onAction 
+  }: { 
+    icon: React.ComponentType<{ className?: string }>; 
+    title: string; 
+    description: string; 
+    actionText: string; 
+    onAction: () => void; 
+  }) => {
     return (
       <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg">
         <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-200 mb-4">

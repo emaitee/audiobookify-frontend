@@ -37,11 +37,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-    const [showSidebar,setShowSidebar]=useState(false)
   
 const pathname = usePathname();
   const isNowPlayingPage = pathname === '/now-playing';
-  const router = useRouter()
   return (
     <html lang="en">
       <body
@@ -53,7 +51,7 @@ const pathname = usePathname();
 
         <div className="bg-white min-h-screen relative text-black">
       {/* Header */}
-      <Header showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
+      <Header />
       
       {/* Main Content */}
       <main className="p-4">

@@ -23,7 +23,7 @@ interface HeaderProps {
   setShowSidebar: (value: boolean) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ showSidebar, setShowSidebar }) => {
+const Header = () => {
   const router = useRouter()
   const pathname = usePathname()
     const [currentView, setCurrentView] = useState('home');
@@ -87,12 +87,6 @@ const handleSearchInput = (e: SearchInputEvent): void => {
     
     <header className="sticky top-0 bg-white border-b p-4 flex justify-between items-center z-10">
       <div className="flex items-center gap-2">
-        <button 
-          className="lg:hidden"
-          onClick={() => setShowSidebar(!showSidebar)}
-        >
-          <Menu size={24} />
-        </button>
         <div className="flex items-center gap-2">
           <BookOpen className="text-blue-500" size={24} />
           <h1 className="text-lg font-bold hidden sm:block">AudioVerse</h1>
