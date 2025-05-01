@@ -82,7 +82,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       const response = await fetch(`${API_BASE_URL}/users/profile`, {
         method: 'PUT',
         headers: {
-            'x-auth-token': token,
+            'x-auth-token': token||"",
         },
         body: formData
       });
