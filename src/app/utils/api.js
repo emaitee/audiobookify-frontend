@@ -81,6 +81,23 @@ export const authApiHelper = {
     }
   },
 
+  patch: async (endpoint, body) => {
+    let token = localStorage.getItem('token')||""
+
+    try {
+      return await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+        },
+        body: JSON.stringify(body),
+      });
+    } catch (error) {
+      handleError(error, 'AUTH POST');
+    }
+  },
+
   put: async (endpoint, body) => {
     let token = localStorage.getItem('token')||""
 

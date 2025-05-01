@@ -1,9 +1,9 @@
 'use client'
-import { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useRef, useEffect, ReactNode, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApiHelper } from '@/app/utils/api';
 import { Book, Episode } from '@/app/page';
-
+import { useDebounceFn } from '@/hooks/useDebounce';
 
 interface PlayerContextType {
   currentBook: Book | null;
@@ -24,6 +24,7 @@ interface PlayerContextType {
   setPlaybackSpeed: (speed: number) => void;
   setCurrentBook: (book: Book) => void;
   refreshLibrary: () => Promise<void>;
+  updateListenHistory?: (bookId: string, progress: number, episodeId?: string) => Promise<void>;
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
@@ -40,154 +41,269 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioSourceRef = useRef<string | null>(null); // Track current audio source
 
-  const fetchBooks = async () => {
+  // Helper function to update listen history
+  const updateListenHistory = async (bookId: string, progress: number, episodeId?: string) => {
+    try {
+      await authApiHelper.patch(`/books/${bookId}/listen`, {
+        progress,
+        episodeId
+      });
+    } catch (err) {
+      console.error('Failed to update listen history:', err);
+    }
+  };
+
+  const immediateProgressUpdate = async (bookId: string, progress: number, episodeId?: string) => {
+    await updateListenHistory(bookId, progress, episodeId);
+  };
+
+  const { debouncedFn: debouncedProgressUpdate, flush: flushProgressUpdates } = useDebounceFn(
+    (bookId: string, progress: number, episodeId?: string) => {
+      updateListenHistory(bookId, progress, episodeId);
+    },
+    30000 // 30 second delay
+  );
+
+  // Memoize fetchBooks to prevent unnecessary changes
+  const fetchBooks = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await authApiHelper.get('/books');
-      if (!response?.ok) {
-        throw new Error(`HTTP error! status: ${response?.status}`);
-      }
+      if (!response?.ok) throw new Error(`HTTP error! status: ${response?.status}`);
+  
       const data = await response.json();
       setAllBooks(data.books);
-      
-      // If there's a current book being played, update it with fresh data
-      if (currentBook) {
-        const updatedBook = data.books.find((b: Book) => b._id === currentBook._id);
-        if (updatedBook) {
-          setCurrentBook(updatedBook);
-          // Also update current episode if it exists
-          if (currentEpisode) {
-            const updatedEpisode = updatedBook.episodes?.find(
-              (ep: Episode) => ep._id === currentEpisode._id
-            );
-            if (updatedEpisode) {
-              setCurrentEpisode(updatedEpisode);
-              // Update audio source if playing
-              if (audioRef.current && isPlaying) {
-                audioRef.current.src = updatedEpisode.audioFile;
-              }
-            }
-          }
-        }
-      }
+  
+      // Only update currentBook if it's found
+      setCurrentBook(prev => {
+        if (!prev) return prev;
+        const updatedBook: Book | undefined = data.books.find((b: Book) => b._id === prev._id);
+        return updatedBook || prev;
+      });
+  
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch books');
       console.error('Error fetching books:', err);
     } finally {
       setLoading(false);
     }
-  };
-
-  // Initialize audio element and fetch books
+  }, []);
+  
+  // Update current episode when books are refreshed
   useEffect(() => {
-    // Initialize audio element
-    audioRef.current = new Audio();
-    audioRef.current.volume = volume;
-    audioRef.current.playbackRate = playbackSpeed;
+    if (!currentBook || !currentEpisode) return;
+  
+    const updatedBook = allBooks.find(b => b._id === currentBook._id);
+    if (!updatedBook) return;
+  
+    const updatedEpisode = updatedBook.episodes?.find(ep => ep._id === currentEpisode._id);
+    if (updatedEpisode) {
+      setCurrentEpisode(updatedEpisode);
+    }
+  }, [allBooks, currentBook, currentEpisode]);
+  
+  // Initialize audio element and set up event listeners
+  useEffect(() => {
+    const audio = new Audio();
+    audioRef.current = audio;
+    audio.volume = volume;
+    audio.playbackRate = playbackSpeed;
 
-    // Fetch books from API
-    fetchBooks();
-
-    const updateProgress = () => {
-      if (audioRef.current) {
-        const newProgress = (audioRef.current.currentTime / audioRef.current.duration) * 100;
-        setProgress(isNaN(newProgress) ? 0 : newProgress);
+    // Audio event handlers
+    const handleTimeUpdate = () => {
+      if (!audio.currentTime || !audio.duration) return;
+      const newProgress = (audio.currentTime / audio.duration) * 100;
+      setProgress(isNaN(newProgress) ? 0 : newProgress);
+      
+      if (currentBook) {
+        debouncedProgressUpdate(currentBook._id, audio.currentTime, currentEpisode?._id);
       }
     };
 
-    const interval = setInterval(updateProgress, 1000);
-
-    // Handle audio events
     const handleEnded = () => {
       setIsPlaying(false);
-      // Auto-play next episode if available
       if (currentBook?.isSeries && currentEpisode) {
-        const nextEp = currentBook.episodes?.find(ep => 
-          ep.episodeNumber === (currentEpisode.episodeNumber + 1)
+        const nextEp = currentBook.episodes?.find(
+          ep => ep.episodeNumber === currentEpisode.episodeNumber + 1
         );
-        if (nextEp) {
-          play(currentBook, nextEp);
-        }
+        nextEp && play(currentBook, nextEp);
       }
     };
 
-    audioRef.current.addEventListener('ended', handleEnded);
+    const handlePause = () => {
+      setIsPlaying(false);
+      if (currentBook && audio.currentTime) {
+        flushProgressUpdates();
+        immediateProgressUpdate(currentBook._id, audio.currentTime, currentEpisode?._id);
+      }
+    };
 
+    const handleError = (e: ErrorEvent) => {
+      console.error('Audio error:', e);
+      setError('Audio playback error. Check your connection or file format.');
+      setIsPlaying(false);
+    };
+
+    // Add event listeners
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('error', handleError);
+
+    // Cleanup
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.removeEventListener('ended', handleEnded);
-        audioRef.current = null;
+      flushProgressUpdates();
+      if (currentBook && audio.currentTime > 0) {
+        immediateProgressUpdate(currentBook._id, audio.currentTime, currentEpisode?._id);
       }
-      clearInterval(interval);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('error', handleError);
+      audio.pause();
+      audio.src = ''; // Clear source
+      audioRef.current = null;
     };
-  }, []);
+  }, []); // Empty dependency array as we want this to run once
 
-  // Update playback speed when changed
+  // Handle updates to volume and playback speed
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.playbackRate = playbackSpeed;
-    }
-  }, [playbackSpeed]);
+    const audio = audioRef.current;
+    if (!audio) return;
+    
+    audio.volume = volume;
+    audio.playbackRate = playbackSpeed;
+  }, [volume, playbackSpeed]);
 
-  const play = (book: Book, episode?: Episode) => {
+  // Initial fetch of books
+  useEffect(() => {
+    fetchBooks();
+  }, [fetchBooks]);
+
+  // Update audio source when episode changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentEpisode?.audioFile) return;
+    
+    // Only update the source if it's different
+    if (audioSourceRef.current !== currentEpisode.audioFile) {
+      console.log(`Setting new audio source: ${currentEpisode.audioFile}`);
+      audio.src = currentEpisode.audioFile;
+      audioSourceRef.current = currentEpisode.audioFile;
+      
+      // If we're supposed to be playing, restart after changing source
+      if (isPlaying) {
+        audio.play().catch(err => {
+          console.error('Failed to play after source change:', err);
+          setIsPlaying(false);
+          setError('Failed to play audio. Check your connection or file format.');
+        });
+      }
+    }
+  }, [currentEpisode, isPlaying]);
+
+  // Update playback state if isPlaying changes but audio state doesn't match
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    
+    // Synchronize the actual audio state with our isPlaying state
+    if (isPlaying && audio.paused) {
+      audio.play().catch(err => {
+        console.error('Failed to play:', err);
+        setIsPlaying(false);
+        setError('Failed to play audio. Check your connection or file format.');
+      });
+    } else if (!isPlaying && !audio.paused) {
+      audio.pause();
+    }
+  }, [isPlaying]);
+
+  const play = async (book: Book, episode?: Episode) => {
     if (!audioRef.current) return;
-
-    // Find the book in our allBooks array to ensure we have the latest data
-    const freshBook = allBooks.find(b => b._id === book._id) || book;
-
-    console.log(freshBook,'freshBookfreshBookfreshBook')
-
-    // Determine which episode to play
-    let playEpisode = episode;
-    if (!playEpisode && freshBook.episodes) {
-      // If no episode specified, play first episode or resume last played
-      playEpisode = freshBook.episodes[0];
+  
+    try {
+      // Find the book in our allBooks array to ensure we have the latest data
+      const freshBook = allBooks.find(b => b._id === book._id) || book;
+  
+      // Determine which episode to play with priority:
+      // 1. Explicitly passed episode
+      // 2. First episode
+      let playEpisode = episode;
+      if (!playEpisode && freshBook?.episodes?.length) {
+        playEpisode = freshBook.episodes[0];
+      }
+  
+      if (!playEpisode) {
+        console.error('No episode available to play');
+        setError('No episode available to play');
+        return;
+      }
+  
+      // Update UI state first for immediate feedback
+      setCurrentBook(freshBook);
+      setCurrentEpisode(playEpisode);
+      
+      // Audio source will be updated in the useEffect
+      // Set initial progress
+      audioRef.current.currentTime = 0;
+      
+      // Call API to update listen count and history
+      if (freshBook?._id) {
+        await updateListenHistory(freshBook._id, 0, playEpisode._id);
+      } else {
+        console.error('Book ID is undefined');
+      }
+  
+      // Set isPlaying to true - actual playback will be handled by useEffect
+      setIsPlaying(true);
+      
+    } catch (err) {
+      console.error('Playback failed:', err);
+      setError('Failed to start playback');
+      setIsPlaying(false);
     }
-
-    if (!playEpisode) {
-      console.error('No episode available to play');
-      return;
-    }
-
-    setCurrentBook(freshBook);
-    setCurrentEpisode(playEpisode);
-    audioRef.current.src = playEpisode.audioFile;
-    audioRef.current.currentTime = 0;
-    audioRef.current.play()
-      .then(() => setIsPlaying(true))
-      .catch(err => console.error('Playback failed:', err));
   };
 
-  const togglePlay = () => {
+  const togglePlay = async () => {
     if (!currentBook || !audioRef.current) return;
-
+  
+    setIsPlaying(!isPlaying); // The useEffect will handle the actual play/pause
+    
+    // Flush progress updates when pausing
     if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play()
-        .then(() => setIsPlaying(true))
-        .catch(err => console.error('Playback failed:', err));
+      flushProgressUpdates();
+      if (currentBook && audioRef.current) {
+        await immediateProgressUpdate(
+          currentBook._id, 
+          audioRef.current.currentTime,
+          currentEpisode?._id
+        );
+      }
     }
-    setIsPlaying(!isPlaying);
   };
 
   const seek = (time: number) => {
     if (!audioRef.current || !currentEpisode) return;
-
-    const duration = currentEpisode.duration || 0;
+  
+    const duration = audioRef.current.duration || currentEpisode.duration || 0;
     const seekTime = (time / 100) * duration;
     audioRef.current.currentTime = seekTime;
     setProgress(time);
+    
+    // Immediately update progress after seeking
+    if (currentBook) {
+      flushProgressUpdates(); // Clear any pending updates
+      immediateProgressUpdate(currentBook._id, seekTime, currentEpisode._id);
+    }
   };
 
   const handleVolumeChange = (newVolume: number) => {
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume;
-    }
     setVolume(newVolume);
+    // The volume will be updated in the useEffect
   };
 
   const nextTrack = () => {

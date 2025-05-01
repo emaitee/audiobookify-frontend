@@ -481,7 +481,7 @@ export default function ContentManagement() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Content Management</h1>
           <button 
-            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-md flex items-center text-sm sm:text-base"
+            className="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-md flex items-center text-sm sm:text-base"
             onClick={() => setShowUploadModal(true)}
           >
             <Plus size={16} className="mr-2" />
@@ -498,7 +498,7 @@ export default function ContentManagement() {
                   key={view}
                   className={`py-3 px-3 sm:py-4 sm:px-6 font-medium text-xs sm:text-sm border-b-2 whitespace-nowrap ${
                     activeView === view 
-                      ? 'border-blue-500 text-blue-600' 
+                      ? 'border-indigo-500 text-indigo-600' 
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                   onClick={() => {
@@ -570,7 +570,7 @@ export default function ContentManagement() {
         {/* Loading and error states */}
         {loading && (
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
           </div>
         )}
         
@@ -631,7 +631,7 @@ export default function ContentManagement() {
                         <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex items-center justify-end space-x-2">
                             <button 
-                              className="text-blue-600 hover:text-blue-900"
+                              className="text-indigo-600 hover:text-indigo-900"
                               onClick={() => router.push(`/content-management/edit/${item._id}`)}
                             >
                               <Edit size={16} />
@@ -708,7 +708,7 @@ export default function ContentManagement() {
                           onClick={() => setCurrentPage(pageNum)}
                           className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                             currentPage === pageNum
-                              ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                              ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
                               : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                           }`}
                         >

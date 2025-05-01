@@ -1,24 +1,46 @@
-// import { useState, useEffect } from 'react';
+// useDebounce.ts
+import { useCallback, useRef, useEffect } from 'react';
 
-// interface UseDebounceProps<T> {
-//   value: T;
-//   delay: number;
-// }
+export function useDebounceFn<T extends (...args: any[]) => any>(
+  fn: T, 
+  delay: number
+) {
+  const timeoutRef = useRef<NodeJS.Timeout>(null);
+  const pendingArgsRef = useRef<Parameters<T>>(null);
 
-// export function useDebounce<T>({ value, delay }: UseDebounceProps<T>): T {
-//   const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  // Cancel pending updates on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
-//   useEffect(() => {
-//     // Set a timeout to update the debounced value after the specified delay
-//     const handler = setTimeout(() => {
-//       setDebouncedValue(value);
-//     }, delay);
+  const debouncedFn = useCallback((...args: Parameters<T>) => {
+    pendingArgsRef.current = args;
+    
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => {
+      if (pendingArgsRef.current) {
+        fn(...pendingArgsRef.current);
+        pendingArgsRef.current = null;
+      }
+    }, delay);
+  }, [fn, delay]);
 
-//     // Clear the timeout if the value changes or the component unmounts
-//     return () => {
-//       clearTimeout(handler);
-//     };
-//   }, [value, delay]);
+  const flush = useCallback(() => {
+    if (timeoutRef.current && pendingArgsRef.current) {
+      clearTimeout(timeoutRef.current);
+      fn(...pendingArgsRef.current);
+      pendingArgsRef.current = null;
+      return true; // Indicate that a flush occurred
+    }
+    return false; // No pending updates to flush
+  }, [fn]);
 
-//   return debouncedValue;
-// }
+  return { debouncedFn, flush };
+}

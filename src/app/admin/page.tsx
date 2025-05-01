@@ -679,7 +679,7 @@ const AdminView = () => {
   };
   
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 pb-24 px-4 sm:px-6 max-w-7xl mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 pb-24 md:px-4 sm:px-6 max-w-7xl mx-auto">
   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
     <h1 className="text-lg sm:text-xl font-bold">Admin Dashboard</h1>
     <button 
