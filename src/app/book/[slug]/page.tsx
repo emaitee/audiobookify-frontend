@@ -327,7 +327,7 @@ const isPlaying = currentBook?._id === book?._id
                   <Star size={14} className="mr-1 fill-amber-500 text-amber-500" />
                   {Number(book.averageRating).toFixed(1)} ({book.ratings.length} ratings)
                 </span>
-                <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium">
                   {book.language}
                 </span>
               </div>

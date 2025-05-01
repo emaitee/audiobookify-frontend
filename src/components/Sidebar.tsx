@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
       lg:translate-x-0 lg:static
     `}>
       <div className="flex items-center gap-2 mb-8">
-        <BookOpen className="text-blue-500" size={24} />
+        <BookOpen className="text-indigo-500" size={24} />
         <h1 className="text-lg font-bold">AudioVerse</h1>
         <button 
           className="ml-auto lg:hidden"
@@ -33,7 +33,7 @@ import { useRouter } from "next/navigation";
       
       <nav className="space-y-1">
         <button 
-          className={`flex items-center gap-3 p-3 w-full rounded-lg ${pathname === 'home' ? 'bg-blue-50 text-blue-500' : 'hover:bg-gray-100'}`}
+          className={`flex items-center gap-3 p-3 w-full rounded-lg ${pathname === 'home' ? 'bg-indigo-50 text-indigo-500' : 'hover:bg-gray-100'}`}
           onClick={() => {
             router.push('home');
             setShowSidebar(false);
@@ -43,7 +43,7 @@ import { useRouter } from "next/navigation";
           <span>Home</span>
         </button>
         <button 
-          className={`flex items-center gap-3 p-3 w-full rounded-lg ${pathname === 'library' ? 'bg-blue-50 text-blue-500' : 'hover:bg-gray-100'}`}
+          className={`flex items-center gap-3 p-3 w-full rounded-lg ${pathname === 'library' ? 'bg-indigo-50 text-indigo-500' : 'hover:bg-gray-100'}`}
           onClick={() => {
             router.push('library');
             setShowSidebar(false);
@@ -53,7 +53,7 @@ import { useRouter } from "next/navigation";
           <span>My Library</span>
         </button>
         <button 
-          className={`flex items-center gap-3 p-3 w-full rounded-lg ${pathname === 'profile' ? 'bg-blue-50 text-blue-500' : 'hover:bg-gray-100'}`}
+          className={`flex items-center gap-3 p-3 w-full rounded-lg ${pathname === 'profile' ? 'bg-indigo-50 text-indigo-500' : 'hover:bg-gray-100'}`}
           onClick={() => {
             router.push('profile');
             setShowSidebar(false);
@@ -80,7 +80,7 @@ import { useRouter } from "next/navigation";
       
       <div className="absolute bottom-4 left-4 right-4">
         <button 
-          className="flex items-center gap-2 p-3 text-blue-500 w-full justify-center border border-blue-500 rounded-lg"
+          className="flex items-center gap-2 p-3 text-indigo-500 w-full justify-center border border-indigo-500 rounded-lg"
           onClick={() => router.push('admin')}
         >
           <Settings size={16} />

@@ -39,7 +39,7 @@ export default function ProfilePage() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
     </div>
   );
 
@@ -139,17 +139,17 @@ export default function ProfilePage() {
                 <img 
                   src={previewUrl || profile.profilePicture} 
                   alt={profile.name} 
-                  className="h-32 w-32 rounded-full object-cover border-2 border-blue-100"
+                  className="h-32 w-32 rounded-full object-cover border-2 border-indigo-100"
                 />
               ) : (
-                <div className="h-32 w-32 rounded-full bg-blue-100 flex items-center justify-center">
-                  <UserCircle2 size={64} className="text-blue-500" />
+                <div className="h-32 w-32 rounded-full bg-indigo-100 flex items-center justify-center">
+                  <UserCircle2 size={64} className="text-indigo-500" />
                 </div>
               )}
               
               {isEditing && (
                 <div className="absolute bottom-0 right-0">
-                  <label htmlFor="profilePicture" className="cursor-pointer bg-blue-500 rounded-full p-2 text-white hover:bg-blue-600">
+                  <label htmlFor="profilePicture" className="cursor-pointer bg-indigo-500 rounded-full p-2 text-white hover:bg-indigo-600">
                     <Upload size={16} />
                     <input 
                       type="file" 
@@ -202,7 +202,7 @@ export default function ProfilePage() {
                   <button 
                     type="button" 
                     onClick={handleSubmit}
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+                    className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded flex items-center"
                   >
                     <Save size={16} className="mr-1" /> Save
                   </button>
@@ -227,7 +227,7 @@ export default function ProfilePage() {
                   </div>
                   <button 
                     onClick={() => setIsEditing(true)}
-                    className="bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium py-2 px-4 rounded-full flex items-center"
+                    className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-medium py-2 px-4 rounded-full flex items-center"
                   >
                     <Edit2 size={16} className="mr-1" /> Edit
                   </button>
@@ -253,7 +253,7 @@ export default function ProfilePage() {
             onClick={() => setActiveTab('library')}
             className={`${
               activeTab === 'library' 
-              ? 'border-blue-500 text-blue-600' 
+              ? 'border-indigo-500 text-indigo-600' 
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
           >
@@ -263,7 +263,7 @@ export default function ProfilePage() {
             onClick={() => setActiveTab('favorites')}
             className={`${
               activeTab === 'favorites' 
-              ? 'border-blue-500 text-blue-600' 
+              ? 'border-indigo-500 text-indigo-600' 
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
           >
@@ -273,7 +273,7 @@ export default function ProfilePage() {
             onClick={() => setActiveTab('history')}
             className={`${
               activeTab === 'history' 
-              ? 'border-blue-500 text-blue-600' 
+              ? 'border-indigo-500 text-indigo-600' 
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
           >
@@ -413,7 +413,7 @@ export default function ProfilePage() {
                           <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
                             <div 
                               style={{ width: `${item.progress * 100}%` }}
-                              className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
+                              className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500"
                             ></div>
                           </div>
                           <p className="text-xs text-gray-500 mt-1">{Math.round(item.progress * 100)}% complete</p>
@@ -684,7 +684,7 @@ export default function ProfilePage() {
 //           <div>
 //             <h2 className="text-xl font-bold">John Smith</h2>
 //             <p className="text-gray-600">Member since January 2025</p>
-//             <button className="text-blue-500 text-sm font-medium mt-1">Edit Profile</button>
+//             <button className="text-indigo-500 text-sm font-medium mt-1">Edit Profile</button>
 //           </div>
 //         </div>
         
@@ -709,19 +709,19 @@ export default function ProfilePage() {
         
 //         <div className="border-b flex">
 //           <button 
-//             className={`px-4 py-2 ${activeTab === 'overview' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-600'}`}
+//             className={`px-4 py-2 ${activeTab === 'overview' ? 'border-b-2 border-indigo-500 text-indigo-500' : 'text-gray-600'}`}
 //             onClick={() => setActiveTab('overview')}
 //           >
 //             Overview
 //           </button>
 //           <button 
-//             className={`px-4 py-2 ${activeTab === 'library' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-600'}`}
+//             className={`px-4 py-2 ${activeTab === 'library' ? 'border-b-2 border-indigo-500 text-indigo-500' : 'text-gray-600'}`}
 //             onClick={() => setActiveTab('library')}
 //           >
 //             My Library
 //           </button>
 //           <button 
-//             className={`px-4 py-2 ${activeTab === 'badges' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-600'}`}
+//             className={`px-4 py-2 ${activeTab === 'badges' ? 'border-b-2 border-indigo-500 text-indigo-500' : 'text-gray-600'}`}
 //             onClick={() => setActiveTab('badges')}
 //           >
 //             Badges
@@ -765,7 +765,7 @@ export default function ProfilePage() {
 //                   <span className="text-sm text-gray-600">30 min / day</span>
 //                 </div>
 //                 <div className="w-full bg-gray-200 h-2 rounded-full mb-1">
-//                   <div className="bg-blue-500 h-2 rounded-full w-2/3"></div>
+//                   <div className="bg-indigo-500 h-2 rounded-full w-2/3"></div>
 //                 </div>
 //                 <p className="text-sm text-gray-600">20 minutes today</p>
 //               </div>
@@ -774,7 +774,7 @@ export default function ProfilePage() {
 //             <section>
 //               <div className="flex justify-between items-center mb-3">
 //                 <h3 className="text-lg font-medium">Reading Habits</h3>
-//                 <button className="text-sm text-blue-500">View Details</button>
+//                 <button className="text-sm text-indigo-500">View Details</button>
 //               </div>
 //               <div className="bg-gray-50 p-4 rounded-lg">
 //                 <div className="flex justify-between mb-4">
@@ -805,7 +805,7 @@ export default function ProfilePage() {
 //         {activeTab === 'library' && (
 //           <div className="flex flex-col gap-4">
 //             <div className="flex gap-2 overflow-x-auto pb-2">
-//               <button className="px-4 py-1 bg-blue-500 text-white rounded-full text-sm whitespace-nowrap">
+//               <button className="px-4 py-1 bg-indigo-500 text-white rounded-full text-sm whitespace-nowrap">
 //                 All Books
 //               </button>
 //               <button className="px-4 py-1 bg-gray-200 rounded-full text-sm whitespace-nowrap">
@@ -828,7 +828,7 @@ export default function ProfilePage() {
 //                   {book.progress && (
 //                     <div className="w-full bg-gray-200 h-1 rounded-full mt-2">
 //                       <div 
-//                         className="bg-blue-500 h-1 rounded-full" 
+//                         className="bg-indigo-500 h-1 rounded-full" 
 //                         style={{ width: `${book.progress}%` }}
 //                       ></div>
 //                     </div>
@@ -843,7 +843,7 @@ export default function ProfilePage() {
 //           <div className="grid grid-cols-3 gap-4">
 //             {Array(12).fill(null).map((_, idx) => (
 //               <div key={idx} className="flex flex-col items-center p-2">
-//                 <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl ${idx < 8 ? 'bg-blue-100 text-blue-500' : 'bg-gray-200 text-gray-400'}`}>
+//                 <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl ${idx < 8 ? 'bg-indigo-100 text-indigo-500' : 'bg-gray-200 text-gray-400'}`}>
 //                   {idx < 8 ? '🏆' : '🔒'}
 //                 </div>
 //                 <h4 className="text-sm font-medium text-center mt-2">

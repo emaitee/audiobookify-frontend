@@ -86,7 +86,7 @@ export default function DiscoverView() {
             {
               title: 'Popular in Fiction',
               books: data.popularFiction || [],
-              icon: <BookOpen size={20} className="text-blue-500" />
+              icon: <BookOpen size={20} className="text-indigo-500" />
             },
             {
               title: 'Popular in Non-Fiction',

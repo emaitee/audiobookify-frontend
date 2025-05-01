@@ -24,13 +24,13 @@ export default function Player() {
         <p className="text-xs text-gray-600 truncate">{currentBook.author}</p>
         <div className="w-full bg-gray-200 h-1 rounded-full mt-1">
           <div 
-            className="bg-blue-500 h-1 rounded-full" 
+            className="bg-indigo-500 h-1 rounded-full" 
             style={{ width: `${progress}%` }}
           />
         </div>
       </div>
       <button 
-        className="p-2 bg-blue-500 text-white rounded-full flex-shrink-0"
+        className="p-2 bg-indigo-500 text-white rounded-full flex-shrink-0"
         onClick={(e) => {
           e.stopPropagation();
           togglePlay();

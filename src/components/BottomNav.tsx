@@ -144,7 +144,8 @@ function ResponsiveNav() {
     <div className="hidden lg:flex h-screen fixed left-0 top-0 bottom-0 w-64 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-20">
       {/* Brand logo area */}
       <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800">
-        <span className="text-xl font-semibold text-indigo-600 dark:text-indigo-400">Your App</span>
+        <BookOpen className="text-indigo-600" size={24} />
+        <span className="text-xl font-semibold text-indigo-600 dark:text-indigo-400">AudioVerse</span>
       </div>
 
       {/* Navigation items */}

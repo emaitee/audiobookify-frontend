@@ -231,7 +231,7 @@ export default function SearchView() {
                             <Clock size={12} className="mr-1" /> {formatDuration(book.duration)}
                           </span>
                         )}
-                        <span className="flex items-center text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full font-medium">
+                        <span className="flex items-center text-xs bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-full font-medium">
                           {book.category}
                         </span>
                       </div>
@@ -308,7 +308,7 @@ export default function SearchView() {
                   {suggestions?.categories?.map((category) => (
                     <button 
                       key={category.name}
-                      className="bg-gradient-to-br from-indigo-50 to-blue-50 p-4 rounded-xl text-left hover:shadow-md transition-all border border-indigo-100 hover:border-indigo-200 relative overflow-hidden group"
+                      className="bg-gradient-to-br from-indigo-50 to-indigo-50 p-4 rounded-xl text-left hover:shadow-md transition-all border border-indigo-100 hover:border-indigo-200 relative overflow-hidden group"
                       onClick={() => {
                         setActiveCategory(category.name);
                         setSearchQuery('');
@@ -453,7 +453,7 @@ export default function SearchView() {
 //             value={searchQuery}
 //             onChange={(e) => setSearchQuery(e.target.value)}
 //             placeholder="Search books, authors, narrators..."
-//             className="w-full bg-gray-100 rounded-full py-3 px-4 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+//             className="w-full bg-gray-100 rounded-full py-3 px-4 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
 //           />
 //           <Search size={18} className="absolute left-3 top-3.5 text-gray-500" />
 //           {searchQuery && (
@@ -472,7 +472,7 @@ export default function SearchView() {
 //               key={category}
 //               className={`px-4 py-1 rounded-full text-sm whitespace-nowrap transition-colors ${
 //                 activeCategory === category 
-//                   ? 'bg-blue-500 text-white' 
+//                   ? 'bg-indigo-500 text-white' 
 //                   : 'bg-gray-100 hover:bg-gray-200'
 //               }`}
 //               onClick={() => setActiveCategory(category)}
@@ -485,7 +485,7 @@ export default function SearchView() {
       
 //       {loading ? (
 //         <div className="flex justify-center items-center py-12">
-//           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+//           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
 //         </div>
 //       ) : searchQuery ? (
 //         <div className="px-4">
@@ -516,7 +516,7 @@ export default function SearchView() {
 //                     )}
 //                     <div className="flex items-center mt-1 gap-2">
 //                       {book.averageRating && (
-//                         <span className="flex items-center text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
+//                         <span className="flex items-center text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
 //                           ★ {book.averageRating.toFixed(1)}
 //                         </span>
 //                       )}

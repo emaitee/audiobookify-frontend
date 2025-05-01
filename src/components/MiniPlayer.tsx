@@ -24,85 +24,111 @@ import { formatTime } from '@/app/utils/helpers';
 import Link from 'next/link';
 
 // Mini Player Component - Appears at bottom of screen
+// import { motion } from 'framer-motion';
+// import { useRouter } from 'next/navigation';
+// import { usePlayer } from '@/context/PlayerContext';
+// import { BookOpen, ChevronUp, Pause, Play } from 'lucide-react';
+// import { useState, useEffect } from 'react';
+
 export function MiniPlayer() {
-    const router = useRouter();
-    const { 
-      currentBook, 
-      currentEpisode,
-      isPlaying, 
-      togglePlay, 
-      progress 
-    } = usePlayer();
+  const router = useRouter();
+  const { 
+    currentBook, 
+    currentEpisode,
+    isPlaying, 
+    togglePlay, 
+    progress 
+  } = usePlayer();
+  const [isMobile, setIsMobile] = useState(true);
   
-    if (!currentBook) return null;
-  
-    const handlePlayerClick = () => {
-      router.push('/now-playing');
+  // Check if we're on desktop or mobile for positioning
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 1024);
     };
-  
-    const handlePlayButtonClick = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      togglePlay();
-    };
-  
-    return (
-      <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 100, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        onClick={handlePlayerClick}
-        className="fixed bottom-16 left-0 right-0 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 cursor-pointer shadow-lg z-40 rounded-t-xl"
-        style={{ marginBottom: 'env(safe-area-inset-bottom, 0)' }} // For iOS devices
-      >
-        <div className="container mx-auto max-w-6xl flex items-center justify-between">
-          <div className="flex items-center space-x-3 flex-1 min-w-0">
-            <div className="relative h-12 w-12 flex-shrink-0">
-              <div className="absolute inset-0 bg-white/20 rounded-md blur-sm"></div>
-              <img 
-                src={currentBook.coverImage} 
-                alt={currentBook.title}
-                className="h-full w-full object-cover rounded-md relative z-10"
-              />
-              {/* Progress indicator */}
-              <div className="absolute bottom-0 left-0 h-1 bg-white/70 rounded-b-md z-20" style={{ width: `${progress}%` }}></div>
-            </div>
-            
-            <div className="truncate">
-              <h3 className="font-semibold text-sm truncate">{currentBook.title}</h3>
-              <p className="text-xs text-white/80 truncate">{currentBook.author}</p>
-              
-              {currentBook.isSeries && currentEpisode && (
-                <div className="inline-flex items-center mt-1 text-xs">
-                  <BookOpen size={12} className="mr-1" />
-                  <span>Ep. {currentEpisode.episodeNumber}</span>
-                </div>
-              )}
-            </div>
+    
+    // Initial check
+    checkScreenSize();
+    
+    // Add listener for resize events
+    window.addEventListener('resize', checkScreenSize);
+    
+    // Clean up
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  if (!currentBook) return null;
+
+  const handlePlayerClick = () => {
+    router.push('/now-playing');
+  };
+
+  const handlePlayButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    togglePlay();
+  };
+
+  return (
+    <motion.div
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 100, opacity: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      onClick={handlePlayerClick}
+      className={`fixed z-40 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 cursor-pointer shadow-lg rounded-t-xl
+        ${isMobile 
+          ? 'bottom-16 left-0 right-0' // Mobile: Full width above bottom nav
+          : 'bottom-0 lg:left-64 right-0'} // Desktop: Offset from left to account for sidebar`}
+      style={{ marginBottom: isMobile ? 'env(safe-area-inset-bottom, 0)' : '0' }} // iOS safe area only on mobile
+    >
+      <div className="container mx-auto max-w-6xl flex items-center justify-between">
+        <div className="flex items-center space-x-3 flex-1 min-w-0">
+          <div className="relative h-12 w-12 flex-shrink-0">
+            <div className="absolute inset-0 bg-white/20 rounded-md blur-sm"></div>
+            <img 
+              src={currentBook.coverImage} 
+              alt={currentBook.title}
+              className="h-full w-full object-cover rounded-md relative z-10"
+            />
+            {/* Progress indicator */}
+            <div className="absolute bottom-0 left-0 h-1 bg-white/70 rounded-b-md z-20" style={{ width: `${progress}%` }}></div>
           </div>
-  
-          <div className="flex items-center space-x-3">
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push('/now-playing');
-              }} 
-              className="p-2 hover:bg-white/10 rounded-full transition-colors"
-            >
-              <ChevronUp size={20} />
-            </button>
+          
+          <div className="truncate">
+            <h3 className="font-semibold text-sm truncate">{currentBook.title}</h3>
+            <p className="text-xs text-white/80 truncate">{currentBook.author}</p>
             
-            <button
-              onClick={handlePlayButtonClick}
-              className="p-3 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
-            >
-              {isPlaying ? <Pause size={20} /> : <Play size={20} fill="white" />}
-            </button>
+            {currentBook.isSeries && currentEpisode && (
+              <div className="inline-flex items-center mt-1 text-xs">
+                <BookOpen size={12} className="mr-1" />
+                <span>Ep. {currentEpisode.episodeNumber}</span>
+              </div>
+            )}
           </div>
         </div>
-      </motion.div>
-    );
-  }
+
+        <div className="flex items-center space-x-3">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push('/now-playing');
+            }} 
+            className="p-2 hover:bg-white/10 rounded-full transition-colors"
+          >
+            <ChevronUp size={20} />
+          </button>
+          
+          <button
+            onClick={handlePlayButtonClick}
+            className="p-3 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
+          >
+            {isPlaying ? <Pause size={20} /> : <Play size={20} fill="white" />}
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function NowPlaying() {
     const {

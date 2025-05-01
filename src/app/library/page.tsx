@@ -127,7 +127,7 @@ const LibraryView = () => {
         <p className="text-gray-500 text-center max-w-md mb-4">{description}</p>
         <button
           onClick={onAction}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+          className="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors"
         >
           {actionText}
         </button>
@@ -189,7 +189,7 @@ const LibraryView = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
       </div>
     );
   }
@@ -220,7 +220,7 @@ const LibraryView = () => {
               placeholder="Search library..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+              className="pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
             />
           </div>
           <button 
@@ -245,7 +245,7 @@ const LibraryView = () => {
             onClick={() => setActiveFilter(filter.id)}
             className={`px-4 py-1 rounded-full text-sm whitespace-nowrap flex items-center gap-1 transition-colors ${
               activeFilter === filter.id
-                ? 'bg-blue-500 text-white'
+                ? 'bg-indigo-500 text-white'
                 : 'bg-gray-100 hover:bg-gray-200'
             }`}
           >
@@ -277,7 +277,7 @@ const LibraryView = () => {
                     <div className="mt-2">
                       <div className="w-full bg-gray-200 h-1 rounded-full">
                         <div 
-                          className="bg-blue-500 h-1 rounded-full" 
+                          className="bg-indigo-500 h-1 rounded-full" 
                           style={{ width: `${Math.min(100, book.progress)}%` }}
                         ></div>
                       </div>

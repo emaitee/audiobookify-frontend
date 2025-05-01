@@ -228,21 +228,21 @@ const UploadModal: React.FC<UploadModalProps> = ({
       
       <div className="mb-6">
         <div className="flex gap-2 mb-6">
-          <div className={`flex-1 p-2 text-center rounded-lg border-2 ${uploadStep >= 1 ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+          <div className={`flex-1 p-2 text-center rounded-lg border-2 ${uploadStep >= 1 ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'}`}>
             <div className="flex justify-center mb-1">
-              {uploadStep > 1 ? <Check size={20} className="text-blue-500" /> : <span className="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs">1</span>}
+              {uploadStep > 1 ? <Check size={20} className="text-indigo-500" /> : <span className="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs">1</span>}
             </div>
             <p className="text-sm">Select File</p>
           </div>
-          <div className={`flex-1 p-2 text-center rounded-lg border-2 ${uploadStep >= 2 ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+          <div className={`flex-1 p-2 text-center rounded-lg border-2 ${uploadStep >= 2 ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'}`}>
             <div className="flex justify-center mb-1">
-              {uploadStep > 2 ? <Check size={20} className="text-blue-500" /> : <span className="w-5 h-5 rounded-full bg-gray-300 text-white flex items-center justify-center text-xs">2</span>}
+              {uploadStep > 2 ? <Check size={20} className="text-indigo-500" /> : <span className="w-5 h-5 rounded-full bg-gray-300 text-white flex items-center justify-center text-xs">2</span>}
             </div>
             <p className="text-sm">Add Details</p>
           </div>
-          <div className={`flex-1 p-2 text-center rounded-lg border-2 ${uploadStep >= 3 ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+          <div className={`flex-1 p-2 text-center rounded-lg border-2 ${uploadStep >= 3 ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'}`}>
             <div className="flex justify-center mb-1">
-              {uploadStep > 3 ? <Check size={20} className="text-blue-500" /> : <span className="w-5 h-5 rounded-full bg-gray-300 text-white flex items-center justify-center text-xs">3</span>}
+              {uploadStep > 3 ? <Check size={20} className="text-indigo-500" /> : <span className="w-5 h-5 rounded-full bg-gray-300 text-white flex items-center justify-center text-xs">3</span>}
             </div>
             <p className="text-sm">Upload</p>
           </div>
@@ -263,7 +263,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
               MP3 format, max 500MB
             </p>
             <button 
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg"
+              className="px-6 py-2 bg-indigo-500 text-white rounded-lg"
               onClick={handleFileUploadClick}
             >
               Browse Files
@@ -353,7 +353,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
                   id="isSeries"
                   checked={bookMetadata.isSeries}
                   onChange={(e) => handleSeriesToggle(e.target.checked)}
-                  className="rounded text-blue-500 mr-2"
+                  className="rounded text-indigo-500 mr-2"
                 />
                 <label htmlFor="isSeries" className="text-sm">This is a series with multiple episodes</label>
               </div>
@@ -443,7 +443,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
             <div className="mb-8">
               <div className="w-full bg-gray-200 h-2 rounded-full">
                 <div 
-                  className="bg-blue-500 h-2 rounded-full transition-all duration-300" 
+                  className="bg-indigo-500 h-2 rounded-full transition-all duration-300" 
                   style={{ width: `${uploadProgress}%` }}
                 ></div>
               </div>
@@ -457,7 +457,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
               </div>
             </div>
             
-            <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+            <div className="bg-indigo-50 border border-indigo-200 p-4 rounded-lg">
               <h5 className="text-sm font-medium mb-2">Details</h5>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                 <div>
@@ -502,7 +502,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
                 : `Your audiobook has been uploaded and is pending approval.`}
             </p>
             {bookMetadata.isSeries && (
-              <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4">
+              <div className="bg-indigo-50 border border-indigo-200 p-4 rounded-lg mb-4">
                 <p className="text-sm mb-2">You can upload more episodes for this series later.</p>
               </div>
             )}
@@ -530,7 +530,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
             Back
           </button>
           <button 
-            className="px-6 py-2 bg-blue-500 text-white rounded"
+            className="px-6 py-2 bg-indigo-500 text-white rounded"
             onClick={uploadAudiobook}
             disabled={!bookMetadata.title || !bookMetadata.author}
           >
@@ -542,7 +542,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
       {uploadStep === 4 && (
         <div className="flex justify-center">
           <button 
-            className="px-6 py-2 bg-blue-500 text-white rounded"
+            className="px-6 py-2 bg-indigo-500 text-white rounded"
             onClick={handleClose}
           >
             Done
@@ -598,7 +598,7 @@ const EpisodesModal: React.FC<EpisodeModalPropTypes> = ({
         {renderErrorState('episodes')}
         {isLoading ? (
           <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-500 border-t-transparent"></div>
             <p className="mt-2 text-gray-500">Loading episodes...</p>
           </div>
         ) : (
@@ -622,7 +622,7 @@ const EpisodesModal: React.FC<EpisodeModalPropTypes> = ({
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <button className="text-blue-500 hover:text-blue-700">
+                        <button className="text-indigo-500 hover:text-indigo-700">
                           <PlayCircle size={18} />
                         </button>
                         <a 
@@ -702,14 +702,14 @@ const EpisodesModal: React.FC<EpisodeModalPropTypes> = ({
               />
               <label 
                 htmlFor="episodeUpload"
-                className="px-4 py-2 bg-blue-500 text-white rounded flex items-center gap-2 cursor-pointer hover:bg-blue-600"
+                className="px-4 py-2 bg-indigo-500 text-white rounded flex items-center gap-2 cursor-pointer hover:bg-indigo-600"
               >
                 <Upload size={16} />
                 <span>Select Episode File</span>
               </label>
               {isUploadingEpisode && (
                 <div className="text-sm text-gray-500 flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-500 mr-2"></div>
                   Uploading...
                 </div>
               )}
@@ -1171,7 +1171,7 @@ const AdminView = () => {
     if (isLoading[key]) {
       return (
         <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-500 border-t-transparent"></div>
           <p className="mt-2 text-gray-500">Loading...</p>
         </div>
       );
@@ -1188,7 +1188,7 @@ const AdminView = () => {
             <p>Error: {error[key]}</p>
           </div>
           <button 
-            className="mt-2 text-blue-500"
+            className="mt-2 text-indigo-500"
             onClick={() => {
               if (key === 'uploads') fetchRecentUploads();
               if (key === 'approvals') fetchPendingApprovals();
@@ -1210,7 +1210,7 @@ const AdminView = () => {
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold">Admin Dashboard</h1>
             <button 
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+              className="bg-indigo-500 text-white px-4 py-2 rounded-lg flex items-center gap-2"
               onClick={() => setShowUploadModal(true)}
             >
               <Plus size={16} />
@@ -1242,25 +1242,25 @@ const AdminView = () => {
           
           <div className="border-b flex">
             <button 
-              className={`px-4 py-2 ${activeTab === 'uploads' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-600'}`}
+              className={`px-4 py-2 ${activeTab === 'uploads' ? 'border-b-2 border-indigo-500 text-indigo-500' : 'text-gray-600'}`}
               onClick={() => setActiveTab('uploads')}
             >
               Uploads
             </button>
             <button 
-              className={`px-4 py-2 ${activeTab === 'approvals' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-600'}`}
+              className={`px-4 py-2 ${activeTab === 'approvals' ? 'border-b-2 border-indigo-500 text-indigo-500' : 'text-gray-600'}`}
               onClick={() => setActiveTab('approvals')}
             >
               Approvals
             </button>
             <button 
-              className={`px-4 py-2 ${activeTab === 'analytics' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-600'}`}
+              className={`px-4 py-2 ${activeTab === 'analytics' ? 'border-b-2 border-indigo-500 text-indigo-500' : 'text-gray-600'}`}
               onClick={() => setActiveTab('analytics')}
             >
               Analytics
             </button>
             <button 
-              className={`px-4 py-2 ${activeTab === 'settings' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-600'}`}
+              className={`px-4 py-2 ${activeTab === 'settings' ? 'border-b-2 border-indigo-500 text-indigo-500' : 'text-gray-600'}`}
               onClick={() => setActiveTab('settings')}
             >
               Settings
@@ -1291,7 +1291,7 @@ const AdminView = () => {
                             <td className="px-4 py-3">
                               {book.title}
                               {book.isSeries && (
-                                <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                                <span className="ml-2 text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">
                                   Series
                                 </span>
                               )}
@@ -1313,7 +1313,7 @@ const AdminView = () => {
                             <td className="px-4 py-3 text-right">
                               <button
                                 onClick={() => book.isSeries ? handleViewEpisodes(mapRecentUploadToBook(book)) : null}
-                                className="text-blue-500 hover:text-blue-700 mr-2"
+                                className="text-indigo-500 hover:text-indigo-700 mr-2"
                                 // {/* onClick={() => book.isSeries ? handleViewEpisodes(book) : null} */}
                                 disabled={!book.isSeries}
                                 title={book.isSeries ? "View Episodes" : "Not a series"}
@@ -1372,7 +1372,7 @@ const AdminView = () => {
                             <td className="px-4 py-3">
                               {book.title}
                               {book.isSeries && (
-                                <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                                <span className="ml-2 text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">
                                   Series
                                 </span>
                               )}
@@ -1433,8 +1433,8 @@ const AdminView = () => {
                           <div className="space-y-4">
                             {analyticsData?.recentActivity?.map((activity, index) => (
                               <div key={index} className="flex items-start gap-3">
-                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                  {activity.type === 'upload' ? <Upload size={16} className="text-blue-500" /> : 
+                                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                  {activity.type === 'upload' ? <Upload size={16} className="text-indigo-500" /> : 
                                    activity.type === 'approve' ? <Check size={16} className="text-green-500" /> :
                                    <X size={16} className="text-red-500" />}
                                 </div>
@@ -1502,7 +1502,7 @@ const AdminView = () => {
                       <input 
                         type="checkbox"
                         id="autoApprove"
-                        className="rounded text-blue-500" 
+                        className="rounded text-indigo-500" 
                         defaultChecked={false}
                       />
                       <label htmlFor="autoApprove" className="ml-2 text-sm">Auto-approve uploads</label>
@@ -1517,7 +1517,7 @@ const AdminView = () => {
                       <input 
                         type="checkbox"
                         id="newUploadNotify"
-                        className="rounded text-blue-500" 
+                        className="rounded text-indigo-500" 
                         defaultChecked={true}
                       />
                       <label htmlFor="newUploadNotify" className="ml-2 text-sm">Notify on new upload</label>
@@ -1527,7 +1527,7 @@ const AdminView = () => {
                       <input 
                         type="checkbox"
                         id="approvalNotify"
-                        className="rounded text-blue-500" 
+                        className="rounded text-indigo-500" 
                         defaultChecked={true}
                       />
                       <label htmlFor="approvalNotify" className="ml-2 text-sm">Notify when book is approved/rejected</label>
@@ -1546,7 +1546,7 @@ const AdminView = () => {
               </div>
               
               <div className="mt-6 flex justify-end">
-                <button className="px-6 py-2 bg-blue-500 text-white rounded">
+                <button className="px-6 py-2 bg-indigo-500 text-white rounded">
                   Save Settings
                 </button>
               </div>

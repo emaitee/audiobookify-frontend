@@ -118,7 +118,7 @@
 //   if (loading) {
 //     return (
 //       <div className="flex justify-center items-center h-64">
-//         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+//         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
 //       </div>
 //     );
 //   }
@@ -158,7 +158,7 @@
 //             onClick={() => setActiveFilter(filter._id)}
 //             className={`px-4 py-1 rounded-full text-sm whitespace-nowrap flex items-center gap-1 ${
 //               activeFilter === filter._id
-//                 ? 'bg-blue-500 text-white'
+//                 ? 'bg-indigo-500 text-white'
 //                 : 'bg-gray-200 hover:bg-gray-300'
 //             }`}
 //           >
@@ -187,7 +187,7 @@
 //                   <div className="mt-2">
 //                     <div className="w-full bg-gray-200 h-1 rounded-full">
 //                       <div 
-//                         className="bg-blue-500 h-1 rounded-full" 
+//                         className="bg-indigo-500 h-1 rounded-full" 
 //                         style={{ width: `${book.progress}%` }}
 //                       ></div>
 //                     </div>

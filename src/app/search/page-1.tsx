@@ -230,7 +230,7 @@ const SearchView = () => {
             <button 
               key={category}
               className={`px-4 py-1 rounded-full text-sm whitespace-nowrap ${
-                activeCategory === category ? 'bg-blue-500 text-white' : 'bg-gray-200'
+                activeCategory === category ? 'bg-indigo-500 text-white' : 'bg-gray-200'
               }`}
               onClick={() => handleCategoryClick(category)}
             >
@@ -255,7 +255,7 @@ const SearchView = () => {
                 <button
                   key={rating}
                   className={`px-3 py-1 rounded-full text-xs ${
-                    ratingFilter === rating ? 'bg-blue-500 text-white' : 'bg-gray-200'
+                    ratingFilter === rating ? 'bg-indigo-500 text-white' : 'bg-gray-200'
                   }`}
                   onClick={() => setRatingFilter(rating)}
                 >
@@ -300,7 +300,7 @@ const SearchView = () => {
               
               {!isLoading && hasMore && (
                 <button 
-                  className="bg-blue-500 text-white rounded-full py-2 px-6 mx-auto mt-4"
+                  className="bg-indigo-500 text-white rounded-full py-2 px-6 mx-auto mt-4"
                   onClick={handleLoadMore}
                 >
                   Load More
@@ -427,7 +427,7 @@ export default SearchView;
 //               <button 
 //                 key={category}
 //                 className={`px-4 py-1 rounded-full text-sm whitespace-nowrap ${
-//                   activeCategory === category ? 'bg-blue-500 text-white' : 'bg-gray-200'
+//                   activeCategory === category ? 'bg-indigo-500 text-white' : 'bg-gray-200'
 //                 }`}
 //                 onClick={() => setActiveCategory(category)}
 //               >
