@@ -52,7 +52,7 @@ export const apiHelper = {
 // Authenticated Fetch Helpers
 export const authApiHelper = {
   get: async (endpoint) => {
-    let token = localStorage.getItem('token')
+    let token = localStorage.getItem('token')||""
     try {
       return await fetch(`${API_BASE_URL}${endpoint}`, {
         headers: {
@@ -65,7 +65,7 @@ export const authApiHelper = {
   },
 
   post: async (endpoint, body) => {
-    let token = localStorage.getItem('token')
+    let token = localStorage.getItem('token')||""
 
     try {
       return await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -82,7 +82,7 @@ export const authApiHelper = {
   },
 
   put: async (endpoint, body) => {
-    let token = localStorage.getItem('token')
+    let token = localStorage.getItem('token')||""
 
     try {
       return await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -99,7 +99,7 @@ export const authApiHelper = {
   },
 
   delete: async (endpoint) => {
-    let token = localStorage.getItem('token')
+    let token = localStorage.getItem('token')||""
 
     try {
       return await fetch(`${API_BASE_URL}${endpoint}`, {

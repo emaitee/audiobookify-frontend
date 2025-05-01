@@ -168,7 +168,7 @@ const audioBookService = {
   },
 
   uploadEpisode: async (bookId: string, formData: FormData): Promise<{ success: boolean; id: string; message: string }> => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || "";
     try {
       const response = await fetch(`${API_BASE_URL}/books/${bookId}/episodes`, {
         method: 'POST',
@@ -987,7 +987,7 @@ const AdminView = () => {
       });
       
       xhr.open('POST', `${API_BASE_URL}/books/upload`);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || "";
 
       if (token) {
         xhr.setRequestHeader('x-auth-token', token);
