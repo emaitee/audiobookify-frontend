@@ -2,10 +2,22 @@
 import React, { useState } from 'react'
 import { Search, User, BookOpen, Menu,X } from 'lucide-react';
 import { featuredBooks } from '@/app/page';
+
 import AuthModal from './AuthModal';
 import { useRouter } from 'next/navigation';
 // import AuthModal from './Auth';
 
+interface Book {
+  _id?: string;
+  id?: number; // Changed _id to id
+  title: string;
+  author: string;
+  cover?: string; // Changed coverImage to cover
+  coverImage?:string;
+  progress: number;
+  narrator?: string;
+  isSeries?: boolean;
+}
 interface HeaderProps {
   showSidebar: boolean;
   setShowSidebar: (value: boolean) => void;
@@ -30,14 +42,6 @@ const Header: React.FC<HeaderProps> = ({ showSidebar, setShowSidebar }) => {
     // resetForms();
   };
 
-  // Function to play a book
-interface Book {
-    id: string;
-    title: string;
-    author: string;
-    cover: string;
-    progress: number;
-}
 
 const playBook = (book: Book): void => {
     // setNowPlaying(book);
@@ -117,7 +121,7 @@ const handleSearchInput = (e: SearchInputEvent): void => {
               {searchQuery ? `Results for "${searchQuery}"` : 'Recent searches'}
             </div>
             <div className="max-h-64 overflow-y-auto">
-              {featuredBooks.slice(0, 3).map(book => (
+              {featuredBooks.slice(0, 3).map((book:Book) => (
                 <div 
                   key={book._id} 
                   className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"
@@ -126,7 +130,7 @@ const handleSearchInput = (e: SearchInputEvent): void => {
                     clearSearch();
                   }}
                 >
-                  <img src={book.cover} alt={book.title} className="w-10 h-10 object-cover rounded" />
+                  <img src={book.coverImage} alt={book.title} className="w-10 h-10 object-cover rounded" />
                   <div>
                     <div className="font-medium">{book.title}</div>
                     <div className="text-xs text-gray-500">{book.author}</div>

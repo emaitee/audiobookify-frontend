@@ -2,32 +2,8 @@
 import { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApiHelper } from '@/app/utils/api';
+import { Book, Episode } from '@/app/page';
 
-interface Episode {
-  _id: string;
-  title: string;
-  episodeNumber: number;
-  audioFile: string;
-  duration: number;
-}
-
-interface Book {
-  _id: string;
-  title: string;
-  author: string;
-  narrator: string;
-  coverImage: string;
-  description?: string;
-  duration?: number;
-  isSeries: boolean;
-  seriesName?: string;
-  episodeNumber?: number;
-  totalEpisodes?: number;
-  hasNextEpisode?: boolean;
-  hasPreviousEpisode?: boolean;
-  episodes?: Episode[];
-  currentEpisode?: Episode;
-}
 
 interface PlayerContextType {
   currentBook: Book | null;
@@ -70,8 +46,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       const response = await authApiHelper.get('/books');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response?.ok) {
+        throw new Error(`HTTP error! status: ${response?.status}`);
       }
       const data = await response.json();
       setAllBooks(data.books);

@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import { 
   PlayCircle, 
@@ -20,116 +20,52 @@ import {
   Rewind,
   Settings
 } from 'lucide-react';
+import { authApiHelper } from '@/app/utils/api';
+import { usePlayer } from '@/context/PlayerContext';
+import { Book } from '@/app/page';
 
-interface BookDetails {
-  _id: string;
-  title: string;
-  author: string;
-  narrator: string;
-  coverImage: string;
-  description: string;
-  category: string;
-  releaseDate: string;
-  publisher: string;
-  language: string;
-  duration: number;
-  averageRating: number;
-  ratings: {
-    count: number;
-    distribution: number[];
-  };
-  chapters: {
-    title: string;
-    duration: number;
-    position: number;
-  }[];
-  similarBooks?: {
-    _id: string;
-    title: string;
-    author: string;
-    coverImage: string;
-  }[];
+interface Rating {
+    user: string,
+      rating: number,
+      review: String,
+      date: string
 }
 
 export default function BookView() {
+    const params = useParams()
   const router = useRouter();
-  const [book, setBook] = useState<BookDetails | null>(null);
+  const { currentBook, play, setCurrentBook, togglePlay } = usePlayer()
+  const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+const isPlaying = currentBook?._id === book?._id
   const [currentTime, setCurrentTime] = useState(0);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [activeTab, setActiveTab] = useState('chapters');
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
 
-  // Mock data for example - would be fetched from API in real implementation
   useEffect(() => {
     const fetchBookDetails = async () => {
       setLoading(true);
+      setError(null);
       try {
-        // In a real implementation, you would get the book ID from the URL
-        // const bookId = router.query.id;
-        // const response = await authApiHelper.get(`/books/${bookId}`);
-        
-        // Mock data for demonstration
-        setTimeout(() => {
-          setBook({
-            _id: '1234567890',
-            title: 'The Midnight Library',
-            author: 'Matt Haig',
-            narrator: 'Carey Mulligan',
-            coverImage: '/api/placeholder/400/600',
-            description: 'Between life and death there is a library, and within that library, the shelves go on forever. Every book provides a chance to try another life you could have lived. To see how things would be if you had made other choices... Would you have done anything different, if you had the chance to undo your regrets? Somewhere out beyond the edge of the universe there is a library that contains an infinite number of books, each one the story of another reality. One tells the story of your life as it is, along with another book for the other life you could have lived if you had made a different choice at any point in your life. While we all wonder how our lives might have been, what if you had the chance to go to the library and see for yourself? Would any of these other lives truly be better?',
-            category: 'Fiction',
-            releaseDate: '2020-08-13',
-            publisher: 'Penguin Audio',
-            language: 'English',
-            duration: 28800, // 8 hours in seconds
-            averageRating: 4.5,
-            ratings: {
-              count: 2547,
-              distribution: [15, 48, 234, 892, 1358]
-            },
-            chapters: [
-              { title: 'The Only Way to Learn Is to Live', duration: 1260, position: 1 },
-              { title: 'The Midnight Library', duration: 2520, position: 2 },
-              { title: 'The Book of Regrets', duration: 1980, position: 3 },
-              { title: 'The Root of the Problem', duration: 2340, position: 4 },
-              { title: 'The Man at the Pub Who Could Have Been', duration: 3060, position: 5 },
-              { title: 'The Other Life of Perfect Days', duration: 2880, position: 6 },
-              { title: 'A Life I Could Live', duration: 3240, position: 7 },
-              { title: 'Trying Not to Try', duration: 2700, position: 8 },
-              { title: 'A Life Beyond the Impossible', duration: 3120, position: 9 },
-              { title: 'The Last Book', duration: 2580, position: 10 },
-              { title: 'The Final Decision', duration: 3120, position: 11 }
-            ],
-            similarBooks: [
-              { _id: '1', title: 'A Man Called Ove', author: 'Fredrik Backman', coverImage: '/api/placeholder/200/300' },
-              { _id: '2', title: 'The Silent Patient', author: 'Alex Michaelides', coverImage: '/api/placeholder/200/300' },
-              { _id: '3', title: 'Anxious People', author: 'Fredrik Backman', coverImage: '/api/placeholder/200/300' },
-              { _id: '4', title: 'Where the Crawdads Sing', author: 'Delia Owens', coverImage: '/api/placeholder/200/300' }
-            ]
-          });
-          setLoading(false);
-        }, 1000);
+        const response = await authApiHelper.get(`/books/${params.slug}`);
+        if (!response?.ok) {
+          throw new Error('Failed to fetch book details');
+        }
+        const data = await response.json();
+        setBook(data);
       } catch (err) {
-        console.error('Failed to fetch book details', err);
+        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      } finally {
         setLoading(false);
       }
     };
 
     fetchBookDetails();
-  }, []);
-
-  const togglePlay = () => {
-    if (isPlaying) {
-      audioRef.current?.pause();
-    } else {
-      audioRef.current?.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
+  }, [params.slug]);
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -175,15 +111,134 @@ export default function BookView() {
     }
   };
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    // Here you would call an API to update the user's favorites
+    const handlePlay = (book: Book) => {
+      // Check if this is the currently playing book
+      if (currentBook?._id === book._id) {
+        // Toggle play/pause for the current book
+        play(currentBook);
+        return;
+      }
+  
+      if (book.isSeries) {
+        // Handle series - play the first episode or last listened episode
+        const episodeToPlay = book.episodes?.[0]; // Default to first episode
+        // Or get the last listened episode from user history
+        
+        if (!episodeToPlay) {
+          console.error('No episodes available for this series');
+          return;
+        }
+  
+        play({
+                  _id: book._id,
+                  episodeId: episodeToPlay._id,
+                  title: `${book.title} - ${episodeToPlay.title}`,
+                  author: book.author,
+                  coverImage: book.coverImage,
+                  audioFile: episodeToPlay.audioFile,
+                  duration: episodeToPlay.duration,
+                  isSeries: true,
+                  episodeNumber: episodeToPlay.episodeNumber,
+                  narrator: book.narrator,
+                  averageRating: book.averageRating,
+                  language: book.language,
+                  ratings: book.ratings
+                }, episodeToPlay);
+      } else {
+        // Handle single audiobook
+        play({
+          _id: book._id,
+          title: book.title,
+          author: book.author,
+          coverImage: book.coverImage,
+          audioFile: book.episodes?.[0]?.audioFile || '', // Assuming single books have one episode
+          duration: book.episodes?.[0]?.duration || 0,
+          narrator: book.narrator || 'Unknown',
+          isSeries: book.isSeries || false,
+          averageRating: book.averageRating || '0',
+          language: book.language || 'Unknown',
+          ratings: book.ratings || []
+        });
+      }
+    };
+
+  const toggleFavorite = async () => {
+    if (!book) return;
+    
+    try {
+        const endpoint = `/users/favorites/${book._id}`;
+        let response;
+        if (book.isFavorite) {
+          response = await authApiHelper.delete(endpoint);
+        } else {
+          response = await authApiHelper.post(endpoint);
+        }
+
+      if (!(response?.ok??false)) throw new Error('Failed to update favorite status');
+      
+      setBook({
+        ...book,
+        isFavorite: !book.isFavorite
+      });
+    } catch (err) {
+      console.error('Error updating favorite:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update favorite');
+    }
+  };
+
+  const toggleLibrary = async () => {
+    if (!book) return;
+    
+    try {
+        const endpoint = `/users/library/${book._id}`;
+        let response;
+        if (book.inLibrary) {
+          response = await authApiHelper.delete(endpoint);
+        } else {
+          response = await authApiHelper.post(endpoint);
+        }
+    //   const method = book.inLibrary ? 'DELETE' : 'POST';
+
+    //   const response = await authApiHelper.request(endpoint, { method });
+      if (!(response?.ok??false)) throw new Error('Failed to update library status');
+      
+      setBook({
+        ...book,
+        inLibrary: !book.inLibrary
+      });
+    } catch (err) {
+      console.error('Error updating library:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update library');
+    }
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-b from-indigo-50 to-white">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-b from-indigo-50 to-white p-4">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Error loading book</h2>
+        <p className="text-gray-600 mb-6 text-center">{error}</p>
+        <div className="flex gap-3">
+          <button 
+            onClick={() => router.push('/search')}
+            className="px-6 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors flex items-center"
+          >
+            <ChevronLeft size={18} className="mr-1" /> Back to Search
+          </button>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
@@ -203,22 +258,14 @@ export default function BookView() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white text-gray-800 pb-32">
-      {/* Hidden audio element for playback */}
-      <audio 
-        ref={audioRef}
-        onTimeUpdate={() => audioRef.current && setCurrentTime(audioRef.current.currentTime)}
-        onEnded={() => setIsPlaying(false)}
-      >
-        <source src="/sample-audio.mp3" type="audio/mpeg" />
-        Your browser does not support the audio element.
-      </audio>
+    <div className="min-h-screen bg-white text-gray-800 pb-32">
+    {/* <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white text-gray-800 pb-32"> */}
       
       {/* Header with back button */}
-      <header className="sticky top-0 bg-white/90 backdrop-blur-lg shadow-sm z-20 px-6 py-4">
+      <header className="sticky top-0 bg-white/90 backdrop-blur-lg shhadow-sm z-20 md:px-6 md:py-4">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <button 
-            onClick={() => router.push('/search')}
+            onClick={() => router.back()}
             className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
           >
             <ChevronLeft size={24} />
@@ -229,11 +276,11 @@ export default function BookView() {
             <button 
               onClick={toggleFavorite}
               className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-              aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+              aria-label={book.isFavorite ? "Remove from favorites" : "Add to favorites"}
             >
               <Heart 
                 size={22} 
-                className={isFavorite ? "fill-red-500 text-red-500" : "text-gray-600"} 
+                className={book.isFavorite ? "fill-red-500 text-red-500" : "text-gray-600"} 
               />
             </button>
             
@@ -248,14 +295,14 @@ export default function BookView() {
       </header>
       
       {/* Book cover and info section */}
-      <section className="px-6 pt-8 pb-6">
+      <section className="md:px-6 pt-8 pb-6">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row gap-8">
             {/* Book cover */}
             <div className="md:w-1/3 flex justify-center">
               <div className="relative">
                 <img 
-                  src={book.coverImage} 
+                  src={book.coverImage || '/default-book-cover.jpg'} 
                   alt={book.title}
                   className="rounded-xl shadow-lg h-auto max-w-full md:max-w-xs object-cover"
                 />
@@ -278,7 +325,7 @@ export default function BookView() {
                 </span>
                 <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm font-medium flex items-center">
                   <Star size={14} className="mr-1 fill-amber-500 text-amber-500" />
-                  {book.averageRating} ({book.ratings.count} ratings)
+                  {Number(book.averageRating).toFixed(1)} ({book.ratings.length} ratings)
                 </span>
                 <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
                   {book.language}
@@ -304,12 +351,18 @@ export default function BookView() {
                 </div>
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                   <p className="text-sm text-gray-500">Release Date</p>
-                  <p className="font-medium">{book.releaseDate}</p>
+                  <p className="font-medium">{book.releaseDate ? new Date(book.releaseDate).toLocaleDateString() : 'Unknown'}</p>
                 </div>
               </div>
               
               <button 
-                onClick={togglePlay}
+                onClick={() => {
+                    if(!currentBook){
+                    setCurrentBook(book);
+                handlePlay(book)} else {
+                    togglePlay()
+                }
+                }}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-full py-3 flex items-center justify-center transition-colors shadow-md"
               >
                 {isPlaying ? (
@@ -320,7 +373,7 @@ export default function BookView() {
                 ) : (
                   <>
                     <PlayCircle size={24} className="mr-2" />
-                    Play Sample
+                    Play 
                   </>
                 )}
               </button>
@@ -330,9 +383,14 @@ export default function BookView() {
                   <Download size={18} className="mr-1" />
                   <span className="text-sm font-medium">Download</span>
                 </button>
-                <button className="flex items-center text-indigo-600 hover:text-indigo-800">
+                <button 
+                  className="flex items-center text-indigo-600 hover:text-indigo-800"
+                  onClick={toggleLibrary}
+                >
                   <Plus size={18} className="mr-1" />
-                  <span className="text-sm font-medium">Add to Library</span>
+                  <span className="text-sm font-medium">
+                    {book.inLibrary ? 'Remove from Library' : 'Add to Library'}
+                  </span>
                 </button>
               </div>
             </div>
@@ -340,79 +398,10 @@ export default function BookView() {
         </div>
       </section>
       
-      {/* Player progress bar */}
-      <section className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-30 px-6 pt-2 pb-6">
-        <div className="max-w-4xl mx-auto">
-          <div 
-            ref={progressBarRef}
-            className="h-2 bg-gray-200 rounded-full mb-3 cursor-pointer"
-            onClick={seekAudio}
-          >
-            <div 
-              className="h-full bg-indigo-600 rounded-full"
-              style={{ width: `${(currentTime / book.duration) * 100}%` }}
-            ></div>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <img 
-                src={book.coverImage} 
-                alt={book.title}
-                className="h-12 w-12 rounded-md object-cover"
-              />
-              <div>
-                <p className="font-medium text-sm truncate max-w-[120px]">{book.title}</p>
-                <p className="text-xs text-gray-600 truncate max-w-[120px]">{book.author}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={handleSkipBackward}
-                className="p-2 hover:bg-gray-100 rounded-full"
-              >
-                <Rewind size={20} className="text-gray-700" />
-              </button>
-              
-              <button 
-                onClick={togglePlay}
-                className="p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors"
-              >
-                {isPlaying ? (
-                  <PauseCircle size={28} />
-                ) : (
-                  <PlayCircle size={28} />
-                )}
-              </button>
-              
-              <button 
-                onClick={handleSkipForward}
-                className="p-2 hover:bg-gray-100 rounded-full"
-              >
-                <FastForward size={20} className="text-gray-700" />
-              </button>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <div className="text-sm text-gray-600">
-                {formatTime(currentTime)} / {formatTime(book.duration)}
-              </div>
-              
-              <button className="p-2 hover:bg-gray-100 rounded-full">
-                <Volume2 size={20} className="text-gray-600" />
-              </button>
-              
-              <button className="p-2 hover:bg-gray-100 rounded-full">
-                <Settings size={20} className="text-gray-600" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+     
       
       {/* Tabs section */}
-      <section className="px-6 py-8">
+      <section className="md:px-6 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex border-b border-gray-200 mb-6">
             <button 
@@ -423,7 +412,7 @@ export default function BookView() {
               }`}
               onClick={() => setActiveTab('chapters')}
             >
-              Chapters
+              Episodes
             </button>
             <button 
               className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${
@@ -450,15 +439,16 @@ export default function BookView() {
           {/* Chapters tab */}
           {activeTab === 'chapters' && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              {book.chapters.map((chapter, index) => (
+              {book?.episodes?.map((chapter, index) => (
                 <div 
                   key={index}
                   className={`flex items-center justify-between p-4 ${
-                    index < book.chapters.length - 1 && 'border-b border-gray-100'
+                    index < (book?.episodes?.length ?? 0) - 1 && 'border-b border-gray-100'
                   } hover:bg-gray-50 transition-colors cursor-pointer`}
                   onClick={() => {
-                    setCurrentTime(0); // In real app would set to chapter start time
-                    setIsPlaying(true);
+                    play(book, chapter)
+                    // setCurrentTime(0); // In real app would set to chapter start time
+                    // setIsPlaying(true);
                   }}
                 >
                   <div className="flex items-center">
@@ -504,7 +494,7 @@ export default function BookView() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Release Date:</span>
-                      <span className="font-medium">{book.releaseDate}</span>
+                      <span className="font-medium">{book.releaseDate ? new Date(book.releaseDate).toLocaleDateString() : 'Unknown'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Language:</span>
@@ -525,7 +515,7 @@ export default function BookView() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Chapters:</span>
-                      <span className="font-medium">{book.chapters.length}</span>
+                      <span className="font-medium">{book?.episodes?.length}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Format:</span>
@@ -533,7 +523,9 @@ export default function BookView() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">File Size:</span>
-                      <span className="font-medium">285 MB</span>
+                      <span className="font-medium">
+                        {Math.round(book.duration * 0.01)} MB {/* Approximate */}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Version:</span>
@@ -551,29 +543,29 @@ export default function BookView() {
               <div className="flex flex-col md:flex-row gap-8">
                 <div className="md:w-1/3 flex flex-col items-center justify-center">
                   <div className="text-5xl font-bold text-indigo-600 mb-2">
-                    {book.averageRating.toFixed(1)}
+                    {Number(book.averageRating)?.toFixed(1)}
                   </div>
                   <div className="flex items-center gap-1 mb-2">
                     {[...Array(5)].map((_, i) => (
                       <Star 
                         key={i} 
                         size={20} 
-                        className={i < Math.round(book.averageRating) 
+                        className={i < Math.round(Number(book.averageRating)) 
                           ? "fill-amber-400 text-amber-400" 
                           : "text-gray-300"} 
                       />
                     ))}
                   </div>
-                  <p className="text-gray-600 text-sm">{book.ratings.count} ratings</p>
+                  <p className="text-gray-600 text-sm">{book.ratings.length} ratings</p>
                 </div>
                 
                 <div className="md:w-2/3">
-                  {book.ratings.distribution.map((count, index) => {
-                    const stars = 5 - index;
-                    const percentage = (count / book.ratings.count) * 100;
-                    
+                  {[5, 4, 3, 2, 1].map((stars) => {
+                    const count = book.ratings.filter(rating => rating.rating === stars).length;
+                    const percentage = (count / book.ratings.length) * 100;
+
                     return (
-                      <div key={index} className="flex items-center mb-2">
+                      <div key={stars} className="flex items-center mb-2">
                         <div className="flex items-center w-16">
                           <span className="text-sm font-medium">{stars}</span>
                           <Star size={14} className="ml-1 fill-amber-400 text-amber-400" />
@@ -589,7 +581,7 @@ export default function BookView() {
                         </div>
                       </div>
                     );
-                  }).reverse()}
+                  })}
                 </div>
               </div>
             </div>
@@ -611,7 +603,7 @@ export default function BookView() {
                 >
                   <div className="relative pb-[140%] mb-2">
                     <img 
-                      src={similar.coverImage} 
+                      src={similar.coverImage || '/default-book-cover.jpg'} 
                       alt={similar.title}
                       className="absolute inset-0 w-full h-full object-cover rounded-lg"
                     />

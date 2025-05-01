@@ -18,28 +18,28 @@ function BottomNav() {
       </button>
       <button 
         className={`p-2 flex flex-col items-center ${pathname === 'library' ? 'text-blue-500' : 'text-gray-500'}`}
-        onClick={() =>  router.push('library')}
+        onClick={() =>  router.push('/library')}
       >
         <Library size={20} />
         <span className="text-xs mt-1">Library</span>
       </button>
       <button 
         className={`p-2 flex flex-col items-center ${pathname === 'search' ? 'text-blue-500' : 'text-gray-500'}`}
-        onClick={() =>  router.push('search')}
+        onClick={() =>  router.push('/search')}
       >
         <Search size={20} />
         <span className="text-xs mt-1">Search</span>
       </button>
       <button 
         className={`p-2 flex flex-col items-center ${pathname === 'profile' ? 'text-blue-500' : 'text-gray-500'}`}
-        onClick={() =>  router.push('profile')}
+        onClick={() =>  router.push('/profile')}
       >
         <User size={20} />
         <span className="text-xs mt-1">Profile</span>
       </button>
       <button 
         className={`p-2 flex flex-col items-center ${pathname === 'admin' ? 'text-blue-500' : 'text-gray-500'}`}
-        onClick={() =>  router.push('admin')}
+        onClick={() =>  router.push('/admin')}
       >
         <BookOpen size={20} />
         <span className="text-xs mt-1">Admin</span>

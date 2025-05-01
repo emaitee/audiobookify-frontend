@@ -122,12 +122,14 @@ export default function NowPlaying() {
     } = usePlayer();
   
     const router = useRouter();
-    const progressBarRef = useRef(null);
+    const progressBarRef = useRef<HTMLDivElement>(null);
     const [isLiked, setIsLiked] = useState(false);
     const [activeTab, setActiveTab] = useState('details');
     const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   
-    const handleProgressClick = (e) => {
+    interface ProgressClickEvent extends React.MouseEvent<HTMLDivElement> {}
+
+    const handleProgressClick = (e: ProgressClickEvent): void => {
       if (progressBarRef.current && currentBook && currentEpisode) {
         const rect = progressBarRef.current.getBoundingClientRect();
         const clickPosition = e.clientX - rect.left;
@@ -445,7 +447,7 @@ export default function NowPlaying() {
                   <div className="mt-4 p-3 bg-white/10 backdrop-blur-sm rounded-lg">
                     <h4 className="font-medium text-white mb-1">Series Information</h4>
                     <p className="text-sm text-white/80">
-                      This audiobook is episode {currentEpisode.episodeNumber} of {currentBook.seriesName}.
+                      This audiobook is episode {currentEpisode.episodeNumber} of {currentBook?.title}.
                       {currentBook.totalEpisodes && ` There are ${currentBook.totalEpisodes} episodes in total.`}
                     </p>
                   </div>

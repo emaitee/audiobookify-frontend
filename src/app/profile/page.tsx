@@ -5,18 +5,14 @@ import { useState, useEffect } from 'react';
 import { UserCircle2, Book, Heart, Clock, Edit2, Save, X, Upload, LogOut } from 'lucide-react';
 import { useProfile } from '@/context/ProfileContext';
 import { useAuth } from '@/context/AuthContext';
+import { usePlayer } from '@/context/PlayerContext';
 
-// Mock book data (in a real app, this would come from your API)
-// This would be replaced with real data from your API
-const mockBooks = {
-  "1": { title: "The Great Gatsby", author: "F. Scott Fitzgerald", cover: "/api/placeholder/120/180" },
-  "2": { title: "To Kill a Mockingbird", author: "Harper Lee", cover: "/api/placeholder/120/180" },
-  "3": { title: "Pride and Prejudice", author: "Jane Austen", cover: "/api/placeholder/120/180" },
-  "4": { title: "Dune", author: "Frank Herbert", cover: "/api/placeholder/120/180" },
-};
+
+type ProfileHistoryBook = { audiobook: { title: string } | string; progress: number; lastListened: Date }
 
 export default function ProfilePage() {
   const { profile, loading, error, updateProfile, addToLibrary, removeFromLibrary, addToFavorites, removeFromFavorites } = useProfile();
+  const { allBooks } = usePlayer()
   const { logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<{
@@ -133,7 +129,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 bg-gray-50 min-h-screen">
+    <div className="max-w-4xl mx-auto md:p-4 bg-gray-50 min-h-screen">
       {/* Profile Header */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
         <div className="md:flex">
@@ -293,18 +289,15 @@ export default function ProfilePage() {
             {profile.library.length > 0 ? (
               profile.library.map(id => {
                 // In production, you'd get these details from your API
-                const book = mockBooks[id] || { 
-                  title: "Audiobook", 
-                  author: "Author", 
-                  cover: "/api/placeholder/120/180" 
-                };
+                const book = allBooks.find(a => a._id === id)
                 
                 return (
                   <div key={id} className="flex flex-col">
+
                     <div className="relative h-56 bg-gray-100 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                       <img 
-                        src={book.cover} 
-                        alt={book.title} 
+                        src={book?.coverImage} 
+                        alt={book?.title} 
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute top-2 right-2 flex space-x-1">
@@ -325,8 +318,8 @@ export default function ProfilePage() {
                         </button>
                       </div>
                     </div>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">{book.title}</h3>
-                    <p className="text-xs text-gray-500">{book.author}</p>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">{book?.title}</h3>
+                    <p className="text-xs text-gray-500">{book?.author}</p>
                   </div>
                 );
               })
@@ -343,18 +336,14 @@ export default function ProfilePage() {
             {profile.favorites.length > 0 ? (
               profile.favorites.map(id => {
                 // In production, you'd get these details from your API
-                const book = mockBooks[id] || { 
-                  title: "Audiobook", 
-                  author: "Author", 
-                  cover: "/api/placeholder/120/180" 
-                };
+                const book = allBooks.find(a => a._id === id)
                 
                 return (
                   <div key={id} className="flex flex-col">
                     <div className="relative h-56 bg-gray-100 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                       <img 
-                        src={book.cover} 
-                        alt={book.title} 
+                        src={book?.coverImage} 
+                        alt={book?.title} 
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute top-2 right-2">
@@ -366,8 +355,8 @@ export default function ProfilePage() {
                         </button>
                       </div>
                     </div>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">{book.title}</h3>
-                    <p className="text-xs text-gray-500">{book.author}</p>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">{book?.title}</h3>
+                    <p className="text-xs text-gray-500">{book?.author}</p>
                   </div>
                 );
               })
@@ -382,11 +371,11 @@ export default function ProfilePage() {
         {activeTab === 'history' && (
           <div className="space-y-4">
             {profile.history.length > 0 ? (
-              profile.history.map((item, index) => {
+              profile.history.map((item:ProfileHistoryBook, index) => {
                 // Format date display
                 const today = new Date();
                 const lastListened = new Date(item.lastListened);
-                const diffTime = Math.abs(today - lastListened);
+                const diffTime = Math.abs(today.getTime() - lastListened.getTime());
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 
                 let timeDisplay;
@@ -404,7 +393,9 @@ export default function ProfilePage() {
                 // For now we'll just use the audiobook string directly
                 const title = typeof item.audiobook === 'string' 
                   ? item.audiobook
-                  : item.audiobook.title || 'Unknown Book';
+                  : typeof item.audiobook === 'object' && 'title' in item.audiobook 
+                    ? item.audiobook.title 
+                    : 'Unknown Book';
                 
                 return (
                   <div key={index} className="border-b border-gray-200 pb-4 last:border-0">

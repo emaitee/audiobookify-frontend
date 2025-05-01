@@ -23,9 +23,15 @@ export const recommendedBooks = [
   { id: 9, title: "Lord of the Flies", author: "William Golding", cover: "https://m.media-amazon.com/images/I/716MU3GOvJL._SL1200_.jpg" },
 ];
 
+interface Rating {
+  user: string,
+  rating: number,
+  review: string,
+  date: string
+}
 
 
-interface Episode {
+export interface Episode {
   _id: string;
   title: string;
   episodeNumber: number;
@@ -33,9 +39,10 @@ interface Episode {
   duration: number;
   listenCount: number;
   averageRating: number;
+  position?:number
 }
 
-interface Book {
+export interface Book {
   _id: string;
   title: string;
   author: string;
@@ -49,68 +56,86 @@ interface Book {
   remainingTime?: string;
   category?: string;
   isFeatured?: boolean;
+  episodeId?:string;
+  audioFile?: string; // Added this property
+  episodeNumber?:number,
+  similarBooks?: {
+    _id: string;
+    title: string;
+    author: string;
+    coverImage: string;
+  }[];
+  isFavorite?: boolean;
+  inLibrary?: boolean;
+  publisher?:string;
+  releaseDate?:string;
+  description?:string;
+  averageRating:string;
+  duration:number;
+  language:string;
+  ratings: Rating[]
 }
 
-const EmptyState = ({ icon: Icon, title, description }) => (
+const EmptyState = ({ icon: Icon, title, description }: { icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; title: string; description: string }) => (
   <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-xl shadow-sm border border-gray-100">
-    <Icon className="w-12 h-12 text-gray-400 mb-4" />
+    {React.createElement(Icon, { className: "w-12 h-12 text-gray-400 mb-4" })}
     <h3 className="text-lg font-medium text-gray-900 mb-1">{title}</h3>
     <p className="text-gray-500 text-center max-w-md">{description}</p>
   </div>
 );
 
-const BookCover = ({ book, size = "normal", onClick = null, showPlayButton = true }) => {
-  const { currentBook, isPlaying } = usePlayer();
-  const isCurrent = currentBook?._id === book._id;
+// const BookCover = ({ book, size = "normal", onClick = null, showPlayButton = true }) => {
+//   const { currentBook, isPlaying } = usePlayer();
+//   const isCurrent = currentBook?._id === book._id;
   
-  const sizeClasses = {
-    small: "h-40 rounded-lg",
-    normal: "h-52 rounded-lg",
-    large: "h-64 rounded-lg"
-  };
+//   const sizeClasses = {
+//     small: "h-40 rounded-lg",
+//     normal: "h-52 rounded-lg",
+//     large: "h-64 rounded-lg"
+//   };
   
-  return (
-    <div className="relative group">
-      <div className={`relative overflow-hidden ${sizeClasses[size]} bg-gradient-to-br from-gray-200 to-gray-100`}>
-        <img 
-          src={book.coverImage || '/default-book-cover.jpg'} 
-          alt={book.title} 
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-        />
+//   return (
+//     <div className="relative group">
+//       <div className={`relative overflow-hidden ${sizeClasses[size]} bg-gradient-to-br from-gray-200 to-gray-100`}>
+//         <img 
+//           src={book.coverImage || '/default-book-cover.jpg'} 
+//           alt={book.title} 
+//           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+//         />
         
-        {book.isSeries && (
-          <div className="absolute top-2 left-2 bg-indigo-600 text-white text-xs px-2 py-1 rounded-md font-medium">
-            Series
-          </div>
-        )}
+//         {book.isSeries && (
+//           <div className="absolute top-2 left-2 bg-indigo-600 text-white text-xs px-2 py-1 rounded-md font-medium">
+//             Series
+//           </div>
+//         )}
         
-        {book.progress !== undefined && (
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-            <div className="w-full bg-gray-600/50 h-1.5 rounded-full overflow-hidden backdrop-blur-sm">
-              <div 
-                className="bg-indigo-500 h-1.5 rounded-full transition-all duration-300" 
-                style={{ width: `${book.progress}%` }}
-              ></div>
-            </div>
-          </div>
-        )}
+//         {book.progress !== undefined && (
+//           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+//             <div className="w-full bg-gray-600/50 h-1.5 rounded-full overflow-hidden backdrop-blur-sm">
+//               <div 
+//                 className="bg-indigo-500 h-1.5 rounded-full transition-all duration-300" 
+//                 style={{ width: `${book.progress}%` }}
+//               ></div>
+//             </div>
+//           </div>
+//         )}
         
-        {showPlayButton && (
-          <button 
-            onClick={onClick}
-            className={`absolute ${isCurrent ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity duration-200 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${
-              isCurrent && isPlaying 
-                ? 'bg-white text-indigo-600' 
-                : 'bg-indigo-600 text-white'
-            } rounded-full p-4 shadow-lg`}
-          >
-            {isCurrent && isPlaying ? <Pause size={24} /> : <Play size={24} />}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-};
+//         {showPlayButton && (
+//           <button 
+//             onClick={onClick}
+//             className={`absolute ${isCurrent ? "opacity-100" : "opacity-0 group-hover:opacity-100"} transition-opacity duration-200 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${
+//               isCurrent && isPlaying 
+//                 ? 'bg-white text-indigo-600' 
+//                 : 'bg-indigo-600 text-white'
+//             } rounded-full p-4 shadow-lg`}
+//           >
+//             {isCurrent && isPlaying ? <Pause size={24} /> : <Play size={24} />}
+//           </button>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
 
 const SectionHeader = ({ title, actionText, onAction }: { title: string; actionText: string; onAction: () => void }) => (
   <div className="flex justify-between items-center mb-5">
@@ -135,25 +160,29 @@ const HomeView = () => {
     featured: true,
     recommended: true
   });
-  const [error, setError] = useState({
-    continue: null,
-    featured: null,
-    recommended: null
-  });
+  const [error, setError] = useState<{
+      continue: string | null;
+      featured: string | null;
+      recommended: string | null;
+    }>({
+      continue: null,
+      featured: null,
+      recommended: null
+    });
 
   useEffect(() => {
     // Fetch continue listening books
     const fetchContinueListening = async () => {
       try {
         const response = await authApiHelper.get('/books-info/continue-listening');
-        if (!response.ok) throw new Error('Failed to fetch continue listening');
-        const data = await response.json();
+        if (!(response?.ok ?? false)) throw new Error('Failed to fetch continue listening');
+        const data = await response?.json();
         setContinueListening(data.books.map((book: Book) => ({
           ...book,
           progress: calculateProgress(book),
           remainingTime: calculateRemainingTime(book)
         })));
-      } catch (err) {
+      } catch (err:any) {
         setError(prev => ({ ...prev, continue: err.message }));
       } finally {
         setLoading(prev => ({ ...prev, continue: false }));
@@ -164,11 +193,11 @@ const HomeView = () => {
     const fetchFeaturedBooks = async () => {
       try {
         const response = await authApiHelper.get('/books-info/featured');
-        if (!response.ok) throw new Error('Failed to fetch featured books');
-        const data = await response.json();
+        if (!(response?.ok??false)) throw new Error('Failed to fetch featured books');
+        const data = await response?.json();
         setFeaturedBooks(data.books);
       } catch (err) {
-        setError(prev => ({ ...prev, featured: err.message }));
+        setError(prev => ({ ...prev, featured: (err as Error)?.message }));
       } finally {
         setLoading(prev => ({ ...prev, featured: false }));
       }
@@ -178,10 +207,10 @@ const HomeView = () => {
     const fetchRecommendedBooks = async () => {
       try {
         const response = await authApiHelper.get('/books-info/recommended');
-        if (!response.ok) throw new Error('Failed to fetch recommended books');
-        const data = await response.json();
+        if (!(response?.ok ?? false)) throw new Error('Failed to fetch recommended books');
+        const data = await response?.json();
         setRecommendedBooks(data.books);
-      } catch (err) {
+      } catch (err:any) {
         setError(prev => ({ ...prev, recommended: err.message }));
       } finally {
         setLoading(prev => ({ ...prev, recommended: false }));
@@ -228,26 +257,35 @@ const HomeView = () => {
       }
 
       play({
-        _id: book._id,
-        episodeId: episodeToPlay._id,
-        title: `${book.title} - ${episodeToPlay.title}`,
-        author: book.author,
-        coverImage: book.coverImage,
-        audioFile: episodeToPlay.audioFile,
-        duration: episodeToPlay.duration,
-        isSeries: true,
-        episodeNumber: episodeToPlay.episodeNumber
-      }, episodeToPlay);
+              _id: book._id,
+              episodeId: episodeToPlay._id,
+              title: `${book.title} - ${episodeToPlay.title}`,
+              author: book.author,
+              coverImage: book.coverImage,
+              audioFile: episodeToPlay.audioFile,
+              duration: episodeToPlay.duration,
+              isSeries: true,
+              episodeNumber: episodeToPlay.episodeNumber,
+              narrator: book.narrator || 'Unknown Narrator',
+              averageRating: book.averageRating || '0',
+              language: book.language || 'Unknown',
+              ratings: book.ratings || []
+            }, episodeToPlay);
     } else {
       // Handle single audiobook
       play({
-        _id: book._id,
-        title: book.title,
-        author: book.author,
-        coverImage: book.coverImage,
-        audioFile: book.episodes?.[0]?.audioFile || '', // Assuming single books have one episode
-        duration: book.episodes?.[0]?.duration || 0
-      });
+              _id: book._id,
+              title: book.title,
+              author: book.author,
+              coverImage: book.coverImage,
+              audioFile: book.episodes?.[0]?.audioFile || '', // Assuming single books have one episode
+              duration: book.episodes?.[0]?.duration || 0,
+              narrator: book.narrator || 'Unknown Narrator',
+              isSeries: book.isSeries || false,
+              averageRating: book.averageRating || '0',
+              language: book.language || 'Unknown',
+              ratings: book.ratings || []
+            });
     }
   };
 
@@ -494,7 +532,7 @@ const BookCard = ({ book = {}, onClick, isCurrent }: BookCardProps) => {
       <h3 className="font-semibold text-lg mb-1">{book.title}</h3>
       <p className="text-gray-600 text-sm">{book.author}</p>
       {book.isSeries && (
-        <p className="text-indigo-600 text-xs mt-1">{book.seriesName}</p>
+        <p className="text-indigo-600 text-xs mt-1">{book.title}</p>
       )}
       <div className="flex justify-between items-center mt-3 text-xs text-gray-500">
         <span>{formatTime(book.duration, true)}</span>
