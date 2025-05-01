@@ -116,7 +116,7 @@ export const authApiHelper = {
 
 // Response handler
 const handleResponse = async (response) => {
-  if (!response.ok) {
+  if (!response?.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
   }

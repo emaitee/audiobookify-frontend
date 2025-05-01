@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password })
       });
 
-      if (!response.ok) {
+      if (!response?.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Login failed');
       }
@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ name, email, password })
       });
 
-      if (!response.ok) {
+      if (!response?.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Registration failed');
       }

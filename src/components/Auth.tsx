@@ -15,7 +15,7 @@
 //         body: JSON.stringify({ email, password })
 //       });
       
-//       if (!response.ok) {
+//       if (!response?.ok) {
 //         const errorData = await response.json();
 //         throw new Error(errorData.message || 'Login failed');
 //       }
@@ -35,7 +35,7 @@
 //         body: JSON.stringify(userData)
 //       });
       
-//       if (!response.ok) {
+//       if (!response?.ok) {
 //         const errorData = await response.json();
 //         throw new Error(errorData.message || 'Signup failed');
 //       }

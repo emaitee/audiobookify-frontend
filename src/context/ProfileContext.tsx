@@ -49,7 +49,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     try {
       const response = await authApiHelper.get('/auth/me');
 
-      if (!response.ok) {
+      if (!response?.ok) {
         throw new Error('Failed to fetch profile');
       }
 
@@ -87,7 +87,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         body: formData
       });
 
-      if (!response.ok) {
+      if (!response?.ok) {
         throw new Error('Failed to update profile');
       }
 
@@ -111,7 +111,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         }
       });
 
-      if (!response.ok) {
+      if (!response?.ok) {
         throw new Error('Failed to add to library');
       }
 
@@ -132,7 +132,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         }
       });
 
-      if (!response.ok) {
+      if (!response?.ok) {
         throw new Error('Failed to remove from library');
       }
 
@@ -153,7 +153,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         }
       });
 
-      if (!response.ok) {
+      if (!response?.ok) {
         throw new Error('Failed to add to favorites');
       }
 
@@ -174,7 +174,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         }
       });
 
-      if (!response.ok) {
+      if (!response?.ok) {
         throw new Error('Failed to remove from favorites');
       }
 

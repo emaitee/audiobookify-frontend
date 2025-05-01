@@ -111,7 +111,7 @@ const SearchView = () => {
       });
       
       const response = await fetch(`/api/search?${params.toString()}`);
-      if (!response.ok) {
+      if (!response?.ok) {
         throw new Error(`Search failed with status: ${response.status}`);
       }
       

@@ -27,7 +27,7 @@
 //         setLoading(true);
 //         const response = await authApiHelper.get('/library');
 //         console.log(response)
-//         if (!response.ok) throw new Error('Failed to fetch library');
+//         if (!response?.ok) throw new Error('Failed to fetch library');
         
 //         const data = await response.json();
 //         setBooks(data.books.map((book: any) => ({
@@ -64,7 +64,7 @@
 //   const toggleFavorite = async (bookId: string) => {
 //     try {
 //       const response = await authApiHelper.patch(`/library/${bookId}/favorite`);
-//       if (!response.ok) throw new Error('Failed to update favorite status');
+//       if (!response?.ok) throw new Error('Failed to update favorite status');
       
 //       setBooks(books.map(book => 
 //         book._id === bookId 
