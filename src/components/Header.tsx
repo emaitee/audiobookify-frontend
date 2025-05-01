@@ -1,10 +1,10 @@
 'use client'
 import React, { useState } from 'react'
-import { Search, User, BookOpen, Menu,X } from 'lucide-react';
-import { featuredBooks } from '@/app/page';
+import { Search, BookOpen, Menu,X } from 'lucide-react';
+
 
 import AuthModal from './AuthModal';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 // import AuthModal from './Auth';
 
 interface Book {
@@ -24,8 +24,9 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ showSidebar, setShowSidebar }) => {
+  const router = useRouter()
+  const pathname = usePathname()
     const [currentView, setCurrentView] = useState('home');
-  const [nowPlaying, setNowPlaying] = useState(featuredBooks[0]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showMiniPlayer, setShowMiniPlayer] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,6 +81,8 @@ const handleSearchInput = (e: SearchInputEvent): void => {
     setSearchQuery('');
     setShowSearchResults(false);
   };
+
+  const isOnSearchPage = pathname === '/search'
     return(
     
     <header className="sticky top-0 bg-white border-b p-4 flex justify-between items-center z-10">
@@ -96,13 +99,14 @@ const handleSearchInput = (e: SearchInputEvent): void => {
         </div>
       </div>
       <div className="flex-1 mx-4 relative">
-        <div className="relative">
+       {isOnSearchPage ? null : <div className="relative" onClick={() => router.push('/search')}>
           <input 
             type="text" 
             placeholder="Search books, authors..." 
             className="w-full bg-gray-100 rounded-full py-2 px-4 pl-10 text-sm"
             value={searchQuery}
             onChange={handleSearchInput}
+            
           />
           <Search size={16} className="absolute left-3 top-2.5 text-gray-500" />
           {searchQuery && (
@@ -113,33 +117,7 @@ const handleSearchInput = (e: SearchInputEvent): void => {
               <X size={16} />
             </button>
           )}
-        </div>
-        
-        {showSearchResults && (
-          <div className="absolute top-full left-0 right-0 bg-white shadow-lg rounded-lg mt-1 p-2 z-20">
-            <div className="p-2 text-sm text-gray-500">
-              {searchQuery ? `Results for "${searchQuery}"` : 'Recent searches'}
-            </div>
-            <div className="max-h-64 overflow-y-auto">
-              {featuredBooks.slice(0, 3).map((book:Book) => (
-                <div 
-                  key={book._id} 
-                  className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"
-                  onClick={() => {
-                    // playBook(book);
-                    clearSearch();
-                  }}
-                >
-                  <img src={book.coverImage} alt={book.title} className="w-10 h-10 object-cover rounded" />
-                  <div>
-                    <div className="font-medium">{book.title}</div>
-                    <div className="text-xs text-gray-500">{book.author}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        </div>}
       </div>
       
 

@@ -1,27 +1,9 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { Book, Headphones, List, Pause, Play, ChevronRight, Clock, Calendar, BookOpen } from 'lucide-react';
+import { Book, Headphones, List, ChevronRight, BookOpen } from 'lucide-react';
 import { authApiHelper } from './utils/api';
 import { formatTime } from './utils/helpers';
 import { usePlayer } from '@/context/PlayerContext';
-
-export const featuredBooks = [
-  { id: 1, title: "The Great Gatsby", author: "F. Scott Fitzgerald", cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtmKvVXY7v2epRmCPTFdvEmfNH8158b-XX0A&s", progress: 65 },
-  { id: 2, title: "To Kill a Mockingbird", author: "Harper Lee", cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSn5xkKB1ByJI59VpGEBBkkFRN0_FJ9COkr2g&s", progress: 23 },
-  { id: 3, title: "1984", author: "George Orwell", cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKF1ay8V0kUQ9dxj25l1plHNYcIzX80ThxLg&s", progress: 45 },
-  { id: 4, title: "Pride and Prejudice", author: "Jane Austen", cover: "https://cdn.kobo.com/book-images/1a735d96-6075-4bca-87b7-15fb97ee50c7/1200/1200/False/pride-and-prejudice-216.jpg", progress: 12 },
-];
-
-export const continueListing = [
-  { id: 5, title: "Dune", author: "Frank Herbert", cover: "https://cdn.kobo.com/book-images/2bd0e164-5c02-4e40-a43a-17d2fd5451b7/1200/1200/False/dune-2.jpg", progress: 78, remainingTime: "3h 24m" },
-  { id: 6, title: "The Hobbit", author: "J.R.R. Tolkien", cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm9RoFW1jhDShbA1xYmG05GkgzUGzaEhsNeA&s", progress: 30, remainingTime: "6h 12m" },
-];
-
-export const recommendedBooks = [
-  { id: 7, title: "Brave New World", author: "Aldous Huxley", cover: "https://cdn.kobo.com/book-images/6f07a0e9-8ca8-4b28-982c-7898ac591744/1200/1200/False/brave-new-world-79.jpg" },
-  { id: 8, title: "The Catcher in the Rye", author: "J.D. Salinger", cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVdPsvFMMqa0HJGRWfEcfcxDQ4v3XJ1VcPRA&s" },
-  { id: 9, title: "Lord of the Flies", author: "William Golding", cover: "https://m.media-amazon.com/images/I/716MU3GOvJL._SL1200_.jpg" },
-];
 
 interface Rating {
   user: string,
