@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation";
     `}>
       <div className="flex items-center gap-2 mb-8">
         <BookOpen className="text-indigo-500" size={24} />
-        <h1 className="text-lg font-bold">AudioVerse</h1>
+        <h1 className="text-lg font-bold">SautiBox</h1>
         <button 
           className="ml-auto lg:hidden"
           onClick={() => setShowSidebar(false)}

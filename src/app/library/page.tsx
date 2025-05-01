@@ -1,5 +1,5 @@
 'use client'
-import { Heart, Plus, Search, Book, Bookmark, CheckCircle, Download, Clock } from 'lucide-react';
+import { Heart, Plus, Search, Book, Bookmark, CheckCircle, Download, Clock, ArrowLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { authApiHelper } from '../utils/api';
 import { useRouter } from 'next/navigation';
@@ -23,6 +23,7 @@ const LibraryView = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     const fetchLibraryBooks = async () => {
@@ -79,19 +80,14 @@ const LibraryView = () => {
       const book = books.find(b => b._id === bookId);
       let favoritesEndpoint = `/users/favorites/${bookId}`
       let libraryEndpoint = `/users/library/${bookId}/favorite`
-      // const endpoint = book?.isFavorite 
-      //   ? `/users/favorites/${bookId}`
-      //   : `/users/library/${bookId}/favorite`;
-      // const method = book?.isFavorite ? 'DELETE' : 'POST';
 
       let response;
-      if ( book?.isFavorite ) {
+      if (book?.isFavorite) {
         response = await authApiHelper.delete(favoritesEndpoint)
       } else {
         response = await authApiHelper.post(libraryEndpoint)
       }
 
-      // const response = await authApiHelper.request(endpoint, { method });
       if (!response?.ok) throw new Error('Failed to update favorite status');
       
       setBooks(books.map(book => 
@@ -119,12 +115,12 @@ const LibraryView = () => {
     onAction: () => void; 
   }) => {
     return (
-      <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg">
+      <div className="flex flex-col items-center justify-center py-12 px-4 bg-gray-50 rounded-lg">
         <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-200 mb-4">
           <Icon className="w-8 h-8 text-gray-500" />
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-1">{title}</h3>
-        <p className="text-gray-500 text-center max-w-md mb-4">{description}</p>
+        <h3 className="text-lg font-medium text-gray-900 mb-1 text-center">{title}</h3>
+        <p className="text-gray-500 text-center max-w-md mb-4 text-sm sm:text-base">{description}</p>
         <button
           onClick={onAction}
           className="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors"
@@ -175,16 +171,27 @@ const LibraryView = () => {
         action = () => router.push('/discover');
     }
 
-
-
     return <DisplayEmptyState
-    icon={icon}
-    title={title}
-    description={description}
-    actionText={actionText}
-    onAction={action}
-  />
+      icon={icon}
+      title={title}
+      description={description}
+      actionText={actionText}
+      onAction={action}
+    />
   };
+
+  const SearchBar = () => (
+    <div className="relative flex-1 max-w-md">
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+      <input
+        type="text"
+        placeholder="Search library..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-sm"
+      />
+    </div>
+  );
 
   if (loading) {
     return (
@@ -196,7 +203,7 @@ const LibraryView = () => {
 
   if (error) {
     return (
-      <div className="p-4 bg-red-50 text-red-500 rounded-lg">
+      <div className="p-4 bg-red-50 text-red-500 rounded-lg text-sm">
         Error loading library: {error}
         <button 
           onClick={() => window.location.reload()}
@@ -209,30 +216,42 @@ const LibraryView = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 pb-24 text-black">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Your Library</h2>
-        <div className="flex gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              type="text"
-              placeholder="Search library..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
-            />
-          </div>
+    <div className="flex flex-col gap-4 sm:gap-6 pb-24 text-black md:px-4 sm:px-6 max-w-6xl mx-auto">
+      {isSearchOpen ? (
+        <div className="flex items-center gap-2">
           <button 
-            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200"
-            onClick={() => router.push('/discover')}
+            onClick={() => setIsSearchOpen(false)}
+            className="p-2 rounded-full bg-gray-100"
           >
-            <Plus size={20} />
+            <ArrowLeft size={20} />
           </button>
+          <SearchBar />
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg sm:text-xl font-semibold">Your Library</h2>
+          <div className="flex gap-2">
+            <button 
+              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 md:hidden"
+              onClick={() => setIsSearchOpen(true)}
+            >
+              <Search size={20} />
+            </button>
+            <div className="hidden md:block">
+              <SearchBar />
+            </div>
+            <button 
+              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200"
+              onClick={() => router.push('/discover')}
+              aria-label="Add books"
+            >
+              <Plus size={20} />
+            </button>
+          </div>
+        </div>
+      )}
       
-      <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
+      <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide -mx-4 px-4">
         {[
           { id: 'all', label: 'All', icon: Book },
           { id: 'in-progress', label: 'In Progress', icon: Clock },
@@ -243,38 +262,38 @@ const LibraryView = () => {
           <button
             key={filter.id}
             onClick={() => setActiveFilter(filter.id)}
-            className={`px-4 py-1 rounded-full text-sm whitespace-nowrap flex items-center gap-1 transition-colors ${
+            className={`px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 transition-colors ${
               activeFilter === filter.id
                 ? 'bg-indigo-500 text-white'
                 : 'bg-gray-100 hover:bg-gray-200'
             }`}
           >
             <filter.icon size={16} />
-            {filter.label}
+            <span className="hidden xs:inline">{filter.label}</span>
           </button>
         ))}
       </div>
       
       {filteredBooks.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {filteredBooks.map(book => (
             <div 
               key={book._id} 
-              className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              className="bg-white p-3 sm:p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
               onClick={() => router.push(`/book/${book._id}`)}
             >
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-3 sm:gap-4">
                 <img 
                   src={book.coverImage || '/default-book-cover.jpg'} 
                   alt={book.title} 
-                  className="w-16 h-20 object-cover rounded" 
+                  className="w-14 h-20 sm:w-16 sm:h-24 object-cover rounded" 
                 />
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium truncate">{book.title}</h3>
-                  <p className="text-sm text-gray-600 truncate mb-2">{book.author}</p>
+                  <h3 className="font-medium truncate text-sm sm:text-base">{book.title}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 truncate mb-1 sm:mb-2">{book.author}</p>
                   
                   {book.progress && book.progress > 0 && (
-                    <div className="mt-2">
+                    <div className="mt-1 sm:mt-2">
                       <div className="w-full bg-gray-200 h-1 rounded-full">
                         <div 
                           className="bg-indigo-500 h-1 rounded-full" 
@@ -293,8 +312,9 @@ const LibraryView = () => {
                     e.stopPropagation();
                     toggleFavorite(book._id);
                   }}
+                  aria-label={book.isFavorite ? "Remove from favorites" : "Add to favorites"}
                 >
-                  <Heart size={20} fill={book.isFavorite ? 'currentColor' : 'none'} />
+                  <Heart size={18}  fill={book.isFavorite ? 'currentColor' : 'none'} />
                 </button>
               </div>
             </div>

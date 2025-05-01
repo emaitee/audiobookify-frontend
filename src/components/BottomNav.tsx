@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { Search, Home, User, BookOpen, Library } from 'lucide-react'
+import { Search, Home, User, BookOpen, Library, BarChart2,Book } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -65,6 +65,18 @@ function ResponsiveNav() {
       icon: <User size={22} strokeWidth={1.5} color='#fff' />, 
       activeIcon: <User size={22} strokeWidth={2} fill="#4f46e5" />,
       label: 'Profile' 
+    },
+    { 
+      path: '/analytics-report', 
+      icon: <BarChart2 size={22} strokeWidth={1.5} color='#fff' />, 
+      activeIcon: <BarChart2 size={22} strokeWidth={2} fill="#4f46e5" />,
+      label: 'Analytics' 
+    },
+    { 
+      path: '/content-management', 
+      icon: <Book size={22} strokeWidth={1.5} color='#fff' />, 
+      activeIcon: <Book size={22} strokeWidth={2} fill="#4f46e5" />,
+      label: 'Content' 
     },
     { 
       path: '/admin', 
@@ -145,7 +157,7 @@ function ResponsiveNav() {
       {/* Brand logo area */}
       <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800">
         <BookOpen className="text-indigo-600" size={24} />
-        <span className="text-xl font-semibold text-indigo-600 dark:text-indigo-400">AudioVerse</span>
+        <span className="text-xl font-semibold text-indigo-600 dark:text-indigo-400">SautiBox</span>
       </div>
 
       {/* Navigation items */}

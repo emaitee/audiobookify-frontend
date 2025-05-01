@@ -55,7 +55,9 @@ export interface Book {
   averageRating:string;
   duration:number;
   language:string;
-  ratings: Rating[]
+  ratings: Rating[];
+  status?: string;
+  createdAt?:string;
 }
 
 const EmptyState = ({ icon: Icon, title, description }: { icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; title: string; description: string }) => (
@@ -297,7 +299,7 @@ const HomeView = () => {
       <section className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-800 rounded-2xl p-8 text-white shadow-xl">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="mb-6 md:mb-0 md:w-1/2">
-            <h1 className="text-3xl md:text-4xl font-bold mb-3">Welcome to AudioVerse</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">Welcome to SautiBox</h1>
             <p className="text-indigo-100 text-lg mb-6">Discover stories that move with you. Your next great listen awaits.</p>
             <div className="flex gap-4">
               <button className="bg-white text-indigo-900 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition">
