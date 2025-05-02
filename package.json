@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check-case": "node -e \"require('fs').readdirSync('./src').forEach(f => { if (f !== f.toLowerCase()) throw new Error(`Case sensitivity error: ${f}`) })\""
   },
   "dependencies": {
     "framer-motion": "^12.9.2",
