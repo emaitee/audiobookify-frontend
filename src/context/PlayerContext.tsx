@@ -104,6 +104,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       setCurrentEpisode(updatedEpisode);
     }
   }, [allBooks, currentBook, currentEpisode]);
+
+
   
   // Initialize audio element and set up event listeners
   useEffect(() => {

@@ -1,6 +1,6 @@
 'use client'
 import React, { useState } from 'react'
-import { Search, BookOpen, Menu,X } from 'lucide-react';
+import { Search,X, Volume2 } from 'lucide-react';
 
 
 import AuthModal from './AuthModal';
@@ -88,7 +88,7 @@ const handleSearchInput = (e: SearchInputEvent): void => {
     <header className="sticky top-0 bg-white border-b p-4 flex justify-between items-center z-10">
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-2">
-          <BookOpen className="text-indigo-500" size={24} />
+          <Volume2 className="text-indigo-500" size={24} />
           <h1 className="text-lg font-bold hidden sm:block">SautiBox</h1>
         </div>
       </div>
