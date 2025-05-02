@@ -1,7 +1,16 @@
-import type { NextConfig } from "next";
+const path = require('path');
+import { Configuration } from 'webpack';
 
-const nextConfig: NextConfig = {
-  /* config options here */
+interface WebpackConfig extends Configuration {
+  resolve: NonNullable<Configuration['resolve']>;
+}
+
+module.exports = {
+  webpack: (config: WebpackConfig): WebpackConfig => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+    };
+    return config;
+  }
 };
-
-export default nextConfig;
