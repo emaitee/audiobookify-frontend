@@ -25,6 +25,7 @@ interface PlayerContextType {
   setCurrentBook: (book: Book) => void;
   refreshLibrary: () => Promise<void>;
   updateListenHistory?: (bookId: string, progress: number, episodeId?: string) => Promise<void>;
+  recordPlaybackSession: (duration: number) => Promise<void>;
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
@@ -42,6 +43,29 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioSourceRef = useRef<string | null>(null); // Track current audio source
+
+  const recordPlaybackSession = async (duration: number) => {
+    if (!currentBook) return;
+    
+    try {
+      await authApiHelper.post('/listening-sessions', {
+        audiobookId: currentBook._id,
+        episodeId: currentEpisode?._id,
+        duration,
+        completionRate: duration / (currentEpisode?.duration || currentBook.duration)
+      });
+      
+      // Update local state if needed
+      if (currentEpisode) {
+        setCurrentEpisode(prev => ({
+          ...prev!,
+          listenCount: (prev?.listenCount || 0) + 1
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to record session:', err);
+    }
+  };
 
   // Helper function to update listen history
   const updateListenHistory = async (bookId: string, progress: number, episodeId?: string) => {
@@ -125,8 +149,14 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    const handleEnded = () => {
+    const handleEnded = async () => {
       setIsPlaying(false);
+      
+      // Record full playback session
+      if (currentBook && audio.duration) {
+        await recordPlaybackSession(audio.duration);
+      }
+  
       if (currentBook?.isSeries && currentEpisode) {
         const nextEp = currentBook.episodes?.find(
           ep => ep.episodeNumber === currentEpisode.episodeNumber + 1
@@ -134,12 +164,20 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         nextEp && play(currentBook, nextEp);
       }
     };
+  
 
-    const handlePause = () => {
+    // const handlePause = () => {
+    //   setIsPlaying(false);
+    //   if (currentBook && audio.currentTime) {
+    //     flushProgressUpdates();
+    //     immediateProgressUpdate(currentBook._id, audio.currentTime, currentEpisode?._id);
+    //   }
+    // };
+
+    const handlePause = async () => {
       setIsPlaying(false);
-      if (currentBook && audio.currentTime) {
-        flushProgressUpdates();
-        immediateProgressUpdate(currentBook._id, audio.currentTime, currentEpisode?._id);
+      if (currentBook && audio.currentTime > 5) { // Only record if listened >5s
+        await recordPlaybackSession(audio.currentTime);
       }
     };
 
@@ -206,6 +244,18 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   }, [currentEpisode, isPlaying]);
+
+  useEffect(() => {
+    if (!isPlaying || !currentBook) return;
+  
+    const interval = setInterval(async () => {
+      if (audioRef.current?.currentTime) {
+        await recordPlaybackSession(audioRef.current.currentTime);
+      }
+    }, 30000); // Record every 30 seconds
+  
+    return () => clearInterval(interval);
+  }, [isPlaying, currentBook]);
 
   // Update playback state if isPlaying changes but audio state doesn't match
   useEffect(() => {
@@ -382,7 +432,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         previousTrack,
         setPlaybackSpeed,
         setCurrentBook,
-        refreshLibrary
+        refreshLibrary,
+        recordPlaybackSession
       }}
     >
       {children}
