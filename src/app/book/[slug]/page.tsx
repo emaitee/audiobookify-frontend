@@ -20,9 +20,9 @@ import {
   Rewind,
   Settings
 } from 'lucide-react';
-import { authApiHelper } from '@/app/utils/api';
-import { usePlayer } from '@/context/PlayerContext';
-import { Book } from '@/app/page';
+import { authApiHelper } from '../../../app/utils/api';
+import { usePlayer } from '../../../context/PlayerContext';
+import { Book } from '../../../app/page';
 
 interface Rating {
     user: string,

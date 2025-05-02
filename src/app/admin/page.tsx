@@ -3,8 +3,8 @@ import { useState, useRef, useEffect, JSX } from 'react';
 import { Plus, Upload, X, PlayCircle, Check, AlertTriangle, BarChart2, FileText, Download } from 'lucide-react';
 import { authApiHelper, API_BASE_URL } from '../utils/api';
 import { Book, Episode } from '../page';
-import UploadModal from '@/components/dashboard-contents/UploadModal';
-import EpisodesModal from '@/components/dashboard-contents/EpisodeModal';
+import UploadModal from '../../components/dashboard-contents/UploadModal';
+import EpisodesModal from '../../components/dashboard-contents/EpisodeModal';
 
 // Define types for API responses
 export interface ApiResponse {
