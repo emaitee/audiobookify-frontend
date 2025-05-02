@@ -1,12 +1,19 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  // optional: uncomment to enable additional PWA features
+  register: true,
+  scope: '/app',
+  // sw: 'service-worker.js',
+  //...
+})
 
-  webpack: (config) => {
-    config.resolve.extensions = ['.js', '.jsx', '.ts', '.tsx'];
-    return config;
-  }
-};
+
+const nextConfig: NextConfig = withPWA({
+  /* config options here */
+  reactStrictMode: true,
+});
 
 export default nextConfig;

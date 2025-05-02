@@ -72,8 +72,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       router.push('/home');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+    } catch (err:any) {
+      setError(err.message || 'Login failed');
       throw err;
     } finally {
       setIsLoading(false);
@@ -98,8 +98,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Automatically log in after registration
       await login(email, password);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
+    } catch (err:any) {
+      setError(err.message || 'Registration failed');
       throw err;
     } finally {
       setIsLoading(false);

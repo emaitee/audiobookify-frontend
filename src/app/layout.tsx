@@ -1,21 +1,15 @@
-'use client'
 
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
-import Player from "@/components/Player";
-import { useState, useEffect } from "react";
-// import ResponsiveNav from "@/components/ResponsiveNav"; // Updated import
-import Header from "@/components/Header";
 import { ClientAuthProvider } from "@/components/ClientAuthProvider";
-import ProtectedRoute from "@/components/ProtectedRoute";
 import { PlayerProvider } from "@/context/PlayerContext";
-import { MiniPlayer } from '../components/MiniPlayer';
-import { AnimatePresence } from 'framer-motion';
 import { ProfileProvider } from "@/context/ProfileContext";
 import ResponsiveNav from "@/components/BottomNav";
+import { Metadata } from "next";
+import AppWrapper from "@/components/AppWrapper";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import IOSInstallHint from "@/components/IOSInstallHint";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,36 +21,40 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const metadata: Metadata = {
+  title: 'SautiBox: African Voices, Endless Stories',
+  description: 'Listen to stories in your local dialect!',
+  manifest: '/manifest.json',
+  themeColor: '#400AB9',
+  appleWebApp: {
+    capable: true,
+    title: 'SautiBox: African Voices, Endless Stories',
+    statusBarStyle: 'black-translucent',
+  },
+  // Optional: Add more PWA-related metadata
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
+  icons: {
+    icon: '/icons/icon-192x192.png',
+    apple: '/icons/icon-192x192.png',
+  },
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
-  const isNowPlayingPage = pathname === '/now-playing';
-  const [isMobile, setIsMobile] = useState(true);
   
-  // Check if we're on the client side and detect screen size
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-    
-    // Initial check
-    checkScreenSize();
-    
-    // Add listener for resize events
-    window.addEventListener('resize', checkScreenSize);
-    
-    // Clean up
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
 
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Your App Name" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <ClientAuthProvider>
           <ProfileProvider>
             <PlayerProvider>
@@ -65,18 +63,11 @@ export default function RootLayout({
                 <ResponsiveNav />
                 
                 {/* Main Content Wrapper - adjusts based on screen size */}
-                <div className="flex-1 flex flex-col ">
-                  {/* Header - only on mobile or conditionally positioned on desktop */}
-                  {isMobile && <Header />}
-                  
-                  {/* Main Content with proper padding */}
-                  <main className="p-4 flex-1">
-                    {children}
-                    <AnimatePresence>
-                      {!isNowPlayingPage && <MiniPlayer />}
-                    </AnimatePresence>
-                  </main>
-                </div>
+                <AppWrapper>
+                {children}
+                </AppWrapper>
+                <PWAInstallPrompt />
+                <IOSInstallHint />
               </div>
             </PlayerProvider>
           </ProfileProvider>

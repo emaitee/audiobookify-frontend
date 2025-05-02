@@ -1,21 +1,40 @@
+import { apiHelper } from '@/app/utils/api';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  const { email, password } = await request.json();
-  
-  // Replace with your actual authentication logic
-  if (email === 'test@example.com' && password === 'password') {
+  try {
+    const { email, password } = await request.json();
+    
+    // Call your actual login API
+    const response = await apiHelper.post('/auth/login', {
+        email,
+        password
+      });
+
+    if (!response?.ok) {
+      const errorData = await response?.json();
+      return NextResponse.json(
+        { message: errorData.message || 'Login failed' },
+        { status: response?.status }
+      );
+    }
+
+    const data = await response.json();
+    
     return NextResponse.json({
-      token: 'fake-jwt-token',
+      token: data.token,
       user: {
-        email: 'test@example.com',
-        name: 'Test User'
+        email: data.user.email,
+        name: data.user.name
+        // Include any other user fields you need
       }
     });
+    
+  } catch (err:any) {
+    console.error(err?.message || 'Login error');
+    return NextResponse.json(
+      { message: 'Server error' },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json(
-    { message: 'Invalid credentials' },
-    { status: 401 }
-  );
 }
