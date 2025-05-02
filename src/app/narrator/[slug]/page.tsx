@@ -1,3 +1,4 @@
+'use client'
 import { useState, JSX } from 'react';
 import { Star, BookOpen, User, Clock, Award, ChevronDown, ChevronUp, Play, Heart } from 'lucide-react';
 
