@@ -7,8 +7,8 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import UploadModal from "./UploadModal";
 import EpisodesModal from "./EpisodeModal";
-import { AnalyticsData, ApprovedItem, BookMetadata, RecentUpload, Stats } from "@/app/admin/page";
-import { Book as BookType, Episode } from "@/app/page";
+import { AnalyticsData, ApprovedItem, BookMetadata, RecentUpload, Stats } from "@/app/[locale]/admin/page";
+import { Book as BookType, Episode } from "@/app/[locale]/page";
 import { API_BASE_URL } from "@/app/utils/api";
 
 interface Audiobook {
@@ -21,6 +21,7 @@ interface Audiobook {
   status: 'approved' | 'pending' | 'rejected' | 'draft';
   averageRating?: number;
   listenCount?: number;
+  language: 'string',
   coverImage?: string;
   audioFile?: string;
   createdAt: string;
@@ -50,6 +51,7 @@ export default function ContentManagement() {
         narrator: '',
         category: 'fiction',
         description: '',
+        language: '',
         isSeries: false,
         seriesInfo: {
           totalEpisodes: 1,
@@ -223,6 +225,7 @@ export default function ContentManagement() {
           formData.append('author', bookMetadata.author);
           formData.append('narrator', bookMetadata.narrator);
           formData.append('category', bookMetadata.category);
+          formData.append('language', bookMetadata.language);
           formData.append('description', bookMetadata.description);
           formData.append('isSeries', String(bookMetadata.isSeries));
           
@@ -331,6 +334,7 @@ export default function ContentManagement() {
           category: 'fiction',
           description: '',
           isSeries: false,
+          language: '',
           seriesInfo: {
             totalEpisodes: 1,
             currentEpisode: 1,

@@ -4,10 +4,12 @@ import Header from './Header';
 import { AnimatePresence } from 'framer-motion';
 import { MiniPlayer } from './MiniPlayer';
 import { usePathname } from 'next/navigation';
+import { useTheme } from 'next-themes';
 
 function AppWrapper({ children }: React.PropsWithChildren<{}>) {
+    const {theme} = useTheme()
     const pathname = usePathname();
-  const isNowPlayingPage = pathname === '/now-playing';
+  const isNowPlayingPage = pathname.includes('/now-playing');
   const [isMobile, setIsMobile] = useState(true);
   
   // Check if we're on the client side and detect screen size
@@ -29,7 +31,7 @@ function AppWrapper({ children }: React.PropsWithChildren<{}>) {
 
   return (
 
-        <div className="flex-1 flex flex-col ">
+        <div className={`flex-1 flex flex-col ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
                   {/* Header - only on mobile or conditionally positioned on desktop */}
                   {isMobile && <Header />}
                   

@@ -14,7 +14,7 @@ import {
   Calendar,
   RefreshCw
 } from 'lucide-react';
-import { authApiHelper } from '../utils/api';
+import { authApiHelper } from '../../utils/api';
 
 interface Audiobook {
   _id: string;

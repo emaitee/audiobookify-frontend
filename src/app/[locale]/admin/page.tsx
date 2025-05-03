@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect, JSX } from 'react';
 import { Plus, Upload, X, PlayCircle, Check, AlertTriangle, BarChart2, FileText, Download } from 'lucide-react';
 import { authApiHelper, API_BASE_URL } from '../utils/api';
-import { Book, Episode } from '../page';
+import { Book, Episode } from '../[locale]/page';
 import UploadModal from '../../components/dashboard-contents/UploadModal';
 import EpisodesModal from '../../components/dashboard-contents/EpisodeModal';
 
@@ -72,6 +72,7 @@ export  interface BookMetadata {
   category: string;
   description: string;
   isSeries: boolean;
+  language: string;
   seriesInfo: {
     totalEpisodes: number;
     currentEpisode: number;
@@ -218,6 +219,7 @@ const AdminView = () => {
     category: 'fiction',
     description: '',
     isSeries: false,
+    language: '',
     seriesInfo: {
       totalEpisodes: 1,
       currentEpisode: 1,
@@ -413,6 +415,7 @@ const AdminView = () => {
     formData.append('narrator', bookMetadata.narrator);
     formData.append('category', bookMetadata.category);
     formData.append('description', bookMetadata.description);
+    formData.append('language', bookMetadata.language);
     formData.append('isSeries', String(bookMetadata.isSeries));
     
     if (bookMetadata.isSeries) {
@@ -520,6 +523,7 @@ const AdminView = () => {
       category: 'fiction',
       description: '',
       isSeries: false,
+      language: '',
       seriesInfo: {
         totalEpisodes: 1,
         currentEpisode: 1,
@@ -742,7 +746,7 @@ const AdminView = () => {
   
   {activeTab === 'uploads' && (
     <div>
-      {JSON.stringify(recentUploads)}
+      {/* {JSON.stringify(recentUploads)} */}
       <h2 className="text-base sm:text-lg font-medium mb-2 sm:mb-4">Recent Uploads</h2>
       {renderErrorState('uploads')}
       {isLoading.uploads && recentUploads.length === 0 ? renderLoadingState('uploads') : (

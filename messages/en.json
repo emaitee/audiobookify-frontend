@@ -1,0 +1,35 @@
+{
+    "Error": {
+      "description": "<p>We've unfortunately encountered an error.</p><p>You can try to <retry>reload the page</retry> you were visiting.</p>",
+      "title": "Something went wrong!"
+    },
+    "LocaleLayout": {
+        "title": "SautiBox: African Voices, Endless Stories",
+        "description": "Listen to stories in your local dialect!"
+    },
+    "LocaleSwitcher": {
+      "label": "Change language",
+      "locale": "{locale, select, ha {🇳🇬 Hausa} en {🇺🇸 English} other {Unknown}}"
+    },
+    "Manifest": {
+      "title": "SautiBox: African Voices, Endless Stories",
+    "description": "Listen to stories in your local dialect!"
+    },
+    "Navigation": {
+      "home": "Home",
+      "library": "Library",
+      "search": "Search",
+      "profile": "Profile",
+      "analytics": "Analytics",
+      "content": "Content",
+      "admin": "Admin"
+    },
+    "NotFoundPage": {
+      "description": "Please double-check the browser address bar or use the navigation to go to a known page.",
+      "title": "Page not found"
+    },
+    "HomePage": {
+        "welcome": "WelWelcome to SautiBox",
+        "subtitle": "Discover stories that move with you. Your next great listen awaits."
+    }
+  }

@@ -1,0 +1,355 @@
+'use client'
+import React, { useState, useEffect } from 'react';
+import { Search, BookOpen, ChevronRight, Clock, Play, Headphones, Bookmark, Music, Star, User, Home, Library, Compass } from 'lucide-react';
+import { authApiHelper } from '../utils/api';
+import { formatTime } from '../utils/helpers';
+import { usePlayer } from '@/context/PlayerContext';
+import { useTheme } from 'next-themes';
+
+interface Rating {
+  user: string;
+  rating: number;
+  review: string;
+  date: string;
+}
+
+export interface Episode {
+  _id: string;
+  title: string;
+  episodeNumber: number;
+  audioFile: string;
+  duration: number;
+  listenCount: number;
+  averageRating: number;
+  position?: number;
+}
+
+export interface Book {
+  _id: string;
+  title: string;
+  author: string;
+  narrator: string;
+  coverImage: string;
+  isSeries: boolean;
+  episodes?: Episode[];
+  totalEpisodes?: number;
+  progress?: number;
+  currentEpisode?: number;
+  remainingTime?: string;
+  category?: string;
+  isFeatured?: boolean;
+  episodeId?: string;
+  audioFile?: string;
+  episodeNumber?: number;
+  similarBooks?: {
+    _id: string;
+    title: string;
+    author: string;
+    coverImage: string;
+  }[];
+  isFavorite?: boolean;
+  inLibrary?: boolean;
+  publisher?: string;
+  releaseDate?: string;
+  description?: string;
+  averageRating: string;
+  duration: number;
+  language: string;
+  ratings: Rating[];
+  status?: string;
+  createdAt?: string;
+}
+
+export default function AlternativeAudiobookExplorePage() {
+  const { theme } = useTheme();
+  const { play, currentBook } = usePlayer();
+  const [activeTab, setActiveTab] = useState('discover');
+  const [newReleases, setNewReleases] = useState<Book[]>([]);
+  const [featuredBooks, setFeaturedBooks] = useState<Book[]>([]);
+  const [continueListening, setContinueListening] = useState<Book[]>([]);
+  const [loading, setLoading] = useState({
+    newReleases: true,
+    featured: true,
+    continue: true
+  });
+  const [error, setError] = useState({
+    newReleases: null,
+    featured: null,
+    continue: null
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch new releases
+        const newReleasesResponse = await authApiHelper.get('/books-info/new-releases');
+        if (newReleasesResponse?.ok) {
+          let resp = await newReleasesResponse?.json()
+          setNewReleases(resp?.books);
+        }
+
+        // Fetch featured books
+        const featuredResponse = await authApiHelper.get('/books-info/featured');
+        if (featuredResponse?.ok) {
+          let resp = await featuredResponse?.json()
+          setFeaturedBooks(resp.books);
+        }
+
+        // Fetch continue listening
+        const continueResponse = await authApiHelper.get('/books-info/continue-listening');
+        // console.log(continueResponse,'xxx')
+        if (continueResponse?.ok) {
+          let resp = await continueResponse?.json()
+          setContinueListening(resp?.books.map((book: Book) => ({
+            ...book,
+            progress: calculateProgress(book)
+          })))
+        }
+      } catch (err) {
+        console.log(err)
+        setError({
+          newReleases: 'Failed to load new releases',
+          featured: 'Failed to load featured books',
+          continue: 'Failed to load continue listening'
+        });
+      } finally {
+        setLoading({
+          newReleases: false,
+          featured: false,
+          continue: false
+        });
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const calculateProgress = (book: Book): number => {
+    return Math.floor(Math.random() * 100);
+  };
+
+  const handlePlay = (book: Book) => {
+    if (book.isSeries && book.episodes?.[0]) {
+      play({
+        ...book,
+        audioFile: book.episodes[0].audioFile,
+        duration: book.episodes[0].duration,
+        episodeNumber: book.episodes[0].episodeNumber
+      }, book.episodes[0]);
+    } else {
+      play({
+        ...book,
+        audioFile: book.audioFile || '',
+        duration: book.duration || 0
+      });
+    }
+  };
+
+  
+
+  const categories = [
+    'Fiction', 'Mystery', 'Romance', 'History', 
+    'Business', 'Fantasy', 'Horror', 'Comedy'
+  ];
+
+  return (
+    <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'} pb-20`}>
+      
+      {/* <main className="flex-1 "> */}
+        {/* Hero Section */}
+        <section className="md:px-4 pb-6">
+          {featuredBooks?.length > 0 && (
+            <div className="relative rounded-xl overflow-hidden">
+              <div className={`absolute inset-0 bg-gradient-to-r ${theme === 'dark' ? 'from-purple-900 to-blue-900' : 'from-purple-600 to-blue-600'} opacity-70`}></div>
+              <img 
+                src={featuredBooks[0].coverImage} 
+                alt={featuredBooks[0].title} 
+                className="w-full h-48 object-cover"
+              />
+              <div className="absolute inset-0 flex flex-col justify-end p-4">
+                <span className={`text-xs font-semibold px-2 py-1 ${theme === 'dark' ? 'bg-purple-500' : 'bg-purple-600'} rounded-full w-fit mb-2`}>FEATURED</span>
+                <h2 className="text-xl font-bold mb-1">{featuredBooks[0].title}</h2>
+                <p className="text-sm opacity-90 mb-3">By {featuredBooks[0].author}</p>
+                <div className="flex space-x-2">
+                  <button 
+                    onClick={() => handlePlay(featuredBooks[0])}
+                    className={`px-4 py-2 ${theme === 'dark' ? 'bg-white text-gray-900' : 'bg-gray-900 text-white'} rounded-full text-sm font-medium flex items-center`}
+                  >
+                    <Play size={16} className="mr-1" /> Listen Now
+                  </button>
+                  <button className={`p-2 ${theme === 'dark' ? 'bg-gray-800 bg-opacity-60' : 'bg-white bg-opacity-80'} rounded-full`}>
+                    <Bookmark size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* New Releases */}
+        <section className="md:px-4 pb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">New Releases</h2>
+            <button className={`text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+              View All <ChevronRight size={16} />
+            </button>
+          </div>
+          
+          {loading.newReleases ? (
+            <div className="flex space-x-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="w-32 flex-shrink-0">
+                  <div className={`relative rounded-lg overflow-hidden aspect-[2/3] mb-2 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} animate-pulse`}></div>
+                  <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded mb-2 animate-pulse`}></div>
+                  <div className={`h-3 w-3/4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded animate-pulse`}></div>
+                </div>
+              ))}
+            </div>
+          ) : error.newReleases ? (
+            <div className={`p-3 rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-red-400' : 'bg-red-50 text-red-600'} text-sm`}>
+              {error.newReleases}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <div className="flex space-x-4 pb-2">
+                {newReleases.map((book) => (
+                  <div key={book._id} className="w-32 flex-shrink-0">
+                    <div className="relative rounded-lg overflow-hidden aspect-[2/3] mb-2 shadow-lg">
+                      <img src={book.coverImage} alt={book.title} className="object-cover w-full h-full" />
+                      <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t ${theme === 'dark' ? 'from-black' : 'from-gray-900'} to-transparent py-2 px-2`}>
+                        <div className="flex items-center text-xs">
+                          <Clock size={10} className="mr-1" />
+                          <span>{formatTime(book.duration)}</span>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => handlePlay(book)}
+                        className={`absolute top-2 right-2 h-8 w-8 ${theme === 'dark' ? 'bg-purple-500' : 'bg-purple-600'} rounded-full flex items-center justify-center opacity-90`}
+                      >
+                        <Play size={14} />
+                      </button>
+                    </div>
+                    <h3 className="font-medium text-sm line-clamp-1">{book.title}</h3>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{book.author}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+        
+        {/* Collections */}
+        <section className="md:px-4 pb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">Curated Collections</h2>
+            <button className={`text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+              Explore <ChevronRight size={16} />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { title: 'Best of 2025', description: 'Top-rated titles this year', color: 'bg-emerald-500' },
+              { title: 'Staff Picks', description: 'Curated by our editors', color: 'bg-purple-500' },
+              { title: 'Award Winners', description: 'Recognized excellence', color: 'bg-amber-500' },
+              { title: 'Hidden Gems', description: 'Undiscovered treasures', color: 'bg-pink-500' },
+            ].map((list) => (
+              <div key={list.title} className="relative overflow-hidden rounded-lg shadow-lg">
+                <div className={`absolute inset-0 ${list.color} opacity-90`}></div>
+                <div className="relative p-4">
+                  <h3 className="font-bold mb-1">{list.title}</h3>
+                  <p className="text-xs opacity-90 mb-3">{list.description}</p>
+                  <button className={`text-xs font-medium ${theme === 'dark' ? 'bg-black bg-opacity-30' : 'bg-white bg-opacity-30'} px-3 py-1 rounded-full`}>
+                    View List
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+        
+        {/* Continue Listening */}
+        <section className="md:px-4 pb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">Continue Listening</h2>
+            <button className={`text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+              History <ChevronRight size={16} />
+            </button>
+          </div>
+          
+          {loading.continue ? (
+            <div className="space-y-3">
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className={`flex items-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} rounded-lg p-3 shadow-lg animate-pulse`}>
+                  <div className={`w-12 h-16 rounded overflow-hidden mr-3 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                  <div className="flex-1">
+                    <div className={`h-4 w-3/4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'} rounded mb-2`}></div>
+                    <div className={`h-3 w-1/2 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'} rounded mb-3`}></div>
+                    <div className={`w-full ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'} rounded-full h-1.5 mb-1`}></div>
+                    <div className={`h-3 w-1/4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'} rounded`}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : error.continue ? (
+            <div className={`p-3 rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-red-400' : 'bg-red-50 text-red-600'} text-sm`}>
+              {error.continue}
+            </div>
+          ) : continueListening.length > 0 ? (
+            <div className="space-y-3">
+              {continueListening.map((book) => (
+                <div key={book._id} className={`flex items-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg p-3 shadow-lg`}>
+                  <div className="w-12 h-16 rounded overflow-hidden mr-3 flex-shrink-0">
+                    <img src={book.coverImage} alt={book.title} className="object-cover w-full h-full" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-sm mb-1">{book.title}</h3>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mb-2`}>{book.author}</p>
+                    <div className={`w-full ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5 mb-1`}>
+                      <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${book.progress}%` }}></div>
+                    </div>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>{book.progress}% completed</p>
+                  </div>
+                  <button 
+                    onClick={() => handlePlay(book)}
+                    className={`ml-3 h-10 w-10 rounded-full ${theme === 'dark' ? 'bg-purple-500' : 'bg-purple-600'} flex items-center justify-center`}
+                  >
+                    <Play size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} text-center`}>
+              <Headphones size={24} className={`mx-auto mb-2 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
+              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>No recent listens</p>
+            </div>
+          )}
+        </section>
+        
+        {/* Categories Shelf */}
+        <section className="pd:px-4 pb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">Browse Categories</h2>
+          </div>
+          
+          <div className="grid grid-cols-4 gap-3">
+            {categories.map((genre) => (
+              <button 
+                key={genre} 
+                className={`rounded-lg p-3 flex flex-col items-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}
+              >
+                <div className={`h-8 w-8 rounded-full ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} flex items-center justify-center mb-2`}>
+                  <Music size={14} className="text-purple-400" />
+                </div>
+                <span className="text-xs text-center">{genre}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>
+      
+    
+
+  );
+}

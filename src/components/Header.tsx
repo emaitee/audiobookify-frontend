@@ -1,10 +1,14 @@
 'use client'
 import React, { useState } from 'react'
-import { Search,X, Volume2 } from 'lucide-react';
+import { Search,X, Volume2, SunIcon, MoonIcon } from 'lucide-react';
+import { useTheme } from 'next-themes';
+// import appLogo from '../../public/appLogo.png'
 
 
 import AuthModal from './AuthModal';
 import { usePathname, useRouter } from 'next/navigation';
+import LocaleSwitcher from './LocaleSwitcher';
+import Image from 'next/image';
 // import AuthModal from './Auth';
 
 interface Book {
@@ -25,12 +29,17 @@ interface HeaderProps {
 
 const Header = () => {
   const router = useRouter()
+    const { theme, setTheme } = useTheme();
   const pathname = usePathname()
     const [currentView, setCurrentView] = useState('home');
   const [isPlaying, setIsPlaying] = useState(false);
   const [showMiniPlayer, setShowMiniPlayer] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => {
@@ -84,40 +93,56 @@ const handleSearchInput = (e: SearchInputEvent): void => {
 
   const isOnSearchPage = pathname === '/search'
     return(
-    
-    <header className="sticky top-0 bg-white border-b p-4 flex justify-between items-center z-10">
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2">
-          <Volume2 className="text-indigo-500" size={24} />
-          <h1 className="text-lg font-bold hidden sm:block">SautiBox</h1>
-        </div>
+<header className={`sticky top-0 p-4 flex justify-between items-center z-10 
+                    ${theme === 'dark' ? 
+                      'bg-gray-900 border-gray-700' : 
+                      'bg-white border-gray-200'} border-b`}>
+  <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2">
+      <Image src='/logo.png' height={30} width={30} alt='logo' />
+      {/* <Volume2 className={`${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-500'}`} size={24} /> */}
+      <h1 className={`text-lg font-bold hidden sm:block ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+        SautiBox
+      </h1>
+    </div>
+  </div>
+  <div className="flex-1 mx-4 relative">
+    {isOnSearchPage ? null : (
+      <div className="relative" onClick={() => router.push('/search')}>
+        <input 
+          type="text" 
+          placeholder="Search books, authors..." 
+          className={`w-full rounded-full py-2 px-4 pl-10 text-sm
+                    ${theme === 'dark' ? 
+                      'bg-gray-700 text-white placeholder-gray-400' : 
+                      'bg-gray-100 text-gray-900 placeholder-gray-500'}`}
+          value={searchQuery}
+          onChange={handleSearchInput}
+        />
+        <Search 
+          size={16} 
+          className={`absolute left-3 top-2.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} 
+        />
+        {searchQuery && (
+          <button 
+            className={`absolute right-3 top-2.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+            onClick={clearSearch}
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
-      <div className="flex-1 mx-4 relative">
-       {isOnSearchPage ? null : <div className="relative" onClick={() => router.push('/search')}>
-          <input 
-            type="text" 
-            placeholder="Search books, authors..." 
-            className="w-full bg-gray-100 rounded-full py-2 px-4 pl-10 text-sm"
-            value={searchQuery}
-            onChange={handleSearchInput}
-            
-          />
-          <Search size={16} className="absolute left-3 top-2.5 text-gray-500" />
-          {searchQuery && (
-            <button 
-              className="absolute right-3 top-2.5 text-gray-500"
-              onClick={clearSearch}
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>}
-      </div>
+    )}
+  </div>
       
-
-
-        <AuthModal />
-      {/* <AuthModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} openModal={openModal} closeModal={closeModal} /> */}
+     
+<LocaleSwitcher />
+        <AuthModal /> <button 
+              onClick={toggleTheme}
+              className={`p-1 rounded-full ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`}
+            >
+              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+            </button>
     </header>
   )};
 

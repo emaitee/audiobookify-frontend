@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useRef, useEffect, ReactNode, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApiHelper } from '@/app/utils/api';
-import { Book, Episode } from '@/app/page';
+import { Book, Episode } from '@/app/[locale]/page';
 import { useDebounceFn } from '@/hooks/useDebounce';
 
 interface PlayerContextType {

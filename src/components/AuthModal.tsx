@@ -125,15 +125,17 @@ export default function AuthModal() {
   return (
     <>
     {/* {JSON.stringify(user)} */}
-      {!user ? <button 
+      {user ? 
+      <button  onClick={() => router.push("/profile")} className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
+      <User size={20} />
+    </button>
+    : 
+    <button 
         onClick={openModal}
         className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
       >
         Sign In / Sign Up
-      </button> :
-      <button  onClick={() => router.push("/profile")} className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
-              <User size={20} />
-            </button>}
+      </button> }
 
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

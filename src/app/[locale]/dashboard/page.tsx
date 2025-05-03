@@ -18,8 +18,8 @@ import {
   ArrowRight, Settings as SettingsIcon,
   Star,
 } from 'lucide-react';
-import AnalyticsReports from "../../components/dashboard-contents/AnalyticsReport";
-import ContentManagement from "../../components/dashboard-contents/ContentManagement";
+import AnalyticsReports from "../../../components/dashboard-contents/AnalyticsReport";
+import ContentManagement from "../../../components/dashboard-contents/ContentManagement";
 
 export default function AudiobookAdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');

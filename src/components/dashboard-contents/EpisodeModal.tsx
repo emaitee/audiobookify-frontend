@@ -1,7 +1,7 @@
 'use client'
 import {  JSX } from 'react';
 import {  Upload, X, PlayCircle,  Download } from 'lucide-react';
-import { Book, Episode } from '@/app/page';
+import { Book, Episode } from '@/app/[locale]/page';
 
 type EpisodeModalPropTypes = {
   selectedBook: Book | null;

@@ -1,7 +1,9 @@
 'use client'
 
-import { BookMetadata } from '@/app/admin/page';
+import { BookMetadata } from '@/app/[locale]/admin/page';
 import {  Upload, X, Check,  FileText } from 'lucide-react';
+
+const languages = ["English", "Hausa", "Yoruba"]
 
 interface UploadModalProps {
   handleClose: () => void;
@@ -149,17 +151,31 @@ const UploadModal: React.FC<UploadModalProps> = ({
                 </div>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium mb-1">Category</label>
-                <select 
-                  className="w-full p-2 border rounded"
-                  value={bookMetadata.category}
-                  onChange={(e) => setBookMetadata(prev => ({...prev, category: e.target.value}))}
-                >
-                  {categories.map(cat => (
-                    <option key={cat} value={cat.toLowerCase()}>{cat}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Category</label>
+                  <select 
+                    className="w-full p-2 border rounded"
+                    value={bookMetadata.category}
+                    onChange={(e) => setBookMetadata(prev => ({...prev, category: e.target.value}))}
+                  >
+                    {categories.map(cat => (
+                      <option key={cat} value={cat.toLowerCase()}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Language</label>
+                  <select 
+                    className="w-full p-2 border rounded"
+                    value={bookMetadata.language || 'english'}
+                    onChange={(e) => setBookMetadata(prev => ({...prev, language: e.target.value}))}
+                  >
+                    {languages.map(lang => (
+                      <option key={lang} value={lang.toLowerCase()}>{lang}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               
               <div className="flex items-center">
@@ -287,6 +303,9 @@ const UploadModal: React.FC<UploadModalProps> = ({
                 <div>
                   <span className="text-gray-500">Category:</span> {bookMetadata.category}
                 </div>
+                <div>
+                  <span className="text-gray-500">Language:</span> {bookMetadata.language || 'English'}
+                </div>
                 {bookMetadata.isSeries && (
                   <>
                     <div>
@@ -347,7 +366,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
           <button 
             className="px-6 py-2 bg-indigo-500 text-white rounded"
             onClick={uploadAudiobook}
-            disabled={!bookMetadata.title || !bookMetadata.author}
+            disabled={!bookMetadata.title || !bookMetadata.author || !bookMetadata.language}
           >
             Start Upload
           </button>

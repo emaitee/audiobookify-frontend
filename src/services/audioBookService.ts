@@ -1,5 +1,5 @@
-import { ApprovedItem, RecentUpload, Stats } from "@/app/admin/page";
-import { Episode } from "@/app/page";
+import { ApprovedItem, RecentUpload, Stats } from "@/app/[locale]/admin/page";
+import { Episode } from "@/app/[locale]/page";
 import { API_BASE_URL, authApiHelper } from "@/app/utils/api";
 
 

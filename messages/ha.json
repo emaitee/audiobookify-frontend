@@ -1,0 +1,36 @@
+{
+    "Error": {
+      "description": "<p>Abu bai tafi daidai ba.</p><p>Za ka iya <retry>sake loda shafin</retry> da kake ziyarta.</p>",
+      "title": "Wani abu ya faru!"
+    },
+    "LocaleLayout": {
+      "title": "SautiBox: Muryoyin Afirka, Labarai Marasa Ƙarewa",
+      "description": "Saurari labarai a harshenka na gida!"
+    },
+    "LocaleSwitcher": {
+      "label": "Canja harshe",
+      "locale": "{locale, select, ha {🇳🇬 Hausa} en {🇺🇸 Turanci} other {Ba a sani ba}}"
+    },
+    "Manifest": {
+      "title": "SautiBox: Muryoyin Afirka, Labarai Marasa Ƙarewa",
+      "description": "Saurari labarai a harshenka na gida!"
+    },
+    "Navigation": {
+      "home": "Gida",
+      "library": "Dakin karatu",
+      "search": "Bincike",
+      "profile": "Bayanan mai amfani",
+      "analytics": "Nazari",
+      "content": "Abun ciki",
+      "admin": "Mai kula"
+    },
+    "NotFoundPage": {
+      "description": "Da fatan za a duba adireshin da kyau ko kuma ka yi amfani da kewaya domin komawa zuwa wani shafi da ka sani.",
+      "title": "An kasa samun shafin"
+    },
+    "HomePage": {
+      "welcome": "Barka da zuwa SautiBox",
+      "subtitle": "Gano labarai masu motsa rai. Labari mai kayatarwa na gaba na jiran ka."
+    }
+  }
+  
