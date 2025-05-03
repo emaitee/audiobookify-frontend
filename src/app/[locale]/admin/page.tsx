@@ -1,10 +1,10 @@
 'use client'
 import { useState, useRef, useEffect, JSX } from 'react';
 import { Plus, Upload, X, PlayCircle, Check, AlertTriangle, BarChart2, FileText, Download } from 'lucide-react';
-import { authApiHelper, API_BASE_URL } from '../utils/api';
-import { Book, Episode } from '../[locale]/page';
-import UploadModal from '../../components/dashboard-contents/UploadModal';
-import EpisodesModal from '../../components/dashboard-contents/EpisodeModal';
+import { API_BASE_URL, authApiHelper } from '@/app/utils/api';
+import { Book, Episode } from '../page';
+import EpisodesModal from '@/components/dashboard-contents/EpisodeModal';
+import UploadModal from '@/components/dashboard-contents/UploadModal';
 
 // Define types for API responses
 export interface ApiResponse {
