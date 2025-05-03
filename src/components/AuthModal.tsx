@@ -132,9 +132,9 @@ export default function AuthModal() {
     : 
     <button 
         onClick={openModal}
-        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+        className="text-xs md:text-md mx-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
       >
-        Sign In / Sign Up
+        Sign In
       </button> }
 
       {isOpen && (

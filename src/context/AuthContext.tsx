@@ -9,6 +9,7 @@ type User = {
   email: string;
   name: string;
   token: string;
+  role: string;
 };
 
 type AuthContextType = {
@@ -66,7 +67,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await response.json();
-      const userData = { email: data.user.email, name: data.user.name, token: data.token };
+      const userData = { email: data.user.email, name: data.user.name, 
+        token: data.token, role: data.role };
       
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(userData));

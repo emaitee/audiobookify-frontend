@@ -1,15 +1,17 @@
 'use client'
 import React from 'react'
-import { Search, Home, User, BookOpen, Library, BarChart2,Book } from 'lucide-react'
+import { Search, Home, User, BookOpen, Library, BarChart2, Book } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { useAuth } from '@/context/AuthContext' // Adjust the import path as needed
 
 interface NavItem {
   path: string
   icon: React.ReactNode
   activeIcon: React.ReactNode
   label: string
+  adminOnly?: boolean
 }
 
 function ResponsiveNav() {
@@ -18,6 +20,68 @@ function ResponsiveNav() {
   const [scrollDirection, setScrollDirection] = useState('up')
   const [prevScrollY, setPrevScrollY] = useState(0)
   const [isVisible, setIsVisible] = useState(true)
+  const { isAuthenticated, user } = useAuth() // Assuming your auth context provides user role
+
+  // Filter nav items based on authentication and admin status
+  const getFilteredNavItems = () => {
+    const baseItems: NavItem[] = [
+      { 
+        path: '/', 
+        icon: <Home size={22} strokeWidth={1.5} color='#fff' />, 
+        activeIcon: <Home size={22} strokeWidth={2} fill="#4f46e5" />,
+        label: 'Home' 
+      },
+      { 
+        path: '/library', 
+        icon: <Library size={22} strokeWidth={1.5} color='#fff' />, 
+        activeIcon: <Library size={22} strokeWidth={2} fill="#4f46e5" />,
+        label: 'Library' 
+      },
+      { 
+        path: '/search', 
+        icon: <Search size={22} strokeWidth={1.5} color='#fff' />, 
+        activeIcon: <Search size={22} strokeWidth={2} fill="#4f46e5" />,
+        label: 'Search' 
+      },
+      { 
+        path: '/profile', 
+        icon: <User size={22} strokeWidth={1.5} color='#fff' />, 
+        activeIcon: <User size={22} strokeWidth={2} fill="#4f46e5" />,
+        label: 'Profile' 
+      },
+    ]
+
+    if (isAuthenticated && user?.role === 'admin') {
+      return [
+        ...baseItems,
+        { 
+          path: '/analytics-report', 
+          icon: <BarChart2 size={22} strokeWidth={1.5} color='#fff' />, 
+          activeIcon: <BarChart2 size={22} strokeWidth={2} fill="#4f46e5" />,
+          label: 'Analytics',
+          adminOnly: true
+        },
+        { 
+          path: '/content-management', 
+          icon: <Book size={22} strokeWidth={1.5} color='#fff' />, 
+          activeIcon: <Book size={22} strokeWidth={2} fill="#4f46e5" />,
+          label: 'Content',
+          adminOnly: true
+        },
+        { 
+          path: '/admin', 
+          icon: <BookOpen size={22} strokeWidth={1.5} color='#fff' />, 
+          activeIcon: <BookOpen size={22} strokeWidth={2} fill="#4f46e5" />,
+          label: 'Admin',
+          adminOnly: true
+        },
+      ]
+    }
+
+    return baseItems
+  }
+
+  const navItems = getFilteredNavItems()
 
   // Handle scroll direction for hiding/showing nav on mobile
   useEffect(() => {
@@ -41,56 +105,16 @@ function ResponsiveNav() {
     }
   }, [prevScrollY, isVisible])
 
-  const navItems: NavItem[] = [
-    { 
-      path: '/', 
-      icon: <Home size={22} strokeWidth={1.5} color='#fff' />, 
-      activeIcon: <Home size={22} strokeWidth={2} fill="#4f46e5" />,
-      label: 'Home' 
-    },
-    { 
-      path: '/library', 
-      icon: <Library size={22} strokeWidth={1.5} color='#fff' />, 
-      activeIcon: <Library size={22} strokeWidth={2} fill="#4f46e5" />,
-      label: 'Library' 
-    },
-    { 
-      path: '/search', 
-      icon: <Search size={22} strokeWidth={1.5} color='#fff' />, 
-      activeIcon: <Search size={22} strokeWidth={2} fill="#4f46e5" />,
-      label: 'Search' 
-    },
-    { 
-      path: '/profile', 
-      icon: <User size={22} strokeWidth={1.5} color='#fff' />, 
-      activeIcon: <User size={22} strokeWidth={2} fill="#4f46e5" />,
-      label: 'Profile' 
-    },
-    { 
-      path: '/analytics-report', 
-      icon: <BarChart2 size={22} strokeWidth={1.5} color='#fff' />, 
-      activeIcon: <BarChart2 size={22} strokeWidth={2} fill="#4f46e5" />,
-      label: 'Analytics' 
-    },
-    { 
-      path: '/content-management', 
-      icon: <Book size={22} strokeWidth={1.5} color='#fff' />, 
-      activeIcon: <Book size={22} strokeWidth={2} fill="#4f46e5" />,
-      label: 'Content' 
-    },
-    { 
-      path: '/admin', 
-      icon: <BookOpen size={22} strokeWidth={1.5} color='#fff' />, 
-      activeIcon: <BookOpen size={22} strokeWidth={2} fill="#4f46e5" />,
-      label: 'Admin' 
-    },
-  ]
-
   const isActive = (path: string) => {
     if (path === '/') {
       return pathname === path
     }
     return pathname.startsWith(path)
+  }
+
+  // Don't render nav if not authenticated
+  if (!isAuthenticated) {
+    return null
   }
 
   // Render bottom navigation for mobile devices
@@ -205,22 +229,23 @@ function ResponsiveNav() {
         </ul>
       </div>
       
-      {/* Bottom section - could be used for user profile, settings, etc. */}
+      {/* Bottom section - User profile */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-800">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
             <User size={16} />
           </div>
           <div>
-            <p className="text-sm font-medium">User Name</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">View Profile</p>
+            <p className="text-sm font-medium">{user?.name || 'User'}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {user?.role === 'admin' ? 'Administrator' : 'Member'}
+            </p>
           </div>
         </div>
       </div>
     </div>
   )
 
-  // Return both navigation components - they will be shown/hidden using CSS
   return (
     <>
       {renderBottomNav()}

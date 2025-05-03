@@ -1,10 +1,11 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Search, BookOpen, ChevronRight, Clock, Play, Headphones, Bookmark, Music, Star, User, Home, Library, Compass } from 'lucide-react';
 import { authApiHelper } from '../utils/api';
 import { formatTime } from '../utils/helpers';
 import { usePlayer } from '@/context/PlayerContext';
 import { useTheme } from 'next-themes';
+import { useAuth } from '@/context/AuthContext';
 
 interface Rating {
   user: string;
@@ -152,9 +153,11 @@ export default function AlternativeAudiobookExplorePage() {
     'Business', 'Fantasy', 'Horror', 'Comedy'
   ];
 
+  const {user} = useAuth()
+
   return (
     <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'} pb-20`}>
-      
+      {/* {JSON.stringify(user)} */}
       {/* <main className="flex-1 "> */}
         {/* Hero Section */}
         <section className="md:px-4 pb-6">
