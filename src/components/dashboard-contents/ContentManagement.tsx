@@ -21,7 +21,7 @@ interface Audiobook {
   status: 'approved' | 'pending' | 'rejected' | 'draft';
   averageRating?: number;
   listenCount?: number;
-  language: 'string',
+  language: string;
   coverImage?: string;
   audioFile?: string;
   createdAt: string;
@@ -383,7 +383,12 @@ export default function ContentManagement() {
                     sort: sortOption
                 });
                 
-                setContentItems(response.books);
+                setContentItems(
+                    response.books.map((book: Partial<Audiobook>) => ({
+                        ...book,
+                        language: book.language || 'Unknown', // Provide a default value for missing properties
+                    })) as Audiobook[]
+                );
                 setTotalPages(response.pages);
                 setLoading(false);
             } catch (err: any) {
