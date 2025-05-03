@@ -70,7 +70,7 @@ export function MiniPlayer() {
     router.push('/now-playing');
   };
 
-  const handlePlayButtonClick = (e) => {
+  const handlePlayButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setIsLoading(true);
     setTimeout(() => {

@@ -6,6 +6,7 @@ import { formatTime } from '../utils/helpers';
 import { usePlayer } from '@/context/PlayerContext';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/context/AuthContext';
+import './index.css'
 
 interface Rating {
   user: string;
@@ -194,54 +195,56 @@ export default function AlternativeAudiobookExplorePage() {
         </section>
 
         {/* New Releases */}
-        <section className="md:px-4 pb-6">
-  <div className="flex items-center justify-between mb-4">
-    <h2 className="text-lg font-bold">New Releases</h2>
-    <button className={`text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
-      View All <ChevronRight size={16} />
+        <section className="px-2 md:px-4 pb-6">
+  <div className="flex items-center justify-between mb-3 md:mb-4">
+    <h2 className="text-base md:text-lg font-bold">New Releases</h2>
+    <button className={`text-xs md:text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+      View All <ChevronRight size={14} className="ml-0.5" />
     </button>
   </div>
   
   {loading.newReleases ? (
-    <div className="flex space-x-4 overflow-x-auto pb-2">
+    <div className="flex space-x-3 md:space-x-4 overflow-x-auto pb-2 scrollbar-hide">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="w-32 flex-shrink-0">
+        <div key={i} className="w-28 md:w-32 flex-shrink-0">
           <div className={`relative rounded-lg overflow-hidden aspect-[2/3] mb-2 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} animate-pulse`}></div>
-          <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded mb-2 animate-pulse`}></div>
+          <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded mb-1.5 animate-pulse`}></div>
           <div className={`h-3 w-3/4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded animate-pulse`}></div>
         </div>
       ))}
     </div>
   ) : error.newReleases ? (
-    <div className={`p-3 rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-red-400' : 'bg-red-50 text-red-600'} text-sm`}>
+    <div className={`p-3 rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-red-400' : 'bg-red-50 text-red-600'} text-xs md:text-sm`}>
       {error.newReleases}
     </div>
   ) : (
     <div className="relative">
-      <div className="flex space-x-4 pb-4 overflow-x-auto scrollbar-hide">
+      <div className="flex space-x-3 md:space-x-4 pb-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
         {newReleases.map((book) => (
-          <div key={book._id} className="w-32 flex-shrink-0">
+          <div key={book._id} className="w-28 md:w-32 flex-shrink-0 snap-start">
             <div className="relative rounded-lg overflow-hidden aspect-[2/3] mb-2 shadow-lg group">
               <img 
                 src={book.coverImage} 
                 alt={book.title} 
                 className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" 
+                loading="lazy"
               />
-              <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t ${theme === 'dark' ? 'from-black' : 'from-gray-900'} to-transparent py-2 px-2`}>
-                <div className="flex items-center text-xs">
+              <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t ${theme === 'dark' ? 'from-black' : 'from-gray-900'} to-transparent py-1.5 md:py-2 px-2`}>
+                <div className="flex items-center text-[10px] md:text-xs">
                   <Clock size={10} className="mr-1" />
                   <span>{formatTime(book.duration)}</span>
                 </div>
               </div>
               <button 
                 onClick={() => handlePlay(book)}
-                className={`absolute top-2 right-2 h-8 w-8 ${theme === 'dark' ? 'bg-purple-500' : 'bg-purple-600'} rounded-full flex items-center justify-center opacity-0 group-hover:opacity-90 transition-opacity duration-200`}
+                className={`absolute top-1.5 md:top-2 right-1.5 md:right-2 h-7 md:h-8 w-7 md:w-8 ${theme === 'dark' ? 'bg-purple-500' : 'bg-purple-600'} rounded-full flex items-center justify-center opacity-0 group-hover:opacity-90 transition-opacity duration-200`}
+                aria-label={`Play ${book.title}`}
               >
-                <Play size={14} />
+                <Play size={12} className="md:size-[14px]" />
               </button>
             </div>
-            <h3 className="font-medium text-sm line-clamp-1">{book.title}</h3>
-            <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{book.author}</p>
+            <h3 className="font-medium text-xs md:text-sm line-clamp-1">{book.title}</h3>
+            <p className={`text-[10px] md:text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-1`}>{book.author}</p>
           </div>
         ))}
       </div>

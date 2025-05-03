@@ -1,0 +1,19 @@
+/* For Webkit browsers */
+.scrollbar-hide::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.3);
+    border-radius: 2px;
+  }
+  
+  /* For Firefox */
+  .scrollbar-hide {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(155, 155, 155, 0.3) transparent;
+  }
