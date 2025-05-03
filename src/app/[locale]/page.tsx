@@ -73,7 +73,11 @@ export default function AlternativeAudiobookExplorePage() {
     featured: true,
     continue: true
   });
-  const [error, setError] = useState({
+  const [error, setError] = useState<{
+    newReleases: string | null;
+    featured: string | null;
+    continue: string | null;
+  }>({
     newReleases: null,
     featured: null,
     continue: null
