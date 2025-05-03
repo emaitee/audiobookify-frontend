@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
-      router.push('/home');
+      router.push('/');
     } catch (err:any) {
       setError(err.message || 'Login failed');
       throw err;

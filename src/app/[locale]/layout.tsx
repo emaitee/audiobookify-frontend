@@ -16,6 +16,7 @@ import AppWrapper from "@/components/AppWrapper";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import IOSInstallHint from "@/components/IOSInstallHint";
 import { ThemeProvider } from 'next-themes';
+import LanguageSelectionModal from '@/components/LanguageSelectionModal';
 
 type Props = {
   children: ReactNode;
@@ -105,6 +106,7 @@ export default async function RootLocaleLayout({
               <ProfileProvider>
                 <PlayerProvider>
                   <div className="bg-gray-900 relative text-black flex">
+                  <LanguageSelectionModal />
                     {/* Responsive Navigation */}
                     <ResponsiveNav />
                     
