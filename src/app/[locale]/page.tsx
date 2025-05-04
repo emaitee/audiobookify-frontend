@@ -7,6 +7,7 @@ import { usePlayer } from '@/context/PlayerContext';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/context/AuthContext';
 import './index.css'
+import Link from 'next/link';
 
 interface Rating {
   user: string;
@@ -195,9 +196,9 @@ export default function AlternativeAudiobookExplorePage() {
       <section className="px-2 md:px-4 pb-6">
         <div className="flex items-center justify-between mb-3 md:mb-4">
           <h2 className="text-base md:text-lg font-bold">New Releases</h2>
-          <button className={`text-xs md:text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+          <Link href={"/view-list"} className={`text-xs md:text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
             View All <ChevronRight size={14} className="ml-0.5" />
-          </button>
+          </Link>
         </div>
         
         {loading.newReleases ? (
@@ -253,9 +254,9 @@ export default function AlternativeAudiobookExplorePage() {
              <section className="md:px-4 pb-6">
                <div className="flex items-center justify-between mb-4">
                  <h2 className="text-lg font-bold">Curated Collections</h2>
-                 <button className={`text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+                 <Link href={"/view-list"} className={`text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
                    Explore <ChevronRight size={16} />
-                 </button>
+                 </Link>
                </div>
                
                <div className="grid grid-cols-2 gap-3">
@@ -283,9 +284,9 @@ export default function AlternativeAudiobookExplorePage() {
              <section className="md:px-4 pb-6">
                <div className="flex items-center justify-between mb-4">
                  <h2 className="text-lg font-bold">Continue Listening</h2>
-                 <button className={`text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+                 <Link href={"/view-list"} className={`text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
                    History <ChevronRight size={16} />
-                 </button>
+                 </Link>
                </div>
                
                {loading.continue ? (
