@@ -284,7 +284,7 @@ export default function AlternativeAudiobookExplorePage() {
              <section className="md:px-4 pb-6">
                <div className="flex items-center justify-between mb-4">
                  <h2 className="text-lg font-bold">Continue Listening</h2>
-                 <Link href={"/view-list"} className={`text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+                 <Link href={"/history"} className={`text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
                    History <ChevronRight size={16} />
                  </Link>
                </div>
