@@ -29,6 +29,7 @@ export interface Episode {
 export interface Book {
   _id: string;
   title: string;
+  slug: string;
   author: string;
   narrator: string;
   coverImage: string;
@@ -134,6 +135,7 @@ export default function AlternativeAudiobookExplorePage() {
   };
 
   const handlePlay = (book: Book) => {
+    // console.log(book)
     if (book.isSeries && book.episodes?.[0]) {
       play({
         ...book,

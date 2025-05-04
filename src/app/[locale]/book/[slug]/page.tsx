@@ -693,7 +693,7 @@ export default function BookView() {
                                             ? 'bg-gray-800 border-gray-700 hover:shadow-lg' 
                                             : 'bg-white border-gray-100 hover:shadow-md'
                                     }`}
-                                    onClick={() => router.push(`/book/${similar._id}`)}
+                                    onClick={() => router.push(`/book/${similar.slug}`)}
                                 >
                                     <div className="relative pb-[140%] mb-2">
                                         <img 

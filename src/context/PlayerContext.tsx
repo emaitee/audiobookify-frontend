@@ -280,6 +280,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     try {
       // Find the book in our allBooks array to ensure we have the latest data
       const freshBook = allBooks.find(b => b._id === book._id) || book;
+
+      // console.log(book, allBooks)
   
       // Determine which episode to play with priority:
       // 1. Explicitly passed episode

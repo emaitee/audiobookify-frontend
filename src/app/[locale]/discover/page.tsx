@@ -19,6 +19,7 @@ import { authApiHelper } from '../../utils/api';
 interface Audiobook {
   _id: string;
   title: string;
+  slug: string;
   author: string;
   narrator?: string;
   coverImage: string;
@@ -142,7 +143,7 @@ export default function DiscoverView() {
           <div 
             key={book._id} 
             className="flex-shrink-0 w-32 md:w-40 snap-start cursor-pointer"
-            onClick={() => navigateToBook(book._id)}
+            onClick={() => navigateToBook(book.slug)}
           >
             <div className="relative aspect-[2/3] mb-2">
               <img 

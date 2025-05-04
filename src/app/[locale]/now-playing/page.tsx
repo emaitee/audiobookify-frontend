@@ -1,10 +1,13 @@
 'use client'
+import BookReview from '@/components/BookReview';
 import { usePlayer } from '@/context/PlayerContext';
 import { 
   ChevronDown, X, Heart, Share2, BookOpen, ListMusic, 
   Clock, Rewind, SkipBack, Play, Pause, SkipForward, 
   FastForward, VolumeX, Volume1, Volume2, Info, 
-  BookmarkPlus, Maximize2, Minimize2, ChevronUp
+  BookmarkPlus, Maximize2, Minimize2, ChevronUp,
+  Star,
+  MessageCircleHeartIcon
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -22,6 +25,78 @@ function formatTime(seconds: number, fullFormat = false): string {
   }
   return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
+
+  // Review interface
+  interface Review {
+    id: string;
+    userId: string;
+    username: string;
+    avatar: string;
+    rating: number;
+    comment: string;
+    timestamp: string;
+    likes: number;
+    isLiked?: boolean;
+  }
+  
+  // Star Rating Component
+  const StarRating = ({ 
+    rating, 
+    setRating = undefined, 
+    size = 20, 
+    interactive = false 
+  }: { 
+    rating: number; 
+    setRating?: (rating: number) => void; 
+    size?: number;
+    interactive?: boolean;
+  }) => {
+    const [hoverRating, setHoverRating] = useState<number | null>(null);
+    
+    return (
+      <div className="flex">
+        {[1, 2, 3, 4, 5].map((star) => {
+          const filled = (hoverRating !== null ? star <= hoverRating : star <= rating);
+          
+          return (
+            <button
+              key={star}
+              type="button"
+              disabled={!interactive}
+              className={`${interactive ? 'cursor-pointer' : 'cursor-default'} ${filled ? 'text-yellow-400' : 'text-white/30'}`}
+              onClick={() => setRating && setRating(star)}
+              onMouseEnter={() => interactive && setHoverRating(star)}
+              onMouseLeave={() => interactive && setHoverRating(null)}
+            >
+              <Star size={size} fill={filled ? "currentColor" : "none"} />
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // Format date to relative time
+  function formatRelativeTime(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return 'just now';
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    } else if (diffInSeconds < 2592000) {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+    } else {
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+  }
 
 export default function NowPlaying() {
   const {
@@ -47,6 +122,7 @@ export default function NowPlaying() {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
+  const [reviewCount, setReviewCount] = useState(0)
 
   interface ProgressClickEvent extends React.MouseEvent<HTMLDivElement> {}
 
@@ -393,6 +469,13 @@ export default function NowPlaying() {
                 >
                   Bookmarks
                 </button>
+                <button
+                    onClick={() => setActiveTab('reviews')}
+                    className={`px-4 py-2 font-medium text-sm ${activeTab === 'reviews' ? 'text-white border-b-2 border-purple-500' : 'text-white/60 hover:text-white'}`}
+                  >
+                    Reviews 
+                    ({reviewCount})
+                  </button>
               </div>
               
               {/* Tab content */}
@@ -488,6 +571,10 @@ export default function NowPlaying() {
                     </button>
                   </div>
                 )}
+
+                {activeTab === 'reviews' && (
+                  <BookReview currentBook={currentBook} setReviewCount={setReviewCount} />
+                )}
               </div>
             </div>
           </div>
@@ -561,6 +648,23 @@ export default function NowPlaying() {
                 <BookmarkPlus size={18} />
                 <span className="text-xs mt-1">Bookmarks</span>
                 {activeTab === 'notes' && (
+                  <div className="h-0.5 w-10 bg-white rounded-full mt-1" />
+                )}
+              </button>
+
+              <button 
+                className={`flex flex-col items-center transition-colors ${
+                  activeTab === 'reviews' ? 'text-white' : 'text-white/50 hover:text-white/80'
+                }`}
+                onClick={() => {
+                  setActiveTab('reviews');
+                  if (!isBottomSheetExpanded) setIsBottomSheetExpanded(true);
+                }}
+              >
+                <MessageCircleHeartIcon size={18} />
+                
+                <span className="text-xs mt-1">Reviews ({reviewCount})</span>
+                {activeTab === 'reviews' && (
                   <div className="h-0.5 w-10 bg-white rounded-full mt-1" />
                 )}
               </button>
@@ -649,6 +753,10 @@ export default function NowPlaying() {
                   </button>
                 </div>
               )}
+
+{activeTab === 'reviews' && (
+                  <BookReview currentBook={currentBook} setReviewCount={setReviewCount}/>
+                )}
             </div>
           </div>
         </div>

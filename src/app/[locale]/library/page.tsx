@@ -7,6 +7,7 @@ import { useTheme } from 'next-themes';
 
 interface LibraryBook {
   _id: string;
+  slug:string;
   title: string;
   author: string;
   coverImage: string;
@@ -318,7 +319,7 @@ const LibraryView = () => {
                   ? 'bg-gray-800 hover:bg-gray-700' 
                   : 'bg-white hover:bg-gray-50 shadow-sm'
               }`}
-              onClick={() => router.push(`/book/${book._id}`)}
+              onClick={() => router.push(`/book/${book.slug}`)}
             >
               <div className="flex items-start gap-3 sm:gap-4">
                 <img 

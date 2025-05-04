@@ -3,11 +3,14 @@ import { useState, useEffect, useTransition } from 'react';
 import { Globe } from 'lucide-react';
 import { useRouter} from '@/i18n/navigation';
 import {Locale} from 'next-intl';
+import { useParams, usePathname } from 'next/navigation';
 
 export default function LanguageSelectionModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const pathname = usePathname()
+  const params = useParams()
   
   useEffect(() => {
     // Check if user has already selected a language

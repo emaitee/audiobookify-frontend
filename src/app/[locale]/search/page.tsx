@@ -9,6 +9,7 @@ import { useTheme } from 'next-themes';
 interface Audiobook {
   _id: string;
   title: string;
+  slug:string;
   author: string;
   narrator?: string;
   coverImage: string;
@@ -231,7 +232,7 @@ export default function SearchView() {
                         ? 'bg-gray-800 hover:bg-gray-700 border-gray-700' 
                         : 'bg-white hover:bg-indigo-50 border-gray-100'
                     }`}
-                    onClick={() => navigateToBook(book._id)}
+                    onClick={() => navigateToBook(book.slug)}
                   >
                     <div className="relative flex-shrink-0">
                       <img 

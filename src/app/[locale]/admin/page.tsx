@@ -89,7 +89,6 @@ const audioBookService = {
       const response = await authApiHelper.get(`/books-info/recent?page=${page}&limit=${limit}`);
       if (!response?.ok) throw new Error('Failed to fetch recent uploads');
       let resp = await response.json();
-      console.log(resp, "REPSPSPPSPS")
       return resp
     } catch (error) {
       console.error('Error fetching recent uploads:', error);
@@ -303,7 +302,6 @@ const AdminView = () => {
     setError(prev => ({ ...prev, uploads: null }));
     try {
       const data = await audioBookService.getRecentUploads();
-      console.log("RECENNNNNNT", data)
       setRecentUploads(data || []);
     } catch (err: any) {
       setError(prev => ({ ...prev, uploads: err.message }));

@@ -6,6 +6,7 @@ import { API_BASE_URL } from '@/app/utils/api';
 
 
 type User = {
+  _id:string;
   email: string;
   name: string;
   token: string;
@@ -67,8 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await response.json();
-      const userData = { email: data.user.email, name: data.user.name, 
-        token: data.token, role: data.role };
+      const userData = { _id: data.user._id, email: data.user.email, name: data.user.name, 
+        token: data.token, role: data.user.role };
       
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(userData));
