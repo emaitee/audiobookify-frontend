@@ -84,11 +84,13 @@ export  interface BookMetadata {
 
 // API service for audiobooks
 const audioBookService = {
-  getRecentUploads: async (page = 1, limit = 10): Promise<{ books: RecentUpload[] }> => {
+  getRecentUploads: async (page = 1, limit = 10): Promise<RecentUpload[]> => {
     try {
       const response = await authApiHelper.get(`/books-info/recent?page=${page}&limit=${limit}`);
       if (!response?.ok) throw new Error('Failed to fetch recent uploads');
-      return await response.json();
+      let resp = await response.json();
+      console.log(resp, "REPSPSPPSPS")
+      return resp
     } catch (error) {
       console.error('Error fetching recent uploads:', error);
       throw error;
@@ -301,7 +303,8 @@ const AdminView = () => {
     setError(prev => ({ ...prev, uploads: null }));
     try {
       const data = await audioBookService.getRecentUploads();
-      setRecentUploads(data.books || []);
+      console.log("RECENNNNNNT", data)
+      setRecentUploads(data || []);
     } catch (err: any) {
       setError(prev => ({ ...prev, uploads: err.message }));
     } finally {
@@ -631,8 +634,8 @@ const AdminView = () => {
       const nextPage = Math.floor(recentUploads.length / 10) + 1;
       const data = await audioBookService.getRecentUploads(nextPage);
       
-      if (data.books && data.books.length > 0) {
-        setRecentUploads(prev => [...prev, ...data.books]);
+      if (data && data.length > 0) {
+        setRecentUploads(prev => [...prev, ...data]);
       } else {
         alert('No more books to load');
       }
