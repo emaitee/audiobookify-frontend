@@ -16,6 +16,7 @@ export interface ApiResponse {
 export interface RecentUpload {
   _id: string;
   id: string;
+  slug: string;
   title: string;
   author: string;
   narrator: string;
@@ -68,6 +69,7 @@ export interface Stats {
 export  interface BookMetadata {
   title: string;
   author: string;
+  slug: string;
   narrator: string;
   category: string;
   description: string;
@@ -201,6 +203,7 @@ const audioBookService = {
 
 const mapRecentUploadToBook = (recentUpload: RecentUpload): Book => ({
   ...recentUpload,
+  slug: recentUpload.slug,
   coverImage: recentUpload.coverImage || '/default-cover.jpg',
   averageRating: recentUpload.averageRating||"0",
   duration: recentUpload.duration || 0,
@@ -216,6 +219,7 @@ const AdminView = () => {
   const [bookMetadata, setBookMetadata] = useState<BookMetadata>({
     title: '',
     author: '',
+    slug: '',
     narrator: '',
     category: 'fiction',
     description: '',
@@ -442,6 +446,7 @@ const AdminView = () => {
           const newUpload: RecentUpload = {
             _id: response._id || `new-${Date.now()}`,
             id: response?.id || `new-${Date.now()}`,
+            slug: bookMetadata.slug,
             title: bookMetadata.title,
             author: bookMetadata.author,
             narrator: bookMetadata.narrator,
@@ -520,6 +525,7 @@ const AdminView = () => {
     setBookMetadata({
       title: '',
       author: '',
+      slug: '',
       narrator: '',
       category: 'fiction',
       description: '',
@@ -569,6 +575,7 @@ const AdminView = () => {
           _id: approvedItem._id,
           id: approvedItem._id,
           title: approvedItem.title,
+          slug: approvedItem.slug,
           author: approvedItem.author,
           narrator: approvedItem.narrator,
           status: 'approved',
@@ -605,6 +612,7 @@ const AdminView = () => {
           ...rejectedItem,
           id: rejectedItem._id, // Add the 'id' property
           status: 'rejected',
+          slug:rejectedItem.slug,
           date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
           isSeries: rejectedItem.isSeries ?? false // Ensure isSeries is explicitly boolean
         };

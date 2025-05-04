@@ -48,6 +48,7 @@ export default function ContentManagement() {
       const [bookMetadata, setBookMetadata] = useState<BookMetadata>({
         title: '',
         author: '',
+        slug: '',
         narrator: '',
         category: 'fiction',
         description: '',
@@ -253,6 +254,7 @@ export default function ContentManagement() {
                   _id: response._id || `new-${Date.now()}`,
                   id: response._id || `new-${Date.now()}`,
                   title: bookMetadata.title,
+                  slug: bookMetadata.slug,
                   author: bookMetadata.author,
                   narrator: bookMetadata.narrator,
                   status: "pending",
@@ -330,6 +332,7 @@ export default function ContentManagement() {
         setBookMetadata({
           title: '',
           author: '',
+          slug: '',
           narrator: '',
           category: 'fiction',
           description: '',

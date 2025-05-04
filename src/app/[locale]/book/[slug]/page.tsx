@@ -133,6 +133,7 @@ export default function BookView() {
         play({
                   _id: book._id,
                   episodeId: episodeToPlay._id,
+                  slug: book.slug,
                   title: `${book.title} - ${episodeToPlay.title}`,
                   author: book.author,
                   coverImage: book.coverImage,
@@ -150,7 +151,8 @@ export default function BookView() {
         play({
           _id: book._id,
           title: book.title,
-          author: book.author,
+                  slug: book.slug,
+                  author: book.author,
           coverImage: book.coverImage,
           audioFile: book.episodes?.[0]?.audioFile || '', // Assuming single books have one episode
           duration: book.episodes?.[0]?.duration || 0,
@@ -693,7 +695,7 @@ export default function BookView() {
                                             ? 'bg-gray-800 border-gray-700 hover:shadow-lg' 
                                             : 'bg-white border-gray-100 hover:shadow-md'
                                     }`}
-                                    onClick={() => router.push(`/book/${similar.slug}`)}
+                                    onClick={() => router.push(`/book/${similar._id}`)}
                                 >
                                     <div className="relative pb-[140%] mb-2">
                                         <img 
