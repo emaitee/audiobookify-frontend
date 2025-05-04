@@ -21,7 +21,7 @@ interface Audiobook {
   status: 'approved' | 'pending' | 'rejected' | 'draft';
   averageRating?: number;
   listenCount?: number;
-  language: string;
+  narrationLanguage: string;
   coverImage?: string;
   audioFile?: string;
   createdAt: string;
@@ -51,7 +51,7 @@ export default function ContentManagement() {
         narrator: '',
         category: 'fiction',
         description: '',
-        language: '',
+        narrationLanguage: '',
         isSeries: false,
         seriesInfo: {
           totalEpisodes: 1,
@@ -225,7 +225,7 @@ export default function ContentManagement() {
           formData.append('author', bookMetadata.author);
           formData.append('narrator', bookMetadata.narrator);
           formData.append('category', bookMetadata.category);
-          formData.append('language', bookMetadata.language);
+          formData.append('narrationLanguage', bookMetadata.narrationLanguage);
           formData.append('description', bookMetadata.description);
           formData.append('isSeries', String(bookMetadata.isSeries));
           
@@ -334,7 +334,7 @@ export default function ContentManagement() {
           category: 'fiction',
           description: '',
           isSeries: false,
-          language: '',
+          narrationLanguage: '',
           seriesInfo: {
             totalEpisodes: 1,
             currentEpisode: 1,
@@ -386,7 +386,7 @@ export default function ContentManagement() {
                 setContentItems(
                     response.books.map((book: Partial<Audiobook>) => ({
                         ...book,
-                        language: book.language || 'Unknown', // Provide a default value for missing properties
+                        narrationLanguage: book.narrationLanguage || 'Unknown', // Provide a default value for missing properties
                     })) as Audiobook[]
                 );
                 setTotalPages(response.pages);

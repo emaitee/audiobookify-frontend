@@ -29,7 +29,7 @@ export interface RecentUpload {
   coverImage?: string;
   averageRating?: string;
   duration?: number;
-  language?: string;
+  narrationLanguage?: string;
   ratings?: any[];
   createdAt?: string;
   date?: string;
@@ -72,7 +72,7 @@ export  interface BookMetadata {
   category: string;
   description: string;
   isSeries: boolean;
-  language: string;
+  narrationLanguage: string;
   seriesInfo: {
     totalEpisodes: number;
     currentEpisode: number;
@@ -203,7 +203,7 @@ const mapRecentUploadToBook = (recentUpload: RecentUpload): Book => ({
   coverImage: recentUpload.coverImage || '/default-cover.jpg',
   averageRating: recentUpload.averageRating||"0",
   duration: recentUpload.duration || 0,
-  language: recentUpload.language || 'Unknown',
+  narrationLanguage: recentUpload.narrationLanguage || 'Unknown',
   ratings: recentUpload.ratings || [],
 });
 
@@ -219,7 +219,7 @@ const AdminView = () => {
     category: 'fiction',
     description: '',
     isSeries: false,
-    language: '',
+    narrationLanguage: '',
     seriesInfo: {
       totalEpisodes: 1,
       currentEpisode: 1,
@@ -415,7 +415,7 @@ const AdminView = () => {
     formData.append('narrator', bookMetadata.narrator);
     formData.append('category', bookMetadata.category);
     formData.append('description', bookMetadata.description);
-    formData.append('language', bookMetadata.language);
+    formData.append('narrationLanguage', bookMetadata.narrationLanguage);
     formData.append('isSeries', String(bookMetadata.isSeries));
     
     if (bookMetadata.isSeries) {
@@ -523,7 +523,7 @@ const AdminView = () => {
       category: 'fiction',
       description: '',
       isSeries: false,
-      language: '',
+      narrationLanguage: '',
       seriesInfo: {
         totalEpisodes: 1,
         currentEpisode: 1,

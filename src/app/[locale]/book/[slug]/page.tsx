@@ -142,7 +142,7 @@ export default function BookView() {
                   episodeNumber: episodeToPlay.episodeNumber,
                   narrator: book.narrator,
                   averageRating: book.averageRating,
-                  language: book.language,
+                  narrationLanguage: book.narrationLanguage,
                   ratings: book.ratings
                 }, episodeToPlay);
       } else {
@@ -157,7 +157,7 @@ export default function BookView() {
           narrator: book.narrator || 'Unknown',
           isSeries: book.isSeries || false,
           averageRating: book.averageRating || '0',
-          language: book.language || 'Unknown',
+          narrationLanguage: book.narrationLanguage || 'Unknown',
           ratings: book.ratings || []
         });
       }
@@ -374,7 +374,7 @@ export default function BookView() {
                                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                                     theme === 'dark' ? 'bg-indigo-900/30 text-indigo-300' : 'bg-indigo-100 text-indigo-700'
                                 }`}>
-                                    {book.language}
+                                    {book.narrationLanguage}
                                 </span>
                             </div>
                             
@@ -575,7 +575,7 @@ export default function BookView() {
                                             { label: "Narrator:", value: book.narrator },
                                             { label: "Publisher:", value: book.publisher },
                                             { label: "Release Date:", value: book.releaseDate ? new Date(book.releaseDate).toLocaleDateString() : 'Unknown' },
-                                            { label: "Language:", value: book.language }
+                                            { label: "Language:", value: book.narrationLanguage }
                                         ].map((item) => (
                                             <div className="flex justify-between" key={item.label}>
                                                 <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>{item.label}</span>

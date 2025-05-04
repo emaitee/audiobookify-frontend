@@ -3,7 +3,7 @@
 import { BookMetadata } from '@/app/[locale]/admin/page';
 import {  Upload, X, Check,  FileText } from 'lucide-react';
 
-const languages = ["English", "Hausa", "Yoruba"]
+const narrationLanguages = ["English", "Hausa", "Yoruba"]
 
 interface UploadModalProps {
   handleClose: () => void;
@@ -165,13 +165,13 @@ const UploadModal: React.FC<UploadModalProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Language</label>
+                  <label className="block text-sm font-medium mb-1">narrationLanguage</label>
                   <select 
                     className="w-full p-2 border rounded"
-                    value={bookMetadata.language || 'english'}
-                    onChange={(e) => setBookMetadata(prev => ({...prev, language: e.target.value}))}
+                    value={bookMetadata.narrationLanguage || 'english'}
+                    onChange={(e) => setBookMetadata(prev => ({...prev, narrationLanguage: e.target.value}))}
                   >
-                    {languages.map(lang => (
+                    {narrationLanguages.map(lang => (
                       <option key={lang} value={lang.toLowerCase()}>{lang}</option>
                     ))}
                   </select>
@@ -304,7 +304,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
                   <span className="text-gray-500">Category:</span> {bookMetadata.category}
                 </div>
                 <div>
-                  <span className="text-gray-500">Language:</span> {bookMetadata.language || 'English'}
+                  <span className="text-gray-500">narrationLanguage:</span> {bookMetadata.narrationLanguage || 'English'}
                 </div>
                 {bookMetadata.isSeries && (
                   <>
@@ -366,7 +366,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
           <button 
             className="px-6 py-2 bg-indigo-500 text-white rounded"
             onClick={uploadAudiobook}
-            disabled={!bookMetadata.title || !bookMetadata.author || !bookMetadata.language}
+            disabled={!bookMetadata.title || !bookMetadata.author || !bookMetadata.narrationLanguage}
           >
             Start Upload
           </button>

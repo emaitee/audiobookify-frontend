@@ -56,7 +56,7 @@ export interface Book {
   description?: string;
   averageRating: string;
   duration: number;
-  language: string;
+  narrationLanguage: string;
   ratings: Rating[];
   status?: string;
   createdAt?: string;

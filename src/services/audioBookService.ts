@@ -32,7 +32,7 @@ interface PaginatedResponse {
   total: number;
   pages: number;
   currentPage: number;
-  language:string;
+  narrationLanguage:string;
 }
 
 interface ApiResponse {
