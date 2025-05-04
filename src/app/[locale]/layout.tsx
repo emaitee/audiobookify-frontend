@@ -17,6 +17,7 @@ import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import IOSInstallHint from "@/components/IOSInstallHint";
 import { ThemeProvider } from 'next-themes';
 import LanguageSelectionModal from '@/components/LanguageSelectionModal';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 type Props = {
   children: ReactNode;
@@ -100,6 +101,7 @@ export default async function RootLocaleLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Your App Name" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <GoogleAnalytics />
         <ThemeProvider>
           <NextIntlClientProvider>
             <ClientAuthProvider>
