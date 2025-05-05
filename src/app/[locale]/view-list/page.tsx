@@ -6,7 +6,7 @@ import { Book } from '../page';
 import { authApiHelper } from '@/app/utils/api';
 import { useTranslations } from 'next-intl'; // Import useTranslations hook
 
-export default function AudiobookCollectionView() {
+const ViewListContent = () => {
   // Initialize translations
   const t = useTranslations("ListViewPage");
   
@@ -205,7 +205,6 @@ export default function AudiobookCollectionView() {
   }
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
     <div className="md:bg-gray-50 min-h-screen">
       {/* Header with title and back button */}
       <header className="md:bg-white md:shadow">
@@ -461,6 +460,13 @@ export default function AudiobookCollectionView() {
         </div>
       )}
     </div>
-    </Suspense>
   );
+}
+
+export default function ViewListPage () {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ViewListContent />
+    </Suspense>
+  )
 }
