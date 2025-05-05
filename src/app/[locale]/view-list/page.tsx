@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search, Filter, ChevronDown, ChevronUp, Clock, Star, BookOpen } from 'lucide-react';
 import { Book } from '../page';
@@ -205,6 +205,7 @@ export default function AudiobookCollectionView() {
   }
 
   return (
+    <Suspense fallback={<div>Loading...</div>}>
     <div className="md:bg-gray-50 min-h-screen">
       {/* Header with title and back button */}
       <header className="md:bg-white md:shadow">
@@ -460,5 +461,6 @@ export default function AudiobookCollectionView() {
         </div>
       )}
     </div>
+    </Suspense>
   );
 }
