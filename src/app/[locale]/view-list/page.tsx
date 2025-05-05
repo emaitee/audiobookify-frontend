@@ -1,122 +1,225 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Search, Filter, ChevronDown, ChevronUp, Clock, Star, BookOpen } from 'lucide-react';
+import { Book } from '../page';
+import { authApiHelper } from '@/app/utils/api';
+import { useTranslations } from 'next-intl'; // Import useTranslations hook
 
 export default function AudiobookCollectionView() {
+  // Initialize translations
+  const t = useTranslations("ListViewPage");
+  
+  const searchParams = useSearchParams();
   const [sortOrder, setSortOrder] = useState('newest');
   const [filterOpen, setFilterOpen] = useState(false);
+  const [audiobooks, setAudiobooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [totalBooks, setTotalBooks] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState(t('allGenres'));
+  const [selectedNarrator, setSelectedNarrator] = useState(t('allNarrators'));
+  const [selectedDateFilter, setSelectedDateFilter] = useState('any');
+
+  // Get collection type from URL params
+  const collectionType = searchParams.get('type') || 'recent';
+  const categoryName = searchParams.get('category') || '';
+
+  // Collection of genres for filter (would ideally come from API)
+  const genres = [
+    t('allGenres'), 
+    t('genres.fiction'), 
+    t('genres.nonFiction'), 
+    t('genres.thriller'), 
+    t('genres.sciFi'), 
+    t('genres.selfHelp'), 
+    t('genres.memoir'), 
+    t('genres.historicalFiction'), 
+    t('genres.finance')
+  ];
   
-  // Sample data for audiobooks
-  const audiobooks = [
-    {
-      id: 1,
-      title: 'The Silent Patient',
-      author: 'Alex Michaelides',
-      narrator: 'Jack Hawkins',
-      coverImage: '/api/placeholder/250/400',
-      duration: '8h 43m',
-      rating: 4.6,
-      genre: 'Thriller',
-      releaseDate: 'Apr 27, 2025',
-    },
-    {
-      id: 2,
-      title: 'Atomic Habits',
-      author: 'James Clear',
-      narrator: 'James Clear',
-      coverImage: '/api/placeholder/250/400',
-      duration: '5h 35m',
-      rating: 4.8,
-      genre: 'Self-Help',
-      releaseDate: 'Apr 15, 2025',
-    },
-    {
-      id: 3,
-      title: 'Project Hail Mary',
-      author: 'Andy Weir',
-      narrator: 'Ray Porter',
-      coverImage: '/api/placeholder/250/400',
-      duration: '16h 10m',
-      rating: 4.9,
-      genre: 'Sci-Fi',
-      releaseDate: 'Apr 10, 2025',
-    },
-    {
-      id: 4,
-      title: 'The Midnight Library',
-      author: 'Matt Haig',
-      narrator: 'Carey Mulligan',
-      coverImage: '/api/placeholder/250/400',
-      duration: '8h 50m',
-      rating: 4.2,
-      genre: 'Fiction',
-      releaseDate: 'Mar 30, 2025',
-    },
-    {
-      id: 5,
-      title: 'Greenlights',
-      author: 'Matthew McConaughey',
-      narrator: 'Matthew McConaughey',
-      coverImage: '/api/placeholder/250/400',
-      duration: '6h 42m',
-      rating: 4.5,
-      genre: 'Memoir',
-      releaseDate: 'Mar 22, 2025',
-    },
-    {
-      id: 6,
-      title: 'The Four Winds',
-      author: 'Kristin Hannah',
-      narrator: 'Julia Whelan',
-      coverImage: '/api/placeholder/250/400',
-      duration: '15h 2m',
-      rating: 4.4,
-      genre: 'Historical Fiction',
-      releaseDate: 'Mar 15, 2025',
-    },
-    {
-      id: 7,
-      title: 'The Psychology of Money',
-      author: 'Morgan Housel',
-      narrator: 'Chris Hill',
-      coverImage: '/api/placeholder/250/400',
-      duration: '5h 48m',
-      rating: 4.7,
-      genre: 'Finance',
-      releaseDate: 'Mar 5, 2025',
-    },
-    {
-      id: 8,
-      title: 'Where the Crawdads Sing',
-      author: 'Delia Owens',
-      narrator: 'Cassandra Campbell',
-      coverImage: '/api/placeholder/250/400',
-      duration: '12h 12m',
-      rating: 4.8,
-      genre: 'Fiction',
-      releaseDate: 'Feb 28, 2025',
-    },
+  // Collection of narrators for filter (would ideally come from API)
+  const narrators = [
+    t('allNarrators'), 
+    'James Clear', 
+    'Ray Porter', 
+    'Carey Mulligan', 
+    'Matthew McConaughey', 
+    'Julia Whelan', 
+    'Chris Hill', 
+    'Cassandra Campbell', 
+    'Jack Hawkins'
   ];
 
-  // Collection of genres for filter
-  const genres = ['All Genres', 'Fiction', 'Non-Fiction', 'Thriller', 'Sci-Fi', 'Self-Help', 'Memoir', 'Historical Fiction', 'Finance'];
-  
-  // Collection of narrators for filter
-  const narrators = ['All Narrators', 'James Clear', 'Ray Porter', 'Carey Mulligan', 'Matthew McConaughey', 'Julia Whelan', 'Chris Hill', 'Cassandra Campbell', 'Jack Hawkins'];
+  // Fetch audiobooks based on collection type
+  const fetchAudiobooks = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      let endpoint = '';
+      let queryParams = `page=${currentPage}&limit=8`;
+
+      // Add filters to query params
+      if (searchQuery) queryParams += `&search=${searchQuery}`;
+      if (selectedGenre !== t('allGenres')) queryParams += `&category=${selectedGenre}`;
+      if (selectedNarrator !== t('allNarrators')) queryParams += `&narrator=${selectedNarrator}`;
+      if (selectedDateFilter !== 'any') {
+        const dateFilterMap: Record<string, string> = {
+          'last-week': '7',
+          'last-month': '30',
+          'last-three-months': '90',
+          'last-year': '365'
+        };
+        queryParams += `&days=${dateFilterMap[selectedDateFilter]}`;
+      }
+
+      // Determine endpoint based on collection type
+      switch (collectionType) {
+        case 'recent':
+          endpoint = `/books-info/recent?${queryParams}`;
+          break;
+        case 'popular':
+          endpoint = `/books-info/popular?${queryParams}`;
+          break;
+        case 'top-rated':
+          endpoint = `/books-info/top-rated?${queryParams}`;
+          break;
+        case 'category':
+          endpoint = `/books-info/category/${categoryName}?${queryParams}`;
+          break;
+        case 'new-releases':
+          endpoint = `/books-info/new-releases?${queryParams}`;
+          break;
+        case 'featured':
+          endpoint = `/books-info/featured?${queryParams}`;
+          break;
+        default:
+          endpoint = `/books-info/recent?${queryParams}`;
+      }
+
+      const response = await authApiHelper.get(endpoint);
+      if (!response?.ok) {
+        throw new Error(t('errors.fetchFailed'));
+      }
+
+      const data = await response.json();
+      
+      // Handle different response structures from different endpoints
+      if (data.books) {
+        setAudiobooks(data.books);
+        setTotalBooks(data.total || data.books.length);
+      } else if (Array.isArray(data)) {
+        setAudiobooks(data);
+        setTotalBooks(data.length);
+      } else {
+        setAudiobooks([]);
+        setTotalBooks(0);
+      }
+    } catch (err) {
+      console.error('Error fetching audiobooks:', err);
+      setError(err instanceof Error ? err.message : t('errors.loadFailed'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch audiobooks when component mounts or filters change
+  useEffect(() => {
+    fetchAudiobooks();
+  }, [collectionType, categoryName, currentPage, searchQuery, selectedGenre, selectedNarrator, selectedDateFilter]);
+
+  // Get collection title based on type
+  const getCollectionTitle = () => {
+    switch (collectionType) {
+      case 'recent':
+        return t('collectionTitles.recentlyAdded');
+      case 'popular':
+        return t('collectionTitles.mostPopular');
+      case 'top-rated':
+        return t('collectionTitles.topRated');
+      case 'category':
+        return t('collectionTitles.categoryAudiobooks', { category: categoryName });
+      case 'new-releases':
+        return t('collectionTitles.newReleases');
+      case 'featured':
+        return t('collectionTitles.featuredAudiobooks');
+      case 'est-of-the-year':
+        return t('collectionTitles.bestOfYear', { year: '2025' });
+      case 'staff-picks':
+        return t('collectionTitles.staffPicks');
+      case 'award-winners':
+        return t('collectionTitles.awardWinners');
+      case 'hidden-gems':
+        return t('collectionTitles.hiddenGems');
+      default:
+        return t('collectionTitles.default');
+    }
+  };
+
+  // Format duration from seconds to HH:MM:SS or MM:SS
+  const formatDuration = (seconds: number) => {
+    if (!seconds) return '0:00';
+    
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-gray-50 min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-gray-50 min-h-screen flex items-center justify-center">
+        <div className="text-center p-6 bg-white rounded-lg shadow">
+          <h2 className="text-xl font-bold text-gray-800 mb-2">{t('errors.errorLoadingContent')}</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={fetchAudiobooks}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          >
+            {t('buttons.retry')}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="md:bg-gray-50 min-h-screen">
       {/* Header with title and back button */}
-      <header className="bg-white shadow">
-        <div className="container mx-auto px-4 py-6">
+      <header className="md:bg-white md:shadow">
+        <div className="container mx-auto md:px-4 md:py-6 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Recently Released</h1>
-              <p className="text-gray-600 mt-1">Discover our latest audiobook additions</p>
+              <h1 className="text-3xl font-bold text-gray-900">{getCollectionTitle()}</h1>
+              <p className="text-gray-600 mt-1">{t('discover')}</p>
             </div>
             <div>
-              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
-                Back
+              <button 
+                onClick={() => window.history.back()}
+                className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
+              >
+                {t('buttons.back')}
               </button>
             </div>
           </div>
@@ -124,8 +227,8 @@ export default function AudiobookCollectionView() {
       </header>
 
       {/* Search and filter bar */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
+      <div className="md:bg-white border-b">
+        <div className="container mx-auto md:px-4 py-4">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
             {/* Search bar */}
             <div className="relative flex-grow max-w-md">
@@ -135,7 +238,12 @@ export default function AudiobookCollectionView() {
               <input 
                 type="text" 
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Search by title, author, or narrator"
+                placeholder={t('searchPlaceholder')}
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1); // Reset to first page when searching
+                }}
               />
             </div>
 
@@ -145,12 +253,15 @@ export default function AudiobookCollectionView() {
               <div className="relative">
                 <button 
                   className="flex items-center space-x-2 border border-gray-300 rounded-md px-4 py-2 bg-white hover:bg-gray-50"
-                  onClick={() => {}}
+                  onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
                 >
-                  <span>Sort by</span>
-                  <ChevronDown className="h-4 w-4" />
+                  <span>{t('sort.sortBy')}</span>
+                  {sortOrder === 'newest' ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronUp className="h-4 w-4" />
+                  )}
                 </button>
-                {/* Dropdown content would go here */}
               </div>
 
               {/* Filter button */}
@@ -159,7 +270,7 @@ export default function AudiobookCollectionView() {
                 onClick={() => setFilterOpen(!filterOpen)}
               >
                 <Filter className="h-4 w-4" />
-                <span>Filter</span>
+                <span>{t('filter.filterLabel')}</span>
                 {filterOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
             </div>
@@ -170,8 +281,15 @@ export default function AudiobookCollectionView() {
             <div className="mt-4 border-t pt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Genre filter */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Genre</h3>
-                <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <h3 className="text-sm font-medium text-gray-700 mb-2">{t('filter.genre')}</h3>
+                <select 
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={selectedGenre}
+                  onChange={(e) => {
+                    setSelectedGenre(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                >
                   {genres.map((genre) => (
                     <option key={genre} value={genre}>{genre}</option>
                   ))}
@@ -180,8 +298,15 @@ export default function AudiobookCollectionView() {
 
               {/* Narrator filter */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Narrator</h3>
-                <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <h3 className="text-sm font-medium text-gray-700 mb-2">{t('filter.narrator')}</h3>
+                <select 
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={selectedNarrator}
+                  onChange={(e) => {
+                    setSelectedNarrator(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                >
                   {narrators.map((narrator) => (
                     <option key={narrator} value={narrator}>{narrator}</option>
                   ))}
@@ -190,14 +315,21 @@ export default function AudiobookCollectionView() {
 
               {/* Release date filter */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Release date</h3>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">{t('filter.releaseDate')}</h3>
                 <div className="flex space-x-2">
-                  <select className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="any">Any time</option>
-                    <option value="last-week">Last week</option>
-                    <option value="last-month">Last month</option>
-                    <option value="last-three-months">Last 3 months</option>
-                    <option value="last-year">Last year</option>
+                  <select 
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    value={selectedDateFilter}
+                    onChange={(e) => {
+                      setSelectedDateFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <option value="any">{t('filter.dateOptions.any')}</option>
+                    <option value="last-week">{t('filter.dateOptions.lastWeek')}</option>
+                    <option value="last-month">{t('filter.dateOptions.lastMonth')}</option>
+                    <option value="last-three-months">{t('filter.dateOptions.lastThreeMonths')}</option>
+                    <option value="last-year">{t('filter.dateOptions.lastYear')}</option>
                   </select>
                 </div>
               </div>
@@ -207,9 +339,12 @@ export default function AudiobookCollectionView() {
       </div>
 
       {/* Results count and view toggle */}
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto md:px-4 py-4">
         <div className="flex justify-between items-center">
-          <p className="text-gray-600">{audiobooks.length} audiobooks found</p>
+          <p className="text-gray-600">
+            {totalBooks} {totalBooks === 1 ? t('results.audiobook') : t('results.audiobooks')} {t('results.found')}
+            {selectedGenre !== t('allGenres') ? ` ${t('results.in')} ${selectedGenre}` : ''}
+          </p>
           <div className="flex space-x-2">
             {/* View toggle buttons would go here */}
           </div>
@@ -217,56 +352,113 @@ export default function AudiobookCollectionView() {
       </div>
 
       {/* Audiobooks grid */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {audiobooks.map((book) => (
-            <div key={book.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden">
-              {/* Book cover */}
-              <div className="relative pb-[150%]">
-                <img 
-                  src={book.coverImage} 
-                  alt={`${book.title} cover`} 
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              </div>
-              
-              {/* Book info */}
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-900 line-clamp-2">{book.title}</h3>
-                <p className="text-sm text-gray-600 mt-1">{book.author}</p>
-                <p className="text-xs text-gray-500 mt-1">Narrated by {book.narrator}</p>
+      <div className="container mx-auto md:px-4 md:py-6 ">
+        {audiobooks.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-gray-100 rounded-full">
+              <BookOpen className="h-12 w-12 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-medium text-gray-900 mb-2">{t('noResults.title')}</h3>
+            <p className="text-gray-600 max-w-md mx-auto">
+              {t('noResults.message')}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {audiobooks.map((book) => (
+              <div key={book._id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden">
+                {/* Book cover */}
+                <div className="relative pb-[150%]">
+                  <img 
+                    src={book.coverImage || '/api/placeholder/250/400'} 
+                    alt={t('bookItem.coverAlt', { title: book.title })} 
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                </div>
                 
-                {/* Details row */}
-                <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
-                  <div className="flex items-center">
-                    <Clock className="h-3 w-3 mr-1" />
-                    <span>{book.duration}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Star className="h-3 w-3 mr-1 text-yellow-500" />
-                    <span>{book.rating}</span>
+                {/* Book info */}
+                <div className="p-4">
+                  <h3 className="font-semibold text-gray-900 line-clamp-2">{book.title}</h3>
+                  <p className="text-sm text-gray-600 mt-1">{book.author}</p>
+                  <p className="text-xs text-gray-500 mt-1">{t('bookItem.narratedBy')} {book.narrator}</p>
+                  
+                  {/* Details row */}
+                  <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
+                    <div className="flex items-center">
+                      <Clock className="h-3 w-3 mr-1" />
+                      <span>{formatDuration(book.duration || 0)}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Star className="h-3 w-3 mr-1 text-yellow-500" />
+                      <span>{Number(book.averageRating)?.toFixed(1) || t('bookItem.noRating')}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Pagination */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center">
-          <nav className="flex items-center space-x-2">
-            <button className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">Previous</button>
-            <button className="px-3 py-1 bg-indigo-600 text-white rounded-md">1</button>
-            <button className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">2</button>
-            <button className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">3</button>
-            <span className="px-2 text-gray-500">...</span>
-            <button className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">10</button>
-            <button className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">Next</button>
-          </nav>
+      {/* Pagination - only show if there are multiple pages */}
+      {totalBooks > 8 && (
+        <div className="container mx-auto md:px-4 md:py-8 py-4">
+          <div className="flex justify-center">
+            <nav className="flex items-center space-x-2">
+              <button 
+                className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+              >
+                {t('pagination.previous')}
+              </button>
+              
+              {/* Always show first page */}
+              <button 
+                className={`px-3 py-1 rounded-md ${currentPage === 1 ? 'bg-indigo-600 text-white' : 'border border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                onClick={() => handlePageChange(1)}
+              >
+                1
+              </button>
+
+              {/* Show current page and nearby pages */}
+              {currentPage > 2 && (
+                <span className="px-2 text-gray-500">...</span>
+              )}
+
+              {currentPage > 1 && currentPage < Math.ceil(totalBooks / 8) && (
+                <button 
+                  className="px-3 py-1 bg-indigo-600 text-white rounded-md"
+                >
+                  {currentPage}
+                </button>
+              )}
+
+              {currentPage < Math.ceil(totalBooks / 8) - 1 && (
+                <span className="px-2 text-gray-500">...</span>
+              )}
+
+              {/* Always show last page if there are enough items */}
+              {Math.ceil(totalBooks / 8) > 1 && (
+                <button 
+                  className={`px-3 py-1 rounded-md ${currentPage === Math.ceil(totalBooks / 8) ? 'bg-indigo-600 text-white' : 'border border-gray-300 text-gray-600 hover:bg-gray-50'}`}
+                  onClick={() => handlePageChange(Math.ceil(totalBooks / 8))}
+                >
+                  {Math.ceil(totalBooks / 8)}
+                </button>
+              )}
+
+              <button 
+                className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                disabled={currentPage === Math.ceil(totalBooks / 8)}
+                onClick={() => handlePageChange(currentPage + 1)}
+              >
+                {t('pagination.next')}
+              </button>
+            </nav>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

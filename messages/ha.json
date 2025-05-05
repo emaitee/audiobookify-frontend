@@ -28,9 +28,128 @@
       "description": "Da fatan za a duba adireshin da kyau ko kuma ka yi amfani da kewaya domin komawa zuwa wani shafi da ka sani.",
       "title": "An kasa samun shafin"
     },
+    
     "HomePage": {
-      "welcome": "Barka da zuwa SautiBox",
-      "subtitle": "Gano labarai masu motsa rai. Labari mai kayatarwa na gaba na jiran ka."
-    }
+        "common": {
+          "viewAll": "Duba Duk",
+          "explore": "Bincika",
+          "history": "Tarihi",
+          "viewList": "Duba Jerin"
+        },
+        "featured": {
+          "label": "FIFIKO",
+          "listenNow": "Saurara Yanzu"
+        },
+        "sections": {
+          "newReleases": "Sabbin Fitarwa",
+          "curatedCollections": "Zababbun Tarin",
+          "continueListening": "Ci gaba da Sauraro",
+          "browseCategories": "Lilo Rukuni"
+        },
+        "collections": {
+          "bestOfTheYear": "Mafi na 2025",
+          "bestOfTheYearDesc": "Shahararrun sunaye na wannan shekarar",
+          "staffPicks": "Zaben Ma'aikata",
+          "staffPicksDesc": "Zababbun daga editocinmu",
+          "awardWinners": "Masu Nasara a Kyaututtuka",
+          "awardWinnersDesc": "Kwarewa da aka yaba",
+          "hiddenGems": "Duwatsu Masu Daraja da ba a Gani ba",
+          "hiddenGemsDesc": "Gwani da ba a gano ba"
+        },
+        "continueListening": {
+          "completed": "% an kammala",
+          "noListens": "Babu sabbin sauraro"
+        },
+        "categories": {
+          "fiction": "Labari Na Kirkira",
+          "mystery": "Asiri",
+          "romance": "Soyayya",
+          "history": "Tarihi",
+          "business": "Kasuwanci",
+          "fantasy": "Al'ajabi",
+          "horror": "Tsoro",
+          "comedy": "Barkwanci"
+        },
+        "errors": {
+          "failedToLoadNewReleases": "An kasa ɗora sabbin fitarwa",
+          "failedToLoadFeatured": "An kasa ɗora littattafan fifiko",
+          "failedToLoadContinue": "An kasa ɗora ci gaba da sauraro"
+        }
+      },
+
+    "ListViewPage": {
+        "allGenres": "Duk Rukunai",
+        "allNarrators": "Duk Masu Karatu",
+        "discover": "Gano tarin littattafan murya namu",
+        "searchPlaceholder": "Bincika ta suna, marubuci, ko mai karatu",
+        "genres": {
+          "fiction": "Labari Na Kirkira",
+          "nonFiction": "Gaskiyar Rayuwa",
+          "thriller": "Zazzafan Labari",
+          "sciFi": "Kimiyya da Farko",
+          "selfHelp": "Taimako na Kai",
+          "memoir": "Tarihi Na Kai",
+          "historicalFiction": "Labari Na Kirkira Na Tarihi",
+          "finance": "Kudi"
+        },
+        "collectionTitles": {
+          "recentlyAdded": "An Kara Kwanan Nan",
+          "mostPopular": "Mafi Shahara",
+          "topRated": "Mafi Kyau",
+          "categoryAudiobooks": "Littattafan Murya na {category}",
+          "newReleases": "Sabbin Fitarwa",
+          "featuredAudiobooks": "Littattafan Murya na Fifikonmu",
+          "bestOfYear": "Mafi na {year}",
+          "staffPicks": "Zaben Ma'aikata",
+          "awardWinners": "Masu Nasara a Kyaututtuka",
+          "hiddenGems": "Duwatsu Masu Daraja da ba a Gani ba",
+          "default": "Tarin Littattafan Murya"
+        },
+        "buttons": {
+          "back": "Koma Baya",
+          "retry": "Sake Gwada"
+        },
+        "sort": {
+          "sortBy": "Rarraba ta"
+        },
+        "filter": {
+          "filterLabel": "Tace",
+          "genre": "Rukuni",
+          "narrator": "Mai Karatu",
+          "releaseDate": "Ranar Fita",
+          "dateOptions": {
+            "any": "Duk Lokaci",
+            "lastWeek": "Makon da ya gabata",
+            "lastMonth": "Watan da ya wuce",
+            "lastThreeMonths": "Watanni 3 da suka gabata",
+            "lastYear": "Shekarar da ta wuce"
+          }
+        },
+        "results": {
+          "audiobook": "littafin murya",
+          "audiobooks": "littattafan murya",
+          "found": "an samo",
+          "in": "a cikin"
+        },
+        "noResults": {
+          "title": "Ba a samo littattafan murya ba",
+          "message": "Gwada canza bincike ko tacewar ka don samun abin da kake nema."
+        },
+        "bookItem": {
+          "coverAlt": "Murfin {title}",
+          "narratedBy": "Karanta ta",
+          "noRating": "Babu Bayani"
+        },
+        "pagination": {
+          "previous": "Na Baya",
+          "next": "Na Gaba"
+        },
+        "errors": {
+          "fetchFailed": "An kasa samo littattafan murya",
+          "loadFailed": "An kasa ɗora littattafan murya",
+          "errorLoadingContent": "Kuskure Wajen Lodawa"
+        }
+      }
+      
   }
   

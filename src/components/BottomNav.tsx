@@ -109,7 +109,7 @@ function ResponsiveNav() {
     if (path === '/') {
       return pathname === path
     }
-    return pathname.startsWith(path)
+    return pathname.includes(path)
   }
 
   // Don't render nav if not authenticated

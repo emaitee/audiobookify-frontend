@@ -241,7 +241,7 @@ const LibraryView = () => {
   }
 
   return (
-    <div className={`flex flex-col gap-4 sm:gap-6 pb-24 md:px-4 sm:px-6 max-w-6xl mx-auto ${
+    <div className={`flex flex-col gap-4 sm:gap-6 pb-24 md:px-4 sm:px-6 max-w-6xl mx-auto min-h-screen ${
       theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
     }`}>
       {isSearchOpen ? (

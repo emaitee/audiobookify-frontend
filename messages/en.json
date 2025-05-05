@@ -29,7 +29,123 @@
       "title": "Page not found"
     },
     "HomePage": {
-        "welcome": "WelWelcome to SautiBox",
-        "subtitle": "Discover stories that move with you. Your next great listen awaits."
-    }
+        "common": {
+          "viewAll": "View All",
+          "explore": "Explore",
+          "history": "History",
+          "viewList": "View List"
+        },
+        "featured": {
+          "label": "FEATURED",
+          "listenNow": "Listen Now"
+        },
+        "sections": {
+          "newReleases": "New Releases",
+          "curatedCollections": "Curated Collections",
+          "continueListening": "Continue Listening",
+          "browseCategories": "Browse Categories"
+        },
+        "collections": {
+          "bestOfTheYear": "Best of 2025",
+          "bestOfTheYearDesc": "Top-rated titles this year",
+          "staffPicks": "Staff Picks",
+          "staffPicksDesc": "Curated by our editors",
+          "awardWinners": "Award Winners",
+          "awardWinnersDesc": "Recognized excellence",
+          "hiddenGems": "Hidden Gems",
+          "hiddenGemsDesc": "Undiscovered treasures"
+        },
+        "continueListening": {
+          "completed": "% completed",
+          "noListens": "No recent listens"
+        },
+        "categories": {
+          "fiction": "Fiction",
+          "mystery": "Mystery",
+          "romance": "Romance",
+          "history": "History",
+          "business": "Business",
+          "fantasy": "Fantasy",
+          "horror": "Horror",
+          "comedy": "Comedy"
+        },
+        "errors": {
+          "failedToLoadNewReleases": "Failed to load new releases",
+          "failedToLoadFeatured": "Failed to load featured books",
+          "failedToLoadContinue": "Failed to load continue listening"
+        }
+      },
+      "ListViewPage": {
+          "allGenres": "All Genres",
+          "allNarrators": "All Narrators",
+          "discover": "Discover our audiobook collection",
+          "searchPlaceholder": "Search by title, author, or narrator",
+          "genres": {
+            "fiction": "Fiction",
+            "nonFiction": "Non-Fiction",
+            "thriller": "Thriller",
+            "sciFi": "Sci-Fi",
+            "selfHelp": "Self-Help",
+            "memoir": "Memoir",
+            "historicalFiction": "Historical Fiction",
+            "finance": "Finance"
+          },
+          "collectionTitles": {
+            "recentlyAdded": "Recently Added",
+            "mostPopular": "Most Popular",
+            "topRated": "Top Rated",
+            "categoryAudiobooks": "{category} Audiobooks",
+            "newReleases": "New Releases",
+            "featuredAudiobooks": "Featured Audiobooks",
+            "bestOfYear": "Best of {year}",
+            "staffPicks": "Staff Picks",
+            "awardWinners": "Award Winners",
+            "hiddenGems": "Hidden Gems",
+            "default": "Audiobook Collection"
+          },
+          "buttons": {
+            "back": "Back",
+            "retry": "Retry"
+          },
+          "sort": {
+            "sortBy": "Sort by"
+          },
+          "filter": {
+            "filterLabel": "Filter",
+            "genre": "Genre",
+            "narrator": "Narrator",
+            "releaseDate": "Release date",
+            "dateOptions": {
+              "any": "Any time",
+              "lastWeek": "Last week",
+              "lastMonth": "Last month",
+              "lastThreeMonths": "Last 3 months",
+              "lastYear": "Last year"
+            }
+          },
+          "results": {
+            "audiobook": "audiobook",
+            "audiobooks": "audiobooks",
+            "found": "found",
+            "in": "in"
+          },
+          "noResults": {
+            "title": "No audiobooks found",
+            "message": "Try adjusting your search or filters to find what you're looking for."
+          },
+          "bookItem": {
+            "coverAlt": "{title} cover",
+            "narratedBy": "Narrated by",
+            "noRating": "N/A"
+          },
+          "pagination": {
+            "previous": "Previous",
+            "next": "Next"
+          },
+          "errors": {
+            "fetchFailed": "Failed to fetch audiobooks",
+            "loadFailed": "Failed to load audiobooks",
+            "errorLoadingContent": "Error Loading Content"
+          }
+      }
   }
