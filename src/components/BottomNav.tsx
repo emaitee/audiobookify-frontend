@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext' // Adjust the import path as needed
+import Link from 'next/link'
 
 interface NavItem {
   path: string
@@ -134,10 +135,13 @@ function ResponsiveNav() {
         {navItems.map((item) => {
           const active = isActive(item.path)
           return (
-            <button
+            <Link
+            href={item.path}
+            prefetch={true}
+            onMouseEnter={() => import('./MiniPlayer')}
               key={item.path}
               className={`relative group flex flex-col items-center justify-center w-16 h-full transition-all`}
-              onClick={() => router.push(item.path)}
+              // onClick={() => router.push(item.path)}
               aria-label={item.label}
             >
               {/* Icon and label container */}
@@ -168,7 +172,7 @@ function ResponsiveNav() {
                 className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-t-full transition-all duration-300 
                   ${active ? 'bg-indigo-600 dark:bg-indigo-500' : 'bg-transparent group-hover:bg-gray-200 dark:group-hover:bg-gray-700'}`}
               ></div>
-            </button>
+            </Link>
           )
         })}
       </div>
@@ -191,8 +195,10 @@ function ResponsiveNav() {
             const active = isActive(item.path)
             return (
               <li key={item.path}>
-                <button
-                  onClick={() => router.push(item.path)}
+                <Link
+            href={item.path}
+            prefetch={true}
+            onMouseEnter={() => import('./MiniPlayer')}
                   className={`flex items-center w-full px-4 py-3 rounded-lg group transition-all
                     ${active 
                       ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400' 
@@ -222,7 +228,7 @@ function ResponsiveNav() {
                   {active && (
                     <div className="ml-auto w-1 h-6 bg-indigo-600 dark:bg-indigo-500 rounded-full"></div>
                   )}
-                </button>
+                </Link>
               </li>
             )
           })}

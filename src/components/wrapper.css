@@ -1,0 +1,16 @@
+/* Enable smooth transitions between states */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 300ms;
+}
+
+.player-container {
+    will-change: transform, opacity; /* Hint for GPU acceleration */
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  /* Use transform/opacity instead of layout properties */
+  .slide-in {
+    transform: translateX(0);
+    opacity: 1;
+  }

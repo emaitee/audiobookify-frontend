@@ -5,6 +5,7 @@ import { AnimatePresence } from 'framer-motion';
 import { MiniPlayer } from './MiniPlayer';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
+import './wrapper.css'
 
 function AppWrapper({ children }: React.PropsWithChildren<{}>) {
     const {theme} = useTheme()
@@ -37,7 +38,9 @@ function AppWrapper({ children }: React.PropsWithChildren<{}>) {
                   
                   {/* Main Content with proper padding */}
                   <main className="p-4 flex-1">
+                  <AnimatePresence mode="wait">
                     {children}
+                    </AnimatePresence>
                     <AnimatePresence>
                       {!isNowPlayingPage && <MiniPlayer />}
                     </AnimatePresence>
