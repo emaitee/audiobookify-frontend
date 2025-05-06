@@ -8,7 +8,7 @@ import {
   } from 'lucide-react';
   import Link from 'next/link';
   import { useRouter } from 'next/navigation';
-  import { useRef, useState } from 'react';
+  import { useEffect, useRef, useState } from 'react';
   
   // Helper function to format time (HH:MM:SS or MM:SS)
   function formatTime(seconds: number, fullFormat = false): string {
@@ -64,6 +64,27 @@ import {
     };
   
     const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2];
+
+    // useEffect(() => {
+    //   document.addEventListener('keydown', (e) => {
+    //     if (e.target.tagName === 'INPUT') return; // Ignore if typing
+        
+    //     switch (e.key) {
+    //       case ' ':
+    //         isPlaying ? play() : pause();
+    //         break;
+    //       case 'ArrowRight':
+    //         audio.currentTime += 15;
+    //         break;
+    //       case 'ArrowLeft':
+    //         audio.currentTime -= 15;
+    //         break;
+    //       case 'm':
+    //         audio.muted = !audio.muted;
+    //         break;
+    //     }
+    //   });
+    // }, [])
   
     if (!currentBook) {
       return (

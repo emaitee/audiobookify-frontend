@@ -13,7 +13,7 @@ const withPWA = require('next-pwa')({
   // optional: uncomment to enable additional PWA features
   register: true,
   scope: '/app',
-  // sw: 'service-worker.js',
+  sw: 'sw.js',
   runtimeCaching: [
     {
       urlPattern: /\/api\/audio\/.*/,

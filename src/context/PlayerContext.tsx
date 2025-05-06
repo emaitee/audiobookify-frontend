@@ -48,6 +48,9 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioSourceRef = useRef<string | null>(null); // Track current audio source
 
+  let nextChapterBuffer = null;
+  let sleepTimer;
+
   useEffect(() => {
     const connection = (navigator as any).connection;
     if (connection) {
@@ -103,11 +106,22 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     await updateListenHistory(bookId, progress, episodeId);
   };
 
+  const savePlaybackPosition = () => {
+    // clearTimeout(saveTimeout);
+  // saveTimeout = setTimeout(() => {
+    authApiHelper.post('/progress'+currentBook?._id, {
+        chapterId: currentEpisode?._id,
+        position: audioRef.current
+      });
+  // }, 15000);
+  }
+
   const { debouncedFn: debouncedProgressUpdate, flush: flushProgressUpdates } = useDebounceFn(
     (bookId: string, progress: number, episodeId?: string) => {
       updateListenHistory(bookId, progress, episodeId);
+      savePlaybackPosition()
     },
-    30000 // 30 second delay
+    15000 // 15 second delay
   );
 
   // Memoize fetchBooks to prevent unnecessary changes
@@ -199,6 +213,11 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       if (!audio.currentTime || !audio.duration) return;
       const newProgress = (audio.currentTime / audio.duration) * 100;
       setProgress(isNaN(newProgress) ? 0 : newProgress);
+      const chapterEndApproaching = audio.currentTime > (audio.duration - 30);
+      if (chapterEndApproaching && !nextChapterBuffer) {
+        prefetchNextChapter();
+        // preloadNextChapter(currentEpisode + 1);
+      }
 
       // Modified prefetch trigger with network awareness
       if ((newProgress > (isSlowNetwork ? 60 : 80)) && !nextChapterPrefetched && currentBook) {

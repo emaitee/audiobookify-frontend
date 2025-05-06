@@ -59,8 +59,13 @@
       }
     ],
     "ios": {
-        "apple-mobile-web-app-capable": "yes",
-        "apple-mobile-web-app-status-bar-style": "black-translucent",
-        "apple-mobile-web-app-title": "Your App Name"
-      }
+      "apple-mobile-web-app-capable": "yes",
+      "apple-mobile-web-app-status-bar-style": "black-translucent",
+      "apple-mobile-web-app-title": "SautiBox"
+    },
+    "prefer_related_applications": false,
+    "display_override": ["window-controls-overlay"],
+    "launch_handler": {
+      "client_mode": "focus-existing"
+    }
   }
