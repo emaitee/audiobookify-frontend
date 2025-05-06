@@ -41,8 +41,28 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [nextChapterPrefetched, setNextChapterPrefetched] = useState(false);
+  const [nextEpisode, setNextEpisode] = useState<Episode | null>(null);
+  const [isSlowNetwork, setIsSlowNetwork] = useState(false);
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioSourceRef = useRef<string | null>(null); // Track current audio source
+
+  useEffect(() => {
+    const connection = (navigator as any).connection;
+    if (connection) {
+      const handleChange = () => {
+        setIsSlowNetwork(
+          connection.effectiveType === 'slow-2g' || 
+          connection.effectiveType === '2g' ||
+          connection.saveData
+        );
+      };
+      connection.addEventListener('change', handleChange);
+      handleChange(); // Initial check
+      return () => connection.removeEventListener('change', handleChange);
+    }
+  }, []);
 
   const recordPlaybackSession = async (duration: number) => {
     if (!currentBook) return;
@@ -129,7 +149,43 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [allBooks, currentBook, currentEpisode]);
 
-
+  const prefetchNextChapter = useCallback(async () => {
+    if (!currentBook) return;
+  
+    // Determine next episode
+    let nextEp: Episode | undefined;
+    
+    if (currentBook.isSeries && currentEpisode) {
+      nextEp = currentBook.episodes?.find(
+        ep => ep.episodeNumber === currentEpisode.episodeNumber + 1
+      );
+    }
+    
+    if (nextEp) {
+      setNextEpisode(nextEp);
+      
+      try {
+        // Prefetch the audio file metadata
+        const response = await authApiHelper.get(`/audio/metadata/${nextEp._id}`);
+        const { startOffset, endOffset } = await response?.json();
+        
+        // Prefetch first chunk (adjust chunk size as needed)
+        const chunkSize = 1024 * 1024; // 1MB
+        const prefetchUrl = `/api/audio/stream?bookId=${currentBook._id}&start=${startOffset}&end=${Math.min(startOffset + chunkSize, endOffset)}`;
+        
+        // Trigger prefetch by creating a link element
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = prefetchUrl;
+        link.as = 'audio';
+        document.head.appendChild(link);
+        
+        console.log('Prefetched next chapter:', nextEp.title);
+      } catch (err) {
+        console.error('Failed to prefetch next chapter:', err);
+      }
+    }
+  }, [currentBook, currentEpisode]);
   
   // Initialize audio element and set up event listeners
   useEffect(() => {
@@ -143,6 +199,12 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       if (!audio.currentTime || !audio.duration) return;
       const newProgress = (audio.currentTime / audio.duration) * 100;
       setProgress(isNaN(newProgress) ? 0 : newProgress);
+
+      // Modified prefetch trigger with network awareness
+      if ((newProgress > (isSlowNetwork ? 60 : 80)) && !nextChapterPrefetched && currentBook) {
+        prefetchNextChapter();
+        setNextChapterPrefetched(true);
+      }
       
       if (currentBook) {
         debouncedProgressUpdate(currentBook._id, audio.currentTime, currentEpisode?._id);
@@ -212,7 +274,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   // Handle updates to volume and playback speed
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !currentEpisode?.audioFile) return;
     
     audio.volume = volume;
     audio.playbackRate = playbackSpeed;
@@ -222,6 +284,13 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     fetchBooks();
   }, [fetchBooks]);
+
+  const cancelPrefetch = () => {
+    // Find and remove any prefetch links
+    document.querySelectorAll('link[rel="prefetch"]').forEach(link => link.remove());
+    setNextChapterPrefetched(false);
+    setNextEpisode(null);
+  };
 
   // Update audio source when episode changes
   useEffect(() => {
@@ -242,8 +311,14 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
           setError('Failed to play audio. Check your connection or file format.');
         });
       }
+
+      // If this was a prefetched episode, clear the prefetch flag
+    if (nextEpisode && nextEpisode._id === currentEpisode._id) {
+      setNextChapterPrefetched(false);
+      setNextEpisode(null);
     }
-  }, [currentEpisode, isPlaying]);
+    }
+  }, [currentEpisode, isPlaying, nextEpisode]);
 
   useEffect(() => {
     if (!isPlaying || !currentBook) return;
@@ -278,6 +353,10 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     if (!audioRef.current) return;
   
     try {
+       // Reset prefetch state when starting new playback
+      setNextChapterPrefetched(false);
+      setNextEpisode(null);
+
       // Find the book in our allBooks array to ensure we have the latest data
       const freshBook = allBooks.find(b => b._id === book._id) || book;
 

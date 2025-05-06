@@ -14,7 +14,23 @@ const withPWA = require('next-pwa')({
   register: true,
   scope: '/app',
   // sw: 'service-worker.js',
-  //...
+  runtimeCaching: [
+    {
+      urlPattern: /\/api\/audio\/.*/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'audio-cache',
+        expiration: {
+          maxEntries: 50, // Cache 50 most recent audiobook segments
+          maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
+        },
+        cacheableResponse: {
+          statuses: [0, 200, 206]
+        },
+        rangeRequests: true // Critical for audio streaming
+      }
+    }
+  ]
 })
 
 

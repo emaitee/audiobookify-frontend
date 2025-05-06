@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function formatTime(seconds: number, fullFormat = false): string {
   if (!seconds) return '00:00';
@@ -116,6 +116,7 @@ export default function NowPlaying() {
   } = usePlayer();
 
   const router = useRouter();
+  const progressContainerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
@@ -123,6 +124,7 @@ export default function NowPlaying() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const [reviewCount, setReviewCount] = useState(0)
+  const [isDragging, setIsDragging] = useState(false);
 
   interface ProgressClickEvent extends React.MouseEvent<HTMLDivElement> {}
 
@@ -135,6 +137,84 @@ export default function NowPlaying() {
       seek(seekTime);
     }
   };
+
+  const updateProgress = (e: React.MouseEvent) => {
+    if (progressContainerRef.current && currentEpisode) {
+      const rect = progressContainerRef.current.getBoundingClientRect();
+      const clickPosition = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      const percentage = (clickPosition / rect.width) * 100;
+      const seekTime = (percentage / 100) * currentEpisode.duration;
+      seek(percentage); // Use the percentage directly since your seek function expects 0-100
+    }
+  };
+
+  const handleProgressMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    updateProgress(e);
+  };
+  
+  const handleProgressMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      updateProgress(e);
+    }
+  };
+  
+  const handleProgressMouseUp = () => {
+    if (isDragging) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleProgressTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    updateProgressTouch(e);
+  };
+  
+  const handleProgressTouchMove = (e: React.TouchEvent) => {
+    if (isDragging) {
+      updateProgressTouch(e);
+    }
+  };
+  
+  const updateProgressTouch = (e: React.TouchEvent) => {
+    if (progressContainerRef.current && currentEpisode && e.touches.length > 0) {
+      const rect = progressContainerRef.current.getBoundingClientRect();
+      const touchPosition = Math.max(0, Math.min(e.touches[0].clientX - rect.left, rect.width));
+      const percentage = (touchPosition / rect.width) * 100;
+      const seekTime = (percentage / 100) * currentEpisode.duration;
+      seek(percentage);
+    }
+  };
+
+  useEffect(() => {
+    const handleMouseUp = () => setIsDragging(false);
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        handleProgressMouseMove(e as unknown as React.MouseEvent);
+      }
+    };
+
+    const handleTouchEnd = () => setIsDragging(false);
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDragging) {
+        handleProgressTouchMove(e as unknown as React.TouchEvent);
+      }
+    };
+  
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchend', handleTouchEnd);
+    window.addEventListener('touchmove', handleTouchMove);
+  
+    return () => {
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchmove', handleTouchMove);
+
+    };
+  }, [isDragging]);
+
 
   const handleMinimize = () => {
     router.back();
@@ -324,6 +404,24 @@ export default function NowPlaying() {
               {/* Progress bar */}
               <div className="w-full mb-2">
                 <div 
+                  ref={progressContainerRef}
+                  className="w-full h-1.5 bg-white/20 rounded-full cursor-pointer relative overflow-hidden"
+                  onMouseDown={handleProgressMouseDown}
+                  onTouchStart={handleProgressTouchStart}
+                  onClick={updateProgress}
+                >
+                  <div 
+                    className="absolute h-full bg-gradient-to-r from-pink-500 to-purple-500 rounded-full transition-all duration-300 ease-out" 
+                    style={{ width: `${progress}%` }}
+                  />
+                  <div 
+                    className={`absolute h-4 w-4 rounded-full bg-white shadow-lg top-1/2 -translate-y-1/2 transition-all duration-300 glow-effect ${isDragging ? 'scale-125' : ''}`}
+                    style={{ left: `calc(${progress}% - 8px)` }}
+                  />
+                </div>
+              </div>
+              {/* <div className="w-full mb-2">
+                <div 
                   ref={progressBarRef}
                   className="w-full h-1.5 bg-white/20 rounded-full cursor-pointer relative overflow-hidden"
                   onClick={handleProgressClick}
@@ -337,7 +435,7 @@ export default function NowPlaying() {
                     style={{ left: `calc(${progress}% - 8px)` }}
                   />
                 </div>
-              </div>
+              </div> */}
               
               {/* Time indicators */}
               <div className="flex justify-between w-full text-sm text-white/70 mb-6">
