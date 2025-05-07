@@ -27,7 +27,7 @@ interface PlayerContextType {
   updateListenHistory?: (bookId: string, progress: number, episodeId?: string) => Promise<void>;
   recordPlaybackSession: (duration: number) => Promise<void>;
   isTransitioning: boolean;
-  downloadForOffline: () => void
+  downloadForOffline: (bookId:string) => void
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
@@ -71,19 +71,32 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  function downloadForOffline(bookId) {
+  interface StorageEstimate {
+    quota: number;
+    usage: number;
+  }
+
+  interface CacheBookMessage {
+    action: 'cache-book';
+    bookId: string;
+    quality: 'high' | 'standard';
+  }
+
+  function downloadForOffline(bookId: string): void {
     // Show storage quota
     navigator.storage.estimate().then((estimate) => {
-      const remaining = (estimate.quota - estimate.usage) / (1024 * 1024);
+      const quota = estimate?.quota ?? 0; // Default to 0 if undefined
+      const usage = estimate?.usage ?? 0; // Default to 0 if undefined
+      const remaining = (quota - usage) / (1024 * 1024);
       if (remaining < 200) showLowStorageWarning();
     });
   
     // Download in background
-    navigator.serviceWorker.controller.postMessage({
+    navigator.serviceWorker.controller?.postMessage({
       action: 'cache-book',
       bookId,
-      quality: navigator.connection.effectiveType === '4g' ? 'high' : 'standard'
-    });
+      quality: (navigator as any).connection?.effectiveType === '4g' ? 'high' : 'standard'
+    } as CacheBookMessage);
   }
 
   
@@ -632,7 +645,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         setCurrentBook,
         refreshLibrary,
         recordPlaybackSession,
-        isTransitioning
+        isTransitioning,
+        downloadForOffline
       }}
     >
       {children}
@@ -647,3 +661,11 @@ export const usePlayer = () => {
   }
   return context;
 };
+
+function showLowStorageWarning() {
+  alert('Your device is running low on storage. Please free up some space to continue downloading content.');
+}
+function downloadForOffline(arg0: any) {
+  throw new Error('Function not implemented.');
+}
+
