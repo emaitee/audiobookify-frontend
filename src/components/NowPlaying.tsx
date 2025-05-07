@@ -38,7 +38,8 @@ import {
       nextTrack,
       previousTrack,
       playbackSpeed,
-      setPlaybackSpeed
+      setPlaybackSpeed,
+      isTransitioning
     } = usePlayer();
   
     const router = useRouter();
@@ -235,6 +236,12 @@ import {
                 <div className="mb-6 text-center lg:text-left lg:mb-8">
                   <h1 className="text-2xl font-bold text-white mb-1 lg:text-3xl">{currentBook.title}</h1>
                   <p className="text-white/70">{currentBook.author}</p>
+
+                  {isTransitioning && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                    </div>
+                  )}
                   
                   {/* Series navigation if it's a series */}
                   {currentBook.isSeries && currentEpisode && (

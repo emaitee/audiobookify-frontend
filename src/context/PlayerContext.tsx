@@ -26,6 +26,8 @@ interface PlayerContextType {
   refreshLibrary: () => Promise<void>;
   updateListenHistory?: (bookId: string, progress: number, episodeId?: string) => Promise<void>;
   recordPlaybackSession: (duration: number) => Promise<void>;
+  isTransitioning: boolean;
+  downloadForOffline: () => void
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
@@ -44,6 +46,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [nextChapterPrefetched, setNextChapterPrefetched] = useState(false);
   const [nextEpisode, setNextEpisode] = useState<Episode | null>(null);
   const [isSlowNetwork, setIsSlowNetwork] = useState(false);
+  const [isMovingToNextEpisode, setIsMovingToNextEpisode] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioSourceRef = useRef<string | null>(null); // Track current audio source
@@ -66,6 +70,23 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       return () => connection.removeEventListener('change', handleChange);
     }
   }, []);
+
+  function downloadForOffline(bookId) {
+    // Show storage quota
+    navigator.storage.estimate().then((estimate) => {
+      const remaining = (estimate.quota - estimate.usage) / (1024 * 1024);
+      if (remaining < 200) showLowStorageWarning();
+    });
+  
+    // Download in background
+    navigator.serviceWorker.controller.postMessage({
+      action: 'cache-book',
+      bookId,
+      quality: navigator.connection.effectiveType === '4g' ? 'high' : 'standard'
+    });
+  }
+
+  
 
   const recordPlaybackSession = async (duration: number) => {
     if (!currentBook) return;
@@ -231,18 +252,63 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const handleEnded = async () => {
+      console.log("ENDEDEDED", currentBook)
+      // Save current references immediately
+      const endingBook = currentBook;
+      const endingEpisode = currentEpisode;
+      const audioElement = audioRef.current;
+
+      if (!endingBook || !audioElement) return;
+      
       setIsPlaying(false);
+      setIsMovingToNextEpisode(true)
       
       // Record full playback session
-      if (currentBook && audio.duration) {
-        await recordPlaybackSession(audio.duration);
-      }
+      // if (currentBook && audio.duration) {
+      //   await recordPlaybackSession(audio.duration);
+      // }
   
-      if (currentBook?.isSeries && currentEpisode) {
-        const nextEp = currentBook.episodes?.find(
-          ep => ep.episodeNumber === currentEpisode.episodeNumber + 1
-        );
-        nextEp && play(currentBook, nextEp);
+      // if (currentBook?.isSeries && currentEpisode) {
+      //   const nextEp = currentBook.episodes?.find(
+      //     ep => ep.episodeNumber === currentEpisode.episodeNumber + 1
+      //   );
+      //   nextEp && play(currentBook, nextEp);
+      //   console.log(nextEp, 'playing next episode')
+      // }
+      try {
+        // Record full playback session
+        if (audioElement.duration) {
+          await recordPlaybackSession(audioElement.duration);
+        }
+    
+        // Handle series with episodes
+        if (endingBook.isSeries && endingEpisode) {
+          const nextEp = endingBook.episodes?.find(
+            ep => ep.episodeNumber === endingEpisode.episodeNumber + 1
+          );
+          
+          if (nextEp) {
+            // Reset prefetch state for the new episode
+            setNextChapterPrefetched(false);
+            setNextEpisode(null);
+            
+            // Play the next episode
+            await play(endingBook, nextEp);
+            setIsMovingToNextEpisode(false);
+            return;
+          }
+        }
+    
+        // Handle non-series books or last episode in series
+        const currentIndex = allBooks.findIndex(b => b._id === endingBook._id);
+        if (currentIndex < allBooks.length - 1) {
+          const nextBook = allBooks[currentIndex + 1];
+          await play(nextBook);
+        }
+      } catch (err) {
+        console.error('Error moving to next episode:', err);
+      } finally {
+        setIsMovingToNextEpisode(false);
       }
     };
   
@@ -276,7 +342,20 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
     // Cleanup
     return () => {
+      const currentBookToSave = currentBook;
+      const currentEpisodeToSave = currentEpisode;
+      const currentTimeToSave = audio.currentTime;
+
       flushProgressUpdates();
+
+      if (currentBookToSave && currentTimeToSave > 0) {
+        immediateProgressUpdate(
+          currentBookToSave._id, 
+          currentTimeToSave,
+          currentEpisodeToSave?._id
+        );
+      }
+
       if (currentBook && audio.currentTime > 0) {
         immediateProgressUpdate(currentBook._id, audio.currentTime, currentEpisode?._id);
       }
@@ -286,6 +365,12 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       audio.removeEventListener('error', handleError);
       audio.pause();
       audio.src = ''; // Clear source
+      // Only cleanup if not moving to next episode
+      if (!isMovingToNextEpisode) {
+        audio.pause();
+        audio.src = '';
+      }
+      
       audioRef.current = null;
     };
   }, []); // Empty dependency array as we want this to run once
@@ -369,8 +454,10 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   }, [isPlaying]);
 
   const play = async (book: Book, episode?: Episode) => {
-    if (!audioRef.current) return;
-  
+    const audio = audioRef.current;
+    if (!audio) return;
+    // if (!audioRef.current) return;
+    setIsTransitioning(true);
     try {
        // Reset prefetch state when starting new playback
       setNextChapterPrefetched(false);
@@ -401,22 +488,33 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       
       // Audio source will be updated in the useEffect
       // Set initial progress
-      audioRef.current.currentTime = 0;
+      // audioRef.current.currentTime = 0;
+
+      // Reset audio source
+      audio.currentTime = 0;
+      audio.src = playEpisode.audioFile;
+      audioSourceRef.current = playEpisode.audioFile;
       
+      // // Call API to update listen count and history
+      // if (freshBook?._id) {
+      //   await updateListenHistory(freshBook._id, 0, playEpisode._id);
+      // } else {
+      //   console.error('Book ID is undefined');
+      // }
+
       // Call API to update listen count and history
-      if (freshBook?._id) {
-        await updateListenHistory(freshBook._id, 0, playEpisode._id);
-      } else {
-        console.error('Book ID is undefined');
-      }
+      await updateListenHistory(freshBook._id, 0, playEpisode._id);
   
-      // Set isPlaying to true - actual playback will be handled by useEffect
+      // Start playback
+      await audio.play();
       setIsPlaying(true);
       
     } catch (err) {
       console.error('Playback failed:', err);
       setError('Failed to start playback');
       setIsPlaying(false);
+    } finally {
+      setIsTransitioning(false);
     }
   };
 
@@ -533,7 +631,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         setPlaybackSpeed,
         setCurrentBook,
         refreshLibrary,
-        recordPlaybackSession
+        recordPlaybackSession,
+        isTransitioning
       }}
     >
       {children}
