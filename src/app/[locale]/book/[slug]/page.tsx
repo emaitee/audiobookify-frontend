@@ -131,21 +131,22 @@ export default function BookView() {
         }
   
         play({
-                  _id: book._id,
-                  episodeId: episodeToPlay._id,
-                  slug: book.slug,
-                  title: `${book.title} - ${episodeToPlay.title}`,
-                  author: book.author,
-                  coverImage: book.coverImage,
-                  audioFile: episodeToPlay.audioFile,
-                  duration: episodeToPlay.duration,
-                  isSeries: true,
-                  episodeNumber: episodeToPlay.episodeNumber,
-                  narrator: book.narrator,
-                  averageRating: book.averageRating,
-                  narrationLanguage: book.narrationLanguage,
-                  ratings: book.ratings
-                }, episodeToPlay);
+                          _id: book._id,
+                          episodeId: episodeToPlay._id,
+                          slug: book.slug,
+                          title: `${book.title} - ${episodeToPlay.title}`,
+                          author: book.author,
+                          coverImage: book.coverImage,
+                          audioFile: episodeToPlay.audioFile,
+                          duration: episodeToPlay.duration,
+                          isSeries: true,
+                          episodeNumber: episodeToPlay.episodeNumber,
+                          narrator: book.narrator,
+                          averageRating: book.averageRating,
+                          narrationLanguage: book.narrationLanguage,
+                          ratings: book.ratings,
+                          bookmarks: book.bookmarks || [] // Ensure bookmarks are included
+                        }, episodeToPlay);
       } else {
         // Handle single audiobook
         play({
@@ -158,9 +159,10 @@ export default function BookView() {
           duration: book.episodes?.[0]?.duration || 0,
           narrator: book.narrator || 'Unknown',
           isSeries: book.isSeries || false,
-          averageRating: book.averageRating || '0',
+          averageRating: book.averageRating || 0,
           narrationLanguage: book.narrationLanguage || 'Unknown',
-          ratings: book.ratings || []
+          ratings: book.ratings || [],
+          bookmarks: book.bookmarks || [] // Ensure bookmarks are included
         });
       }
     };
