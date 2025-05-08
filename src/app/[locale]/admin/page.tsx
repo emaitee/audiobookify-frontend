@@ -28,7 +28,7 @@ export interface RecentUpload {
     episodeTitle: string;
   } | null;
   coverImage?: string;
-  averageRating?: string;
+  averageRating?: number;
   duration?: number;
   narrationLanguage?: string;
   ratings?: any[];
@@ -205,10 +205,11 @@ const mapRecentUploadToBook = (recentUpload: RecentUpload): Book => ({
   ...recentUpload,
   slug: recentUpload.slug,
   coverImage: recentUpload.coverImage || '/default-cover.jpg',
-  averageRating: recentUpload.averageRating||"0",
+  averageRating: recentUpload.averageRating || 0,
   duration: recentUpload.duration || 0,
   narrationLanguage: recentUpload.narrationLanguage || 'Unknown',
   ratings: recentUpload.ratings || [],
+  bookmarks: [], // Add a default value for bookmarks
 });
 
 const AdminView = () => {
