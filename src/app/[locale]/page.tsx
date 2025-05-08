@@ -9,6 +9,8 @@ import { useAuth } from '@/context/AuthContext';
 import './index.css'
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { Review } from '@/components/BookReview';
+import { Bookmark as BookmarkType } from './playing/page';
 
 interface Rating {
   user: string;
@@ -57,12 +59,16 @@ export interface Book {
   publisher?: string;
   releaseDate?: string;
   description?: string;
-  averageRating: string;
+  averageRating: number;
   duration: number;
   narrationLanguage: string;
   ratings: Rating[];
   status?: string;
   createdAt?: string;
+  reviews?: Review[];
+  listenCount?: number;
+  tags?: string[];
+  bookmarks: BookmarkType[]
 }
 
 export default function AlternativeAudiobookExplorePage() {

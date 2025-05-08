@@ -10,7 +10,7 @@ import './wrapper.css'
 function AppWrapper({ children }: React.PropsWithChildren<{}>) {
     const {theme} = useTheme()
     const pathname = usePathname();
-  const isNowPlayingPage = pathname.includes('/now-playing');
+  const isNowPlayingPage = pathname.includes('/playing');
   const [isMobile, setIsMobile] = useState(true);
   
   // Check if we're on the client side and detect screen size

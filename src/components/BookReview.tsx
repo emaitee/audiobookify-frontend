@@ -8,7 +8,7 @@ import { apiHelper, authApiHelper } from '@/app/utils/api';
 export const defaultAvatar = 'https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI='
 
 // Review interface updated to match API response
-interface Review {
+export interface Review {
   _id: string;
   user: {
     _id: string;

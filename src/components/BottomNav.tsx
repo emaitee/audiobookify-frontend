@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext' // Adjust the import path as needed
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface NavItem {
   path: string
@@ -184,7 +185,7 @@ function ResponsiveNav() {
     <div className="hidden lg:flex h-screen fixed left-0 top-0 bottom-0 w-64 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-20">
       {/* Brand logo area */}
       <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800">
-        <BookOpen className="text-indigo-600" size={24} />
+      <Image src='/logo.png' height={30} width={30} alt='logo' />
         <span className="text-xl font-semibold text-indigo-600 dark:text-indigo-400">SautiBox</span>
       </div>
 

@@ -12,7 +12,7 @@ export default function Player() {
   return (
     <div 
       className="fixed bottom-16 left-4 right-4 max-w-3xl mx-auto bg-white border rounded-lg shadow-lg p-3 flex items-center gap-3 cursor-pointer"
-      onClick={() => router.push('/now-playing')}
+      onClick={() => router.push('/playing')}
     >
       <img 
         src={currentBook.coverImage} 

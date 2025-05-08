@@ -266,12 +266,17 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
     const handleEnded = async () => {
       console.log("ENDEDEDED", currentBook)
-      // Save current references immediately
+      console.log("Audio ended - starting transition");
+
+      // Immediately capture current state
       const endingBook = currentBook;
       const endingEpisode = currentEpisode;
-      const audioElement = audioRef.current;
+      const audio = audioRef.current;
 
-      if (!endingBook || !audioElement) return;
+      if (!endingBook || !audio) {
+        console.log("No book or audio element - cannot handle ended event");
+        return;
+      }
       
       setIsPlaying(false);
       setIsMovingToNextEpisode(true)
@@ -289,39 +294,47 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       //   console.log(nextEp, 'playing next episode')
       // }
       try {
-        // Record full playback session
-        if (audioElement.duration) {
-          await recordPlaybackSession(audioElement.duration);
+        // Record playback session
+        if (audio.duration) {
+          console.log("Recording playback session");
+          await recordPlaybackSession(audio.duration);
         }
     
         // Handle series with episodes
         if (endingBook.isSeries && endingEpisode) {
+          console.log("Looking for next episode in series");
           const nextEp = endingBook.episodes?.find(
             ep => ep.episodeNumber === endingEpisode.episodeNumber + 1
           );
           
           if (nextEp) {
-            // Reset prefetch state for the new episode
+            console.log("Found next episode, playing:", nextEp.title);
+            // Reset prefetch state
             setNextChapterPrefetched(false);
             setNextEpisode(null);
             
-            // Play the next episode
+            // Play next episode
             await play(endingBook, nextEp);
-            setIsMovingToNextEpisode(false);
             return;
           }
         }
     
-        // Handle non-series books or last episode in series
+        // Handle non-series or last episode
+        console.log("Looking for next book in library");
         const currentIndex = allBooks.findIndex(b => b._id === endingBook._id);
         if (currentIndex < allBooks.length - 1) {
           const nextBook = allBooks[currentIndex + 1];
+          console.log("Found next book, playing:", nextBook.title);
           await play(nextBook);
+        } else {
+          console.log("No more books in library");
         }
       } catch (err) {
         console.error('Error moving to next episode:', err);
+        setError('Failed to play next episode');
       } finally {
         setIsMovingToNextEpisode(false);
+        console.log("Finished episode transition");
       }
     };
   
@@ -369,22 +382,22 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         );
       }
 
-      if (currentBook && audio.currentTime > 0) {
-        immediateProgressUpdate(currentBook._id, audio.currentTime, currentEpisode?._id);
-      }
+      // if (currentBook && audio.currentTime > 0) {
+      //   immediateProgressUpdate(currentBook._id, audio.currentTime, currentEpisode?._id);
+      // }
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('error', handleError);
-      audio.pause();
-      audio.src = ''; // Clear source
+      // audio.pause();
+      // audio.src = ''; // Clear source
       // Only cleanup if not moving to next episode
       if (!isMovingToNextEpisode) {
         audio.pause();
         audio.src = '';
+        audioRef.current = null;
       }
       
-      audioRef.current = null;
     };
   }, []); // Empty dependency array as we want this to run once
 
@@ -412,28 +425,33 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   // Update audio source when episode changes
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio || !currentEpisode?.audioFile) return;
+    if (!audio || !currentEpisode?.audioFile) {
+      console.log("No audio element or episode file - skipping update");
+      return;
+    }
     
-    // Only update the source if it's different
+     // Only update if source changed
     if (audioSourceRef.current !== currentEpisode.audioFile) {
-      console.log(`Setting new audio source: ${currentEpisode.audioFile}`);
+      console.log(`Updating audio source from ${audioSourceRef.current} to ${currentEpisode.audioFile}`);
+      
       audio.src = currentEpisode.audioFile;
       audioSourceRef.current = currentEpisode.audioFile;
       
-      // If we're supposed to be playing, restart after changing source
       if (isPlaying) {
+        console.log("Resuming playback after source change");
         audio.play().catch(err => {
-          console.error('Failed to play after source change:', err);
+          console.error('Playback error after source change:', err);
           setIsPlaying(false);
-          setError('Failed to play audio. Check your connection or file format.');
+          setError('Failed to play audio');
         });
       }
 
-      // If this was a prefetched episode, clear the prefetch flag
-    if (nextEpisode && nextEpisode._id === currentEpisode._id) {
-      setNextChapterPrefetched(false);
-      setNextEpisode(null);
-    }
+      // Clear prefetch if this was a prefetched episode
+      if (nextEpisode && nextEpisode._id === currentEpisode._id) {
+        console.log("Clearing prefetch flags");
+        setNextChapterPrefetched(false);
+        setNextEpisode(null);
+      }
     }
   }, [currentEpisode, isPlaying, nextEpisode]);
 
@@ -468,9 +486,14 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
   const play = async (book: Book, episode?: Episode) => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio) {
+      console.error("No audio element available");
+      return;
+    }
     // if (!audioRef.current) return;
     setIsTransitioning(true);
+    console.log("Starting playback transition");
+
     try {
        // Reset prefetch state when starting new playback
       setNextChapterPrefetched(false);
@@ -478,13 +501,14 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
       // Find the book in our allBooks array to ensure we have the latest data
       const freshBook = allBooks.find(b => b._id === book._id) || book;
+      let playEpisode = episode || freshBook.episodes?.[0];
 
       // console.log(book, allBooks)
   
       // Determine which episode to play with priority:
       // 1. Explicitly passed episode
       // 2. First episode
-      let playEpisode = episode;
+      // let playEpisode = episode;
       if (!playEpisode && freshBook?.episodes?.length) {
         playEpisode = freshBook.episodes[0];
       }
@@ -495,32 +519,26 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
   
-      // Update UI state first for immediate feedback
-      setCurrentBook(freshBook);
-      setCurrentEpisode(playEpisode);
-      
-      // Audio source will be updated in the useEffect
-      // Set initial progress
-      // audioRef.current.currentTime = 0;
+      // Update state
+    console.log("Updating current book and episode");
+    setCurrentBook(freshBook);
+    setCurrentEpisode(playEpisode);
+    
+    // Set audio source
+    console.log("Setting audio source:", playEpisode.audioFile);
+    audio.currentTime = 0;
+    audio.src = playEpisode.audioFile;
+    audioSourceRef.current = playEpisode.audioFile;
+    
+    // Update listen history
+    console.log("Updating listen history");
+    await updateListenHistory(freshBook._id, 0, playEpisode._id);
 
-      // Reset audio source
-      audio.currentTime = 0;
-      audio.src = playEpisode.audioFile;
-      audioSourceRef.current = playEpisode.audioFile;
-      
-      // // Call API to update listen count and history
-      // if (freshBook?._id) {
-      //   await updateListenHistory(freshBook._id, 0, playEpisode._id);
-      // } else {
-      //   console.error('Book ID is undefined');
-      // }
-
-      // Call API to update listen count and history
-      await updateListenHistory(freshBook._id, 0, playEpisode._id);
-  
-      // Start playback
-      await audio.play();
-      setIsPlaying(true);
+    // Start playback
+    console.log("Starting playback");
+    await audio.play();
+    setIsPlaying(true);
+    console.log("Playback started successfully");
       
     } catch (err) {
       console.error('Playback failed:', err);
@@ -528,6 +546,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       setIsPlaying(false);
     } finally {
       setIsTransitioning(false);
+      console.log("Finished playback transition");
     }
   };
 

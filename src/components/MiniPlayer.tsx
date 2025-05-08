@@ -67,7 +67,7 @@ export function MiniPlayer() {
   if (!currentBook) return null;
 
   const handlePlayerClick = () => {
-    router.push('/now-playing');
+    router.push('/playing');
   };
 
   const handlePlayButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -186,7 +186,7 @@ export function MiniPlayer() {
           <button 
             onClick={(e) => {
               e.stopPropagation();
-              router.push('/now-playing');
+              router.push('/playing');
             }} 
             className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors"
           >

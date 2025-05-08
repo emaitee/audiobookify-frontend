@@ -112,7 +112,8 @@ export default function NowPlaying() {
     nextTrack,
     previousTrack,
     playbackSpeed,
-    setPlaybackSpeed
+    setPlaybackSpeed,
+    isTransitioning
   } = usePlayer();
 
   const router = useRouter();
@@ -367,6 +368,13 @@ export default function NowPlaying() {
                 )}
               </div>
             </div>
+
+            {isTransitioning && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                <span className="ml-3 text-white">Loading next episode...</span>
+              </div>
+            )}
             
             {/* Book Info */}
             <div className="w-full max-w-md mb-6 text-center lg:text-left lg:mb-4 lg:max-w-none">
