@@ -134,7 +134,7 @@
             "message": "Try adjusting your search or filters to find what you're looking for."
           },
           "bookItem": {
-            "coverAlt": "{title} cover",
+            "coverAlt": "book cover",
             "narratedBy": "Narrated by",
             "noRating": "N/A"
           },

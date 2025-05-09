@@ -5,6 +5,7 @@ import { Search, Filter, ChevronDown, ChevronUp, Clock, Star, BookOpen } from 'l
 import { Book } from '../page';
 import { authApiHelper } from '@/app/utils/api';
 import { useTranslations } from 'next-intl'; // Import useTranslations hook
+import BookCard from '@/components/book/BookCard';
 
 const ViewListContent = () => {
   // Initialize translations
@@ -365,36 +366,8 @@ const ViewListContent = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {audiobooks.map((book) => (
-              <div key={book._id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden">
-                {/* Book cover */}
-                <div className="relative pb-[150%]">
-                  <img 
-                    src={book.coverImage || '/api/placeholder/250/400'} 
-                    alt={t('bookItem.coverAlt', { title: book.title })} 
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                </div>
-                
-                {/* Book info */}
-                <div className="p-4">
-                  <h3 className="font-semibold text-gray-900 line-clamp-2">{book.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{book.author.name}</p>
-                  <p className="text-xs text-gray-500 mt-1">{t('bookItem.narratedBy')} {book.narrator.name}</p>
-                  
-                  {/* Details row */}
-                  <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
-                    <div className="flex items-center">
-                      <Clock className="h-3 w-3 mr-1" />
-                      <span>{formatDuration(book.duration || 0)}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Star className="h-3 w-3 mr-1 text-yellow-500" />
-                      <span>{Number(book.averageRating)?.toFixed(1) || t('bookItem.noRating')}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {audiobooks.map((book, index:number) => (
+              <BookCard key={index} book={book} />
             ))}
           </div>
         )}
