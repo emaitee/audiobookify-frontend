@@ -133,7 +133,7 @@ export default function NowPlaying() {
   const router = useRouter();
   const progressContainerRef = useRef<HTMLDivElement>(null);
   const [isLiked, setIsLiked] = useState(false);
-  const [activeTab, setActiveTab] = useState("episodes");
+  const [activeTab, setActiveTab] = useState("details");
   const [expandedDescription, setExpandedDescription] = useState(false);
   const [showMoreReviews, setShowMoreReviews] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -335,7 +335,7 @@ export default function NowPlaying() {
         
         <div className="mt-8 text-center w-full">
           <h2 className="text-xl font-bold text-white">{currentBook.title}</h2>
-          <p className="text-white/80">{currentBook.author}</p>
+          <p className="text-white/80">{currentBook.author.name}</p>
           <p className="text-white/60 text-sm">
             {currentEpisode?.title || currentBook.title}
           </p>
@@ -475,8 +475,8 @@ export default function NowPlaying() {
           
           <div className="mt-6 w-full p-2">
             <h2 className="text-2xl font-bold">{currentBook.title}</h2>
-            <p className="text-gray-600">By {currentBook.author}</p>
-            <p className="text-gray-500">Narrated by {currentBook.narrator || "Unknown"}</p>
+            <p className="text-gray-600">By {currentBook.author.name}</p>
+            <p className="text-gray-500">Narrated by {currentBook.narrator.name || "Unknown"}</p>
             
             <div className="flex items-center mt-2">
               <StarRating rating={currentBook.averageRating || 0} size={16} />
@@ -505,7 +505,7 @@ export default function NowPlaying() {
         </div>
         
         {/* Current book on mobile */}
-        <div className="md:hidden md:p-4 bg-white border-b border-gray-200">
+        <div className="md:hidden p-2 bg-white border-b border-gray-200">
           <div className="flex items-center">
             <img 
               src={currentBook.coverImage} 
@@ -514,7 +514,7 @@ export default function NowPlaying() {
             />
             <div>
               <h2 className="text-lg font-bold">{currentBook.title}</h2>
-              <p className="text-gray-600 text-sm">By {currentBook.author}</p>
+              <p className="text-gray-600 text-sm">By {currentBook.author.name}</p>
               <div className="flex items-center mt-1">
                 <StarRating rating={currentBook.averageRating || 0} size={12} />
                 <span className="ml-1 text-xs text-gray-600">{currentBook.averageRating || 0}</span>
@@ -618,18 +618,19 @@ export default function NowPlaying() {
           
           {/* Tabs - desktop view */}
           <div className=" border-b border-gray-200">
+             <button 
+              className={`px-6 py-3 font-medium ${activeTab === "details" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-gray-500"}`}
+              onClick={() => setActiveTab("details")}
+            >
+              Details
+            </button>
             <button 
               className={`px-6 py-3 font-medium ${activeTab === "episodes" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-gray-500"}`}
               onClick={() => setActiveTab("episodes")}
             >
               Episodes
             </button>
-            <button 
-              className={`px-6 py-3 font-medium ${activeTab === "details" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-gray-500"}`}
-              onClick={() => setActiveTab("details")}
-            >
-              Details
-            </button>
+           
             {/* <button 
               className={`px-6 py-3 font-medium ${activeTab === "bookmarks" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-gray-500"}`}
               onClick={() => setActiveTab("bookmarks")}
@@ -748,7 +749,7 @@ export default function NowPlaying() {
                     <div>
                       <h4 className="font-medium mb-2">About the Author</h4>
                       <p className="text-sm text-gray-700">
-                        {currentBook.author || "No author information available."}
+                        {currentBook.author.name || "No author information available."}
                       </p>
                     </div>
                   </div>

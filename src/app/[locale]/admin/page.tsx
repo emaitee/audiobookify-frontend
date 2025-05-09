@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect, JSX } from 'react';
 import { Plus, Upload, X, PlayCircle, Check, AlertTriangle, BarChart2, FileText, Download } from 'lucide-react';
 import { API_BASE_URL, authApiHelper } from '@/app/utils/api';
-import { Book, Episode } from '../page';
+import { Author, Book, Episode, Narrator } from '../page';
 import EpisodesModal from '@/components/dashboard-contents/EpisodeModal';
 import UploadModal from '@/components/dashboard-contents/UploadModal';
 
@@ -18,8 +18,8 @@ export interface RecentUpload {
   id: string;
   slug: string;
   title: string;
-  author: string;
-  narrator: string;
+  author: Author;
+  narrator: Narrator;
   status: string;
   isSeries: boolean; // Ensure this is explicitly boolean
   seriesInfo?: {
@@ -444,20 +444,21 @@ const AdminView = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           const response = JSON.parse(xhr.responseText);
           
-          const newUpload: RecentUpload = {
-            _id: response._id || `new-${Date.now()}`,
-            id: response?.id || `new-${Date.now()}`,
-            slug: bookMetadata.slug,
-            title: bookMetadata.title,
-            author: bookMetadata.author,
-            narrator: bookMetadata.narrator,
-            status: "pending",
-            createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            isSeries: bookMetadata.isSeries,
-            // seriesInfo: bookMetadata.isSeries ? bookMetadata.seriesInfo : null
-          };
+          // const newUpload: RecentUpload = {
+          //   _id: response._id || `new-${Date.now()}`,
+          //   id: response?.id || `new-${Date.now()}`,
+          //   slug: bookMetadata.slug,
+          //   title: bookMetadata.title,
+          //   author: bookMetadata.author,
+          //   narrator: bookMetadata.narrator,
+          //   status: "pending",
+          //   createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          //   isSeries: bookMetadata.isSeries,
+          //   // seriesInfo: bookMetadata.isSeries ? bookMetadata.seriesInfo : null
+          // };
           
-          setRecentUploads(prev => [newUpload, ...prev]);
+          // setRecentUploads(prev => [newUpload, ...prev]);
+          fetchRecentUploads()
           fetchStats();
           setUploadStep(4);
         } else {
@@ -572,20 +573,21 @@ const AdminView = () => {
         setPendingApprovals(pendingApprovals.filter(item => item._id !== id));
         
         // Create a new RecentUpload from the ApprovedItem
-        const updatedItem: RecentUpload = {
-          _id: approvedItem._id,
-          id: approvedItem._id,
-          title: approvedItem.title,
-          slug: approvedItem.slug,
-          author: approvedItem.author,
-          narrator: approvedItem.narrator,
-          status: 'approved',
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          isSeries: approvedItem.isSeries,
-          seriesInfo: approvedItem.seriesInfo || null
-        };
+        // const updatedItem: RecentUpload = {
+        //   _id: approvedItem._id,
+        //   id: approvedItem._id,
+        //   title: approvedItem.title,
+        //   slug: approvedItem.slug,
+        //   // author: approvedItem.author,
+        //   // narrator: approvedItem.narrator,
+        //   status: 'approved',
+        //   date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        //   isSeries: approvedItem.isSeries,
+        //   seriesInfo: approvedItem.seriesInfo || null
+        // };
         
-        setRecentUploads(prev => [updatedItem, ...prev]);
+        // setRecentUploads(prev => [updatedItem, ...prev]);
+        fetchRecentUploads();
       }
       
       // Refresh stats
@@ -609,16 +611,17 @@ const AdminView = () => {
         setPendingApprovals(pendingApprovals.filter(item => item._id !== id));
         
         // Add to recent uploads with rejected status
-        const updatedItem: RecentUpload = {
-          ...rejectedItem,
-          id: rejectedItem._id, // Add the 'id' property
-          status: 'rejected',
-          slug:rejectedItem.slug,
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          isSeries: rejectedItem.isSeries ?? false // Ensure isSeries is explicitly boolean
-        };
+        // const updatedItem: RecentUpload = {
+        //   ...rejectedItem,
+        //   id: rejectedItem._id, // Add the 'id' property
+        //   status: 'rejected',
+        //   slug:rejectedItem.slug,
+        //   date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        //   isSeries: rejectedItem.isSeries ?? false // Ensure isSeries is explicitly boolean
+        // };
         
-        setRecentUploads(prev => [updatedItem, ...prev]);
+        // setRecentUploads(prev => [updatedItem, ...prev]);
+        fetchRecentUploads()
       }
       
       // Refresh stats
@@ -786,11 +789,11 @@ const AdminView = () => {
                         )}
                       </div>
                       <div className="text-xs text-gray-500 sm:hidden">
-                        {book.author}
+                        {book.author.name}
                       </div>
                     </td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell">{book.author}</td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell">{book.narrator}</td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell">{book.author.name}</td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell">{book.narrator.name}</td>
                     <td className="px-2 sm:px-4 py-2 sm:py-3">
                       <span 
                         className={`px-2 py-1 rounded-full text-xs ${

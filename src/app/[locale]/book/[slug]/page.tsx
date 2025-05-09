@@ -356,10 +356,10 @@ export default function BookView() {
                             }`}>{book.title}</h1>
                             <p className={`text-xl mb-4 ${
                                 theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                            }`}>{book.author}</p>
+                            }`}>{book.author.name}</p>
                             <p className={`mb-6 ${
                                 theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                            }`}>Narrated by <span className="font-medium">{book.narrator}</span></p>
+                            }`}>Narrated by <span className="font-medium">{book.narrator.name}</span></p>
                             
                             <div className="flex flex-wrap gap-3 mb-6">
                                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -575,8 +575,8 @@ export default function BookView() {
                                     <div className="space-y-3">
                                         {[
                                             { label: "Title:", value: book.title },
-                                            { label: "Author:", value: book.author },
-                                            { label: "Narrator:", value: book.narrator },
+                                            { label: "Author:", value: book.author.name },
+                                            { label: "Narrator:", value: book.narrator.name },
                                             { label: "Publisher:", value: book.publisher },
                                             { label: "Release Date:", value: book.releaseDate ? new Date(book.releaseDate).toLocaleDateString() : 'Unknown' },
                                             { label: "Language:", value: book.narrationLanguage }

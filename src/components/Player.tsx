@@ -21,7 +21,7 @@ export default function Player() {
       />
       <div className="flex-1 min-w-0">
         <h3 className="font-medium text-sm truncate">{currentBook.title}</h3>
-        <p className="text-xs text-gray-600 truncate">{currentBook.author}</p>
+        <p className="text-xs text-gray-600 truncate">{currentBook.author.name}</p>
         <div className="w-full bg-gray-200 h-1 rounded-full mt-1">
           <div 
             className="bg-indigo-500 h-1 rounded-full" 

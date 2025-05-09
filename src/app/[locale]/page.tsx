@@ -12,6 +12,18 @@ import { useTranslations } from 'next-intl';
 import { Review } from '@/components/BookReview';
 import { Bookmark as BookmarkType } from './playing/page';
 
+export interface Author {
+  _id?: string;
+  name: string;
+  slug: string;
+  bio?: string;
+}
+export interface Narrator {
+  _id?: string;
+  name: string;
+  slug: string;
+  bio?: string;
+}
 interface Rating {
   user: string;
   rating: number;
@@ -34,8 +46,8 @@ export interface Book {
   _id: string;
   title: string;
   slug: string;
-  author: string;
-  narrator: string;
+  author: Author;
+  narrator: Narrator;
   coverImage: string;
   isSeries: boolean;
   episodes?: Episode[];
@@ -191,7 +203,7 @@ export default function AlternativeAudiobookExplorePage() {
                 {t('featured.label')}
               </span>
               <h2 className="text-xl font-bold mb-1">{featuredBooks[0].title}</h2>
-              <p className="text-sm opacity-90 mb-3">By {featuredBooks[0].author}</p>
+              <p className="text-sm opacity-90 mb-3">By {featuredBooks[0].author.name}</p>
               <div className="flex space-x-2">
                 <button 
                   onClick={() => handlePlay(featuredBooks[0])}
@@ -235,7 +247,7 @@ export default function AlternativeAudiobookExplorePage() {
           <div className="relative">
             <div className="flex space-x-3 md:space-x-4 pb-2 overflow-x-auto scroll-container snap-x snap-mandatory">
               {newReleases.map((book) => (
-                <div key={book?._id} className="w-28 md:w-32 flex-shrink-0 snap-start">
+                <div key={book?._id} className="w-28 md:w-32 flex-shrink-0 snap-start" onClick={() => handlePlay(book)}>
                   <div className="relative rounded-lg overflow-hidden aspect-[2/3] mb-2 shadow-lg group">
                     <img 
                       src={book.coverImage} 
@@ -250,7 +262,7 @@ export default function AlternativeAudiobookExplorePage() {
                       </div>
                     </div>
                     <button 
-                      onClick={() => handlePlay(book)}
+                      
                       className={`absolute top-1.5 md:top-2 right-1.5 md:right-2 h-7 md:h-8 w-7 md:w-8 ${theme === 'dark' ? 'bg-purple-500' : 'bg-purple-600'} rounded-full flex items-center justify-center opacity-0 group-hover:opacity-90 transition-opacity duration-200`}
                       aria-label={`Play ${book.title}`}
                     >
@@ -258,7 +270,7 @@ export default function AlternativeAudiobookExplorePage() {
                     </button>
                   </div>
                   <h3 className="font-medium text-xs md:text-sm line-clamp-1">{book.title}</h3>
-                  <p className={`text-[10px] md:text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-1`}>{book.author}</p>
+                  <p className={`text-[10px] md:text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-1`}>{book.author.name}</p>
                 </div>
               ))}
             </div>
@@ -332,7 +344,7 @@ export default function AlternativeAudiobookExplorePage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium text-sm mb-1">{book.title}</h3>
-                  <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mb-2`}>{book.author}</p>
+                  <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mb-2`}>{book.author.name}</p>
                   <div className={`w-full ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5 mb-1`}>
                     <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${book.progress}%` }}></div>
                   </div>

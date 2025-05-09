@@ -157,7 +157,7 @@ export function MiniPlayer() {
           
           <div className="truncate">
             <h3 className="font-bold text-white truncate">{currentBook.title}</h3>
-            <p className="text-xs text-indigo-100/80 truncate">{currentBook.author}</p>
+            <p className="text-xs text-indigo-100/80 truncate">{currentBook.author.name}</p>
             
             {currentBook.isSeries && currentEpisode && (
               <div className="inline-flex items-center mt-1 text-xs text-indigo-100/90">

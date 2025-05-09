@@ -379,7 +379,7 @@ export default function NowPlaying() {
             {/* Book Info */}
             <div className="w-full max-w-md mb-6 text-center lg:text-left lg:mb-4 lg:max-w-none">
               <h1 className="text-2xl font-bold text-white mb-1 lg:text-3xl">{currentBook.title}</h1>
-              <p className="text-white/70">{currentBook.author}</p>
+              <p className="text-white/70">{currentBook.author.name}</p>
               
               {/* Series navigation */}
               {currentBook.isSeries && currentEpisode && (
@@ -607,7 +607,7 @@ export default function NowPlaying() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <span className="text-white/60 block">Narrator:</span> 
-                        <p className="text-white font-medium">{currentBook.narrator || "Unknown"}</p>
+                        <p className="text-white font-medium">{currentBook.narrator.name || "Unknown"}</p>
                       </div>
                       <div>
                         <span className="text-white/60 block">Duration:</span>

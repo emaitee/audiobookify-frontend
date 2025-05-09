@@ -379,8 +379,8 @@ const ViewListContent = () => {
                 {/* Book info */}
                 <div className="p-4">
                   <h3 className="font-semibold text-gray-900 line-clamp-2">{book.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{book.author}</p>
-                  <p className="text-xs text-gray-500 mt-1">{t('bookItem.narratedBy')} {book.narrator}</p>
+                  <p className="text-sm text-gray-600 mt-1">{book.author.name}</p>
+                  <p className="text-xs text-gray-500 mt-1">{t('bookItem.narratedBy')} {book.narrator.name}</p>
                   
                   {/* Details row */}
                   <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
