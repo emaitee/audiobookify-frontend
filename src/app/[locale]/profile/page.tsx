@@ -427,7 +427,7 @@ export default function ProfilePage() {
                     }`}>{book?.title}</h3>
                     <p className={`text-xs truncate ${
                       theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                    }`}>{book?.author}</p>
+                    }`}>{book?.author.name}</p>
                   </div>
                 );
               })
@@ -473,7 +473,7 @@ export default function ProfilePage() {
                     }`}>{book?.title}</h3>
                     <p className={`text-xs truncate ${
                       theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                    }`}>{book?.author}</p>
+                    }`}>{book?.author.name}</p>
                   </div>
                 );
               })

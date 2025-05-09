@@ -102,8 +102,8 @@ export default function ListeningHistory() {
       const query = searchQuery.toLowerCase();
       result = result.filter(item => 
         item.audiobook.title.toLowerCase().includes(query) ||
-        item.audiobook.author.toLowerCase().includes(query) ||
-        item.audiobook.narrator.toLowerCase().includes(query)
+        item.audiobook.author.name.toLowerCase().includes(query) ||
+        item.audiobook.narrator.name.toLowerCase().includes(query)
       );
     }
     
@@ -135,7 +135,7 @@ export default function ListeningHistory() {
         case 'title':
           return a.audiobook.title.localeCompare(b.audiobook.title);
         case 'author':
-          return a.audiobook.author.localeCompare(b.audiobook.author);
+          return a.audiobook.author.name.localeCompare(b.audiobook.author.name);
         case 'recent':
         default:
           return new Date(b.lastListened).getTime() - new Date(a.lastListened).getTime();
@@ -411,8 +411,8 @@ export default function ListeningHistory() {
                 />
                 <div className="p-4 flex-1">
                   <h3 className="font-bold text-lg line-clamp-1">{item.audiobook.title}</h3>
-                  <p className="text-sm text-gray-600">{item.audiobook.author}</p>
-                  <p className="text-xs text-gray-500">Narrated by {item.audiobook.narrator}</p>
+                  <p className="text-sm text-gray-600">{item.audiobook.author.name}</p>
+                  <p className="text-xs text-gray-500">Narrated by {item.audiobook.narrator.name}</p>
                   
                   <div className="mt-2">
                     <div className="flex justify-between text-xs text-gray-500 mb-1">
@@ -470,11 +470,11 @@ export default function ListeningHistory() {
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{item.audiobook.title}</div>
-                        <div className="text-xs text-gray-500">Narrated by {item.audiobook.narrator}</div>
+                        <div className="text-xs text-gray-500">Narrated by {item.audiobook.narrator.name}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.audiobook.author}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.audiobook.author.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="w-24">
                       <div className="flex items-center text-xs text-gray-500 mb-1">

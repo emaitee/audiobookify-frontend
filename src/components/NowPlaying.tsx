@@ -235,7 +235,7 @@ import {
                 {/* Book info */}
                 <div className="mb-6 text-center lg:text-left lg:mb-8">
                   <h1 className="text-2xl font-bold text-white mb-1 lg:text-3xl">{currentBook.title}</h1>
-                  <p className="text-white/70">{currentBook.author}</p>
+                  <p className="text-white/70">{currentBook.author.name}</p>
 
                   {isTransitioning && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -453,7 +453,7 @@ import {
                       <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                         <div>
                           <span className="text-white/60">Narrator:</span> 
-                          <p className="text-white font-medium">{currentBook.narrator || "Unknown"}</p>
+                          <p className="text-white font-medium">{currentBook.narrator.name || "Unknown"}</p>
                         </div>
                         <div>
                           <span className="text-white/60">Duration:</span>
@@ -592,7 +592,7 @@ import {
                     <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                       <div>
                         <span className="text-white/60">Narrator:</span> 
-                        <p className="text-white font-medium">{currentBook.narrator || "Unknown"}</p>
+                        <p className="text-white font-medium">{currentBook.narrator.name || "Unknown"}</p>
                       </div>
                       <div>
                         <span className="text-white/60">Duration:</span>

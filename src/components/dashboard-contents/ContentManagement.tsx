@@ -250,20 +250,21 @@ export default function ContentManagement() {
               if (xhr.status >= 200 && xhr.status < 300) {
                 const response = JSON.parse(xhr.responseText);
                 
-                const newUpload: RecentUpload = {
-                  _id: response._id || `new-${Date.now()}`,
-                  id: response._id || `new-${Date.now()}`,
-                  title: bookMetadata.title,
-                  slug: bookMetadata.slug,
-                  author: bookMetadata.author,
-                  narrator: bookMetadata.narrator,
-                  status: "pending",
-                  date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                  isSeries: bookMetadata.isSeries,
-                  seriesInfo: bookMetadata.isSeries ? bookMetadata.seriesInfo : null
-                };
+                // const newUpload: RecentUpload = {
+                //   _id: response._id || `new-${Date.now()}`,
+                //   id: response._id || `new-${Date.now()}`,
+                //   title: bookMetadata.title,
+                //   slug: bookMetadata.slug,
+                //   author: bookMetadata.author,
+                //   narrator: bookMetadata.narrator,
+                //   status: "pending",
+                //   date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                //   isSeries: bookMetadata.isSeries,
+                //   seriesInfo: bookMetadata.isSeries ? bookMetadata.seriesInfo : null
+                // };
                 
-                setRecentUploads(prev => [newUpload, ...prev]);
+                // setRecentUploads(prev => [newUpload, ...prev]);
+                fetchRecentUploads()
                 fetchStats();
                 setUploadStep(4);
               } else {
