@@ -1,17 +1,22 @@
 'use client'
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search, Filter, ChevronDown, ChevronUp, Clock, Star, BookOpen } from 'lucide-react';
 import { Book } from '../page';
 import { authApiHelper } from '@/app/utils/api';
 import { useTranslations } from 'next-intl'; // Import useTranslations hook
 import BookCard from '@/components/book/BookCard';
+import idb, { FilterOptions } from '@/lib/idb';
+import { useTheme } from 'next-themes';
+import FilterPanel from '@/components/FilterPanel';
 
 const ViewListContent = () => {
   // Initialize translations
   const t = useTranslations("ListViewPage");
-  
+  const {theme} = useTheme()
   const searchParams = useSearchParams();
+  
+  const [isOffline, setIsOffline] = useState(false);
   const [sortOrder, setSortOrder] = useState('newest');
   const [filterOpen, setFilterOpen] = useState(false);
   const [audiobooks, setAudiobooks] = useState<Book[]>([]);
@@ -23,114 +28,249 @@ const ViewListContent = () => {
   const [selectedGenre, setSelectedGenre] = useState(t('allGenres'));
   const [selectedNarrator, setSelectedNarrator] = useState(t('allNarrators'));
   const [selectedDateFilter, setSelectedDateFilter] = useState('any');
+  const [genres, setGenres] = useState<string[]>([]);
+  const [narrators, setNarrators] = useState<string[]>([]);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    genres: [t('allGenres')],
+    narrators: [t('allNarrators')],
+    dateFilters: [],
+    sortOptions: [],
+    defaults: {
+      genre: 'all',
+      narrator: 'all',
+      dateFilter: 'any',
+      sortOrder: 'newest'
+    }
+  })
 
   // Get collection type from URL params
   const collectionType = searchParams.get('type') || 'recent';
   const categoryName = searchParams.get('category') || '';
 
+  useEffect(() => {
+    const handleStatusChange = () => {
+      setIsOffline(!navigator.onLine);
+    };
+    
+    window.addEventListener('online', handleStatusChange);
+    window.addEventListener('offline', handleStatusChange);
+    handleStatusChange(); // Set initial state
+    
+    return () => {
+      window.removeEventListener('online', handleStatusChange);
+      window.removeEventListener('offline', handleStatusChange);
+    };
+  }, []);
+
   // Collection of genres for filter (would ideally come from API)
-  const genres = [
-    t('allGenres'), 
-    t('genres.fiction'), 
-    t('genres.nonFiction'), 
-    t('genres.thriller'), 
-    t('genres.sciFi'), 
-    t('genres.selfHelp'), 
-    t('genres.memoir'), 
-    t('genres.historicalFiction'), 
-    t('genres.finance')
-  ];
+  // const genres = [
+  //   t('allGenres'), 
+  //   t('genres.fiction'), 
+  //   t('genres.nonFiction'), 
+  //   t('genres.thriller'), 
+  //   t('genres.sciFi'), 
+  //   t('genres.selfHelp'), 
+  //   t('genres.memoir'), 
+  //   t('genres.historicalFiction'), 
+  //   t('genres.finance')
+  // ];
   
   // Collection of narrators for filter (would ideally come from API)
-  const narrators = [
-    t('allNarrators'), 
-    'James Clear', 
-    'Ray Porter', 
-    'Carey Mulligan', 
-    'Matthew McConaughey', 
-    'Julia Whelan', 
-    'Chris Hill', 
-    'Cassandra Campbell', 
-    'Jack Hawkins'
-  ];
+  // const narrators = [
+  //   t('allNarrators'), 
+  //   'James Clear', 
+  //   'Ray Porter', 
+  //   'Carey Mulligan', 
+  //   'Matthew McConaughey', 
+  //   'Julia Whelan', 
+  //   'Chris Hill', 
+  //   'Cassandra Campbell', 
+  //   'Jack Hawkins'
+  // ];
+
+   useEffect(() => {
+const initFilterOptions = async () => {
+  try {
+    // Try to load from cache
+    const cachedOptions = await idb.getCachedFilterOptions()
+    if (cachedOptions) {
+      setFilterOptions(cachedOptions)
+      setGenres([t('allGenres'), ...(cachedOptions.genres || [])])
+      setNarrators([t('allNarrators'), ...(cachedOptions.narrators || [])])
+    }
+
+    // Fetch fresh options if online
+    if (!isOffline) {
+      const response = await authApiHelper.get('/books-info/filter-options')
+      if (response?.ok) {
+        const data = await response.json()
+        const updatedOptions = {
+          genres: data.genres || [],
+          narrators: data.narrators || [],
+          dateFilters: data.dateFilters || [],
+          sortOptions: data.sortOptions || [],
+          defaults: data.defaults || filterOptions.defaults
+        }
+        
+        setFilterOptions(updatedOptions)
+        setGenres([t('allGenres'), ...updatedOptions.genres])
+        setNarrators([t('allNarrators'), ...updatedOptions.narrators])
+        
+        await idb.cacheFilterOptions(updatedOptions)
+      }
+    }
+  } catch (err) {
+    console.error('Error loading filter options:', err)
+  }
+}
+
+    initFilterOptions();
+  }, [t, isOffline]);
+
+  const handleGenreChange = (genre: string) => {
+  setSelectedGenre(genre)
+  setCurrentPage(1)
+}
+
+const handleNarratorChange = (narrator: string) => {
+  setSelectedNarrator(narrator)
+  setCurrentPage(1)
+}
+
+const handleDateFilterChange = (filter: string) => {
+  setSelectedDateFilter(filter)
+  setCurrentPage(1)
+}
+
+  const generateCacheKey = useCallback(() => {
+    return `${collectionType}-${categoryName}-${currentPage}-${searchQuery}-${selectedGenre}-${selectedNarrator}-${selectedDateFilter}`;
+  }, [collectionType, categoryName, currentPage, searchQuery, selectedGenre, selectedNarrator, selectedDateFilter]);
 
   // Fetch audiobooks based on collection type
-  const fetchAudiobooks = async () => {
+  const fetchAudiobooks = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      let endpoint = '';
-      let queryParams = `page=${currentPage}&limit=8`;
+      const cacheKey = generateCacheKey();
 
-      // Add filters to query params
-      if (searchQuery) queryParams += `&search=${searchQuery}`;
-      if (selectedGenre !== t('allGenres')) queryParams += `&category=${selectedGenre}`;
-      if (selectedNarrator !== t('allNarrators')) queryParams += `&narrator=${selectedNarrator}`;
-      if (selectedDateFilter !== 'any') {
-        const dateFilterMap: Record<string, string> = {
-          'last-week': '7',
-          'last-month': '30',
-          'last-three-months': '90',
-          'last-year': '365'
-        };
-        queryParams += `&days=${dateFilterMap[selectedDateFilter]}`;
+      // First try to load from cache
+      let cachedData = null;
+      try {
+        cachedData = await idb.getCachedAudiobookList(cacheKey);
+      } catch (cacheError) {
+        console.log('Cache access error:', cacheError);
+      }
+      if (cachedData && isOffline) {
+        setAudiobooks(cachedData.books);
+        setTotalBooks(cachedData.total);
+        return;
       }
 
-      // Determine endpoint based on collection type
-      switch (collectionType) {
-        case 'recent':
-          endpoint = `/books-info/recent?${queryParams}`;
-          break;
-        case 'popular':
-          endpoint = `/books-info/popular?${queryParams}`;
-          break;
-        case 'top-rated':
-          endpoint = `/books-info/top-rated?${queryParams}`;
-          break;
-        case 'category':
-          endpoint = `/books-info/category/${categoryName}?${queryParams}`;
-          break;
-        case 'new-releases':
-          endpoint = `/books-info/new-releases?${queryParams}`;
-          break;
-        case 'featured':
-          endpoint = `/books-info/featured?${queryParams}`;
-          break;
-        default:
-          endpoint = `/books-info/recent?${queryParams}`;
-      }
+      // Try to fetch fresh data if online
+      if (!isOffline) {
+        let endpoint = '';
+        let queryParams = `page=${currentPage}&limit=8&includeDetails=true`;
 
-      const response = await authApiHelper.get(endpoint);
-      if (!response?.ok) {
-        throw new Error(t('errors.fetchFailed'));
-      }
+        // Add filters to query params
+        if (searchQuery) queryParams += `&search=${searchQuery}`;
+        if (selectedGenre !== t('allGenres')) queryParams += `&category=${selectedGenre}`;
+        if (selectedNarrator !== t('allNarrators')) queryParams += `&narrator=${selectedNarrator}`;
+        if (selectedDateFilter !== 'any') {
+          const dateFilterMap: Record<string, string> = {
+            'last-week': '7',
+            'last-month': '30',
+            'last-three-months': '90',
+            'last-year': '365'
+          };
+          queryParams += `&days=${dateFilterMap[selectedDateFilter]}`;
+        }
 
-      const data = await response.json();
-      
-      // Handle different response structures from different endpoints
-      if (data.books) {
-        setAudiobooks(data.books);
-        setTotalBooks(data.total || data.books.length);
-      } else if (Array.isArray(data)) {
-        setAudiobooks(data);
-        setTotalBooks(data.length);
-      } else {
+        // Determine endpoint based on collection type
+        switch (collectionType) {
+          case 'recent':
+            endpoint = `/books-info/recent?${queryParams}`;
+            break;
+          case 'popular':
+            endpoint = `/books-info/popular?${queryParams}`;
+            break;
+          case 'top-rated':
+            endpoint = `/books-info/top-rated?${queryParams}`;
+            break;
+          case 'category':
+            endpoint = `/books-info/category/${categoryName}?${queryParams}`;
+            break;
+          case 'new-releases':
+            endpoint = `/books-info/new-releases?${queryParams}`;
+            break;
+          case 'featured':
+            endpoint = `/books-info/featured?${queryParams}`;
+            break;
+          default:
+            endpoint = `/books-info/recent?${queryParams}`;
+        }
+
+        const response = await authApiHelper.get(endpoint);
+        if (!response?.ok) {
+          throw new Error(t('errors.fetchFailed'));
+        }
+
+        const data = await response.json();
+        
+        // Handle different response structures
+        let books = data.books || data;
+        let total = data.total || books.length;
+
+        // Update state
+        setAudiobooks(books);
+        setTotalBooks(total);
+
+        // Cache the data
+        try {
+          await idb.cacheAudiobookList(cacheKey, {
+            books,
+            total
+          });
+        } catch (cacheError) {
+          console.error('Failed to cache audiobook list:', cacheError);
+        }
+      } else if (!cachedData) {
+        // No cached data available offline
+        setError(t('errors.offlineNoData'));
         setAudiobooks([]);
         setTotalBooks(0);
       }
     } catch (err) {
       console.error('Error fetching audiobooks:', err);
       setError(err instanceof Error ? err.message : t('errors.loadFailed'));
+      
+      // Try to load from cache even if error occurred
+      const cacheKey = generateCacheKey();
+      const cachedData = await idb.getCachedAudiobookList(cacheKey);
+      if (cachedData) {
+        setAudiobooks(cachedData.books);
+        setTotalBooks(cachedData.total);
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [
+    collectionType, 
+    categoryName, 
+    currentPage, 
+    searchQuery, 
+    selectedGenre, 
+    selectedNarrator, 
+    selectedDateFilter,
+    t,
+    isOffline,
+    generateCacheKey
+  ]);
 
   // Fetch audiobooks when component mounts or filters change
   useEffect(() => {
     fetchAudiobooks();
-  }, [collectionType, categoryName, currentPage, searchQuery, selectedGenre, selectedNarrator, selectedDateFilter]);
+  }, [fetchAudiobooks]);
 
   // Get collection title based on type
   const getCollectionTitle = () => {
@@ -207,6 +347,12 @@ const ViewListContent = () => {
 
   return (
     <div className="md:bg-gray-50 min-h-screen">
+      {isOffline && (
+        <div className={`p-2 text-center text-sm ${theme === 'dark' ? 'bg-yellow-900 text-yellow-200' : 'bg-yellow-100 text-yellow-800'}`}>
+          {t('offline.message')} - {t('offline.showingCachedData')}
+        </div>
+      )}
+
       {/* Header with title and back button */}
       <header className="md:bg-white md:shadow">
         <div className="container mx-auto md:px-4 md:py-6 py-4">
@@ -277,10 +423,24 @@ const ViewListContent = () => {
             </div>
           </div>
 
+          <FilterPanel
+            isOpen={filterOpen}
+            genres={genres}
+            narrators={narrators}
+            selectedGenre={selectedGenre}
+            selectedNarrator={selectedNarrator}
+            selectedDateFilter={selectedDateFilter}
+            onGenreChange={handleGenreChange}
+            onNarratorChange={handleNarratorChange}
+            onDateFilterChange={handleDateFilterChange}
+            filterOptions={filterOptions}
+            t={t}
+          />
+
           {/* Expanded filter panel */}
-          {filterOpen && (
+          {/* {filterOpen && (
             <div className="mt-4 border-t pt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Genre filter */}
+              {/* Genre filter *
               <div>
                 <h3 className="text-sm font-medium text-gray-700 mb-2">{t('filter.genre')}</h3>
                 <select 
@@ -297,7 +457,7 @@ const ViewListContent = () => {
                 </select>
               </div>
 
-              {/* Narrator filter */}
+              {/* Narrator filter *
               <div>
                 <h3 className="text-sm font-medium text-gray-700 mb-2">{t('filter.narrator')}</h3>
                 <select 
@@ -314,7 +474,7 @@ const ViewListContent = () => {
                 </select>
               </div>
 
-              {/* Release date filter */}
+              {/* Release date filter *
               <div>
                 <h3 className="text-sm font-medium text-gray-700 mb-2">{t('filter.releaseDate')}</h3>
                 <div className="flex space-x-2">
@@ -335,7 +495,7 @@ const ViewListContent = () => {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
 
@@ -365,7 +525,7 @@ const ViewListContent = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {audiobooks.map((book, index:number) => (
               <BookCard key={index} book={book} />
             ))}

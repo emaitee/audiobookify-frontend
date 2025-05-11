@@ -71,7 +71,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
               type="file" 
               ref={fileInputRef}
               onChange={handleFileSelect} 
-              accept="audio/mp3,audio/mpeg" 
+              accept="audio/mp3,audio/mpeg,audio/amr" 
               className="hidden" 
             />
             <Upload size={40} className="text-gray-400 mb-4" />

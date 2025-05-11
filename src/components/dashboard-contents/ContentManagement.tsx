@@ -11,27 +11,10 @@ import { AnalyticsData, ApprovedItem, BookMetadata, RecentUpload, Stats } from "
 import { Book as BookType, Episode } from "@/app/[locale]/page";
 import { API_BASE_URL } from "@/app/utils/api";
 
-interface Audiobook {
-  _id: string;
-  title: string;
-  author: string;
-  narrator?: string;
-  category: string;
-  description?: string;
-  status: 'approved' | 'pending' | 'rejected' | 'draft';
-  averageRating?: number;
-  listenCount?: number;
-  narrationLanguage: string;
-  coverImage?: string;
-  audioFile?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export default function ContentManagement() {
     const router = useRouter();
     const [activeView, setActiveView] = useState<'all' | 'published' | 'draft' | 'review'>('all');
-    const [contentItems, setContentItems] = useState<Audiobook[]>([]);
+    const [contentItems, setContentItems] = useState<BookType[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Record<string, string | null>>({});
     const [searchQuery, setSearchQuery] = useState('');
@@ -388,10 +371,12 @@ export default function ContentManagement() {
                 });
                 
                 setContentItems(
-                    response.books.map((book: Partial<Audiobook>) => ({
+                    response.books.map((book: Partial<BookType>) => ({
                         ...book,
                         narrationLanguage: book.narrationLanguage || 'Unknown', // Provide a default value for missing properties
-                    })) as Audiobook[]
+                        author: typeof book.author === 'string' ? { name: book.author } : book.author, // Map author correctly
+                        narrator: typeof book.narrator === 'string' ? { name: book.narrator } : book.narrator, // Map author correctly
+                    })) as BookType[]
                 );
                 setTotalPages(response.pages);
                 setLoading(false);
@@ -620,7 +605,7 @@ export default function ContentManagement() {
                             <div className="text-sm font-medium text-gray-900">{item.title}</div>
                           </div>
                         </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.author}</td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.author.name}</td>
                         <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{item.category}</td>
                         <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(item.status)}`}>

@@ -1,34 +1,34 @@
 import { ApprovedItem, RecentUpload, Stats } from "@/app/[locale]/admin/page";
-import { Episode } from "@/app/[locale]/page";
+import { Book, Episode } from "@/app/[locale]/page";
 import { API_BASE_URL, authApiHelper } from "@/app/utils/api";
 
 
-interface Audiobook {
-  _id: string;
-  title: string;
-  author: string;
-  narrator?: string;
-  category: string;
-  description?: string;
-  status: 'approved' | 'pending' | 'rejected' | 'draft';
-  averageRating?: number;
-  listenCount?: number;
-  coverImage?: string;
-  audioFile?: string;
-  createdAt: string;
-  updatedAt: string;
-  duration?: number;
-  isSeries?: boolean;
-  episodes?: Array<{
-    title: string;
-    episodeNumber: number;
-    audioFile: string;
-    duration?: number;
-  }>;
-}
+// interface Audiobook {
+//   _id: string;
+//   title: string;
+//   author: string;
+//   narrator?: string;
+//   category: string;
+//   description?: string;
+//   status: 'approved' | 'pending' | 'rejected' | 'draft';
+//   averageRating?: number;
+//   listenCount?: number;
+//   coverImage?: string;
+//   audioFile?: string;
+//   createdAt: string;
+//   updatedAt: string;
+//   duration?: number;
+//   isSeries?: boolean;
+//   episodes?: Array<{
+//     title: string;
+//     episodeNumber: number;
+//     audioFile: string;
+//     duration?: number;
+//   }>;
+// }
 
 interface PaginatedResponse {
-  books: Audiobook[];
+  books: Book[];
   total: number;
   pages: number;
   currentPage: number;
@@ -92,7 +92,7 @@ export const audioBookService = {
   /**
    * Get a single audiobook by ID
    */
-  getBookById: async (id: string): Promise<Audiobook> => {
+  getBookById: async (id: string): Promise<Book> => {
     try {
       const response = await authApiHelper.get(`/books/${id}`);
       if (!response?.ok) throw new Error('Failed to fetch audiobook');
@@ -106,7 +106,7 @@ export const audioBookService = {
   /**
    * Upload a new audiobook
    */
-  uploadBook: async (formData: FormData): Promise<Audiobook> => {
+  uploadBook: async (formData: FormData): Promise<Book> => {
     try {
       const response = await authApiHelper.post('/books/upload', formData);
       if (!response?.ok) throw new Error('Failed to upload audiobook');
@@ -120,7 +120,7 @@ export const audioBookService = {
   /**
    * Update an existing audiobook
    */
-  updateBook: async (id: string, formData: FormData): Promise<Audiobook> => {
+  updateBook: async (id: string, formData: FormData): Promise<Book> => {
     try {
       const response = await authApiHelper.put(`/books/${id}`, formData);
       if (!response?.ok) throw new Error('Failed to update audiobook');
@@ -204,7 +204,7 @@ export const audioBookService = {
   /**
    * Add episode to a series
    */
-  addEpisode: async (bookId: string, formData: FormData): Promise<Audiobook> => {
+  addEpisode: async (bookId: string, formData: FormData): Promise<Book> => {
     try {
       const response = await authApiHelper.post(`/books/${bookId}/episodes`, formData);
       if (!response?.ok) throw new Error('Failed to add episode');

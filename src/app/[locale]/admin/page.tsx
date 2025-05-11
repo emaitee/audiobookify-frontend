@@ -34,13 +34,14 @@ export interface RecentUpload {
   ratings?: any[];
   createdAt?: string;
   date?: string;
+  updatedAt: string;
 }
 
 export interface ApprovedItem {
   _id: string;
   title: string;
-  author: string;
-  narrator: string;
+  author: Author;
+  narrator: Narrator;
   date: string;
   isSeries: boolean;
   seriesInfo?: {
@@ -210,6 +211,7 @@ const mapRecentUploadToBook = (recentUpload: RecentUpload): Book => ({
   narrationLanguage: recentUpload.narrationLanguage || 'Unknown',
   ratings: recentUpload.ratings || [],
   bookmarks: [], // Add a default value for bookmarks
+  updatedAt: recentUpload.updatedAt || ""
 });
 
 const AdminView = () => {
@@ -875,11 +877,11 @@ const AdminView = () => {
                         )}
                       </div>
                       <div className="text-xs text-gray-500 sm:hidden">
-                        {book.author} • {book.date}
+                        {book.author.name} • {book.date}
                       </div>
                     </td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell">{book.author}</td>
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell">{book.narrator}</td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell">{book.author.name}</td>
+                    <td className="px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell">{book.narrator.name}</td>
                     <td className="px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell">{book.date}</td>
                     <td className="px-2 sm:px-4 py-2 sm:py-3 text-right">
                       <div className="flex justify-end">

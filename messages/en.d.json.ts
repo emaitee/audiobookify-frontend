@@ -36,11 +36,14 @@ declare const messages: {
           "viewAll": "View All",
           "explore": "Explore",
           "history": "History",
-          "viewList": "View List"
+          "viewList": "View List",
+          "viewMore": "View More"
         },
         "featured": {
           "label": "FEATURED",
-          "listenNow": "Listen Now"
+          "listenNow": "Listen Now",
+          "reviews": "Reviews",
+          "sectionTitle": "Featured Audiobooks"
         },
         "sections": {
           "newReleases": "New Releases",
@@ -75,8 +78,14 @@ declare const messages: {
         "errors": {
           "failedToLoadNewReleases": "Failed to load new releases",
           "failedToLoadFeatured": "Failed to load featured books",
-          "failedToLoadContinue": "Failed to load continue listening"
+          "failedToLoadContinue": "Failed to load continue listening",
+          "offlineNoData": "Offline - No cached data available"
+        },
+        "offline": {
+          "message": "You are currently offline",
+          "showingCachedData": "Showing last cached data"
         }
+
       },
       "ListViewPage": {
           "allGenres": "All Genres",
@@ -148,8 +157,54 @@ declare const messages: {
           "errors": {
             "fetchFailed": "Failed to fetch audiobooks",
             "loadFailed": "Failed to load audiobooks",
-            "errorLoadingContent": "Error Loading Content"
+            "errorLoadingContent": "Error Loading Content",
+            "offlineNoData": "Offline - No cached data available for this view"
+          },
+          "offline": {
+            "message": "You are currently offline",
+            "showingCachedData": "Showing last cached data"
           }
+      },
+    "Filters": {
+      "genre": "Genre",
+      "narrator": "Narrator",
+      "dateRange": "Date Range",
+      "sortBy": "Sort By",
+      "anyTime": "Any Time",
+      "retry": "Try Again",
+      "allGenres": "All Genres",
+      "allNarrators": "All Narrators",
+      "errors": {
+        "loadFailed": "Failed to load filters. Please check your connection."
       }
+    },
+    "SearchPage": {
+        "searchPlaceholder": "Search by title, author, or narrator",
+        "noResults": {
+          "title": "No results found",
+          "message": "Try adjusting your search or filters to find what you're looking for."
+        },
+        "results": {
+          "audiobook": "audiobook",
+          "audiobooks": "audiobooks",
+          "found": "found",
+          "in": "in"
+        },
+        "bookItem": {
+          "coverAlt": "book cover",
+          "narratedBy": "Narrated by",
+          "noRating": "N/A"
+        },
+        "errors": {
+          "fetchFailed": "Failed to fetch audiobooks",
+          "loadFailed": "Failed to load audiobooks",
+          "errorLoadingContent": "Error Loading Content",
+          "offlineNoData": "Offline - No cached data available for this view"
+        },
+        "offline": {
+          "message": "You are currently offline",
+          "showingCachedData": "Showing last cached data"
+        }
+    }
   };
 export default messages;

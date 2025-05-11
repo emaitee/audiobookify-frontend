@@ -5,25 +5,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApiHelper } from '../../utils/api';
 import { useTheme } from 'next-themes';
-
-interface Audiobook {
-  _id: string;
-  title: string;
-  slug:string;
-  author: string;
-  narrator?: string;
-  coverImage: string;
-  category: string;
-  averageRating?: number;
-  duration?: number;
-}
+import { Book } from '../page';
 
 export default function SearchView() {
   const { theme } = useTheme();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
-  const [searchResults, setSearchResults] = useState<Audiobook[]>([]);
+  const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<{
     recentSearches: string[];
@@ -110,11 +99,11 @@ export default function SearchView() {
 
   return (
     <div className={`flex flex-col min-h-screen ${
-      theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800'
+      theme === 'dark' ? 'bg-gray-900 text-gray-100' : ' text-gray-800'
     }`}>
       {/* Header */}
       <div className={`sticky mb-4 top-0 backdrop-blur-lg z-v10 md:pt-4 pb-2 md:px-4 md:px-6 ${
-        theme === 'dark' ? 'bg-gray-900/95 border-b border-gray-700' : 'bg-white/95 shadow-md border-b border-gray-200'
+        theme === 'dark' ? 'bg-gray-900/95 border-b border-gray-700' : ' border-b border-gray-200'
       }`}>
         <div className="relative max-w-3xl mx-auto">
           <div className="relative">
@@ -127,7 +116,7 @@ export default function SearchView() {
               className={`w-full rounded-full py-3.5 px-5 pl-12 text-base focus:outline-none focus:ring-2 transition-all duration-300 shadow-sm ${
                 theme === 'dark' 
                   ? 'bg-gray-700 text-white placeholder-gray-400 focus:ring-indigo-500 focus:bg-gray-600' 
-                  : 'bg-gray-100 text-gray-800 placeholder-gray-500 focus:ring-indigo-500 focus:bg-white'
+                  : 'bg-white text-gray-800 placeholder-gray-500 focus:ring-indigo-500 focus:bg-white'
               }`}
               aria-label="Search audiobooks"
             />
@@ -253,11 +242,11 @@ export default function SearchView() {
                       }`}>{book.title}</h3>
                       <p className={`text-sm truncate ${
                         theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                      }`}>{book.author}</p>
+                      }`}>{book.author.name}</p>
                       {book.narrator && (
                         <p className={`text-xs truncate mt-1 ${
                           theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
-                        }`}>Narrated by: {book.narrator}</p>
+                        }`}>Narrated by: {book.narrator.name}</p>
                       )}
                       <div className="flex flex-wrap items-center mt-2 gap-2 md:gap-3">
                         {book.averageRating && (
@@ -446,7 +435,7 @@ export default function SearchView() {
       </div>
 
       {/* Empty footer for spacing */}
-      <div className="h-16 md:h-8"></div>
+      {/* <div className="h-16 md:h-8"></div> */}
     </div>
   );
 }

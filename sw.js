@@ -1,7 +1,7 @@
 // Claim clients to keep audio alive in background
-self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim());
-  });
+// self.addEventListener('activate', (event) => {
+//     event.waitUntil(self.clients.claim());
+//   });
 
 
   // Cache selected audiobooks when user clicks "Download"
@@ -33,7 +33,7 @@ window.addEventListener('offline', () => {
   }
 
 
-  const CACHE_PREFIX = 'audiobook-v1';
+const CACHE_PREFIX = 'audiobook-v1';
 const MAX_CACHE_SIZE = 1024 * 1024 * 500; // 500MB per book
 
 // Tiered caching strategy

@@ -1,41 +1,31 @@
-// // File: lib/db.js
-// import { MongoClient } from 'mongodb';
+// lib/db.js
+import { openDB } from 'idb';
 
-// const uri = process.env.MONGODB_URI;
-// const dbName = process.env.MONGODB_DB;
+const DB_NAME = 'audiobookDB';
+const STORE_NAME = 'audiobooks';
+const VERSION = 1;
 
-// let cachedClient = null;
-// let cachedDb = null;
+async function initDB() {
+  return openDB(DB_NAME, VERSION, {
+    upgrade(db) {
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    },
+  });
+}
 
-// if (!uri) {
-//   throw new Error(
-//     'Please define the MONGODB_URI environment variable inside .env.local'
-//   );
-// }
+export async function saveAudiobook(data) {
+  const db = await initDB();
+  return db.put(STORE_NAME, data);
+}
 
-// if (!dbName) {
-//   throw new Error(
-//     'Please define the MONGODB_DB environment variable inside .env.local'
-//   );
-// }
+export async function getAudiobook(id) {
+  const db = await initDB();
+  return db.get(STORE_NAME, id);
+}
 
-// export async function connectToDatabase() {
-//   // If we have cached values, use them
-//   if (cachedClient && cachedDb) {
-//     return cachedDb;
-//   }
-
-//   // Connect to MongoDB
-//   const client = await MongoClient.connect(uri, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//   });
-
-//   const db = client.db(dbName);
-
-//   // Cache the client and db connection
-//   cachedClient = client;
-//   cachedDb = db;
-
-//   return db;
-// }
+export async function getAllAudiobooks() {
+  const db = await initDB();
+  return db.getAll(STORE_NAME);
+}

@@ -1,10 +1,21 @@
 'use client'
-import { createContext, useContext, useState, useRef, useEffect, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, useRef, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApiHelper } from '@/app/utils/api';
 import { Book, Episode } from '@/app/[locale]/page';
 import { useDebounceFn } from '@/hooks/useDebounce';
+import idb from '@/lib/idb';
 
+interface OfflineQueueItem {
+  action: 'updateListenHistory' | 'recordPlaybackSession';
+  payload: any;
+  timestamp: number;
+}
+
+interface OfflineState {
+  isOffline: boolean;
+  queuedActions: OfflineQueueItem[];
+}
 interface PlayerContextType {
   currentBook: Book | null;
   currentEpisode: Episode | null;
@@ -27,12 +38,20 @@ interface PlayerContextType {
   updateListenHistory?: (bookId: string, progress: number, episodeId?: string) => Promise<void>;
   recordPlaybackSession: (duration: number) => Promise<void>;
   isTransitioning: boolean;
-  downloadForOffline: (bookId:string) => void
+  downloadForOffline: (bookId:string) => void,
+  isOffline: boolean;
+  queuedActions: OfflineQueueItem[];
+  retryQueuedActions: () => Promise<void>;
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
 
 export const PlayerProvider = ({ children }: { children: ReactNode }) => {
+  let localStrInit = '[]';
+  if (typeof localStorage !== 'undefined') {
+    localStrInit = localStorage.getItem('offlineQueue') || '[]'
+  }
+
   const router = useRouter();
   const [allBooks, setAllBooks] = useState<Book[]>([]);
   const [currentBook, setCurrentBook] = useState<Book | null>(null);
@@ -48,6 +67,10 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const [isSlowNetwork, setIsSlowNetwork] = useState(false);
   const [isMovingToNextEpisode, setIsMovingToNextEpisode] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [offlineState, setOfflineState] = useState<OfflineState>({
+    isOffline: !navigator.onLine,
+    queuedActions: JSON.parse(localStrInit) || []
+  });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioSourceRef = useRef<string | null>(null); // Track current audio source
@@ -69,6 +92,25 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       handleChange(); // Initial check
       return () => connection.removeEventListener('change', handleChange);
     }
+  }, []);
+
+  // Add network status listener
+  useEffect(() => {
+    const handleOnline = () => {
+      setOfflineState(prev => ({ ...prev, isOffline: false }));
+      retryQueuedActions();
+    };
+    const handleOffline = () => {
+      setOfflineState(prev => ({ ...prev, isOffline: true }));
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   interface StorageEstimate {
@@ -99,20 +141,76 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     } as CacheBookMessage);
   }
 
-  
+  const addToOfflineQueue = (item: OfflineQueueItem) => {
+    setOfflineState(prev => {
+      const newQueue = [...prev.queuedActions, item];
+      localStorage.setItem('offlineQueue', JSON.stringify(newQueue));
+      return { ...prev, queuedActions: newQueue };
+    });
+  };
+
+  const retryQueuedActions = async () => {
+    if (offlineState.isOffline || offlineState.queuedActions.length === 0) return;
+    
+    const successes: number[] = [];
+    const failures: number[] = [];
+    
+    for (const [index, item] of offlineState.queuedActions.entries()) {
+      try {
+        switch (item.action) {
+          case 'updateListenHistory':
+            await authApiHelper.patch(
+              `/books/${item.payload.bookId}/listen`,
+              { progress: item.payload.progress, episodeId: item.payload.episodeId }
+            );
+            break;
+          case 'recordPlaybackSession':
+            await authApiHelper.post('/listening-sessions', item.payload);
+            break;
+        }
+        successes.push(index);
+      } catch (err) {
+        console.error(`Failed to retry ${item.action}:`, err);
+        failures.push(index);
+      }
+    }
+    
+    // Remove successfully synced items
+    if (successes.length > 0) {
+      setOfflineState(prev => {
+        const newQueue = prev.queuedActions.filter((_, i) => !successes.includes(i));
+        localStorage.setItem('offlineQueue', JSON.stringify(newQueue));
+        return { ...prev, queuedActions: newQueue };
+      });
+    }
+  };
 
   const recordPlaybackSession = async (duration: number) => {
     if (!currentBook) return;
     
+    const payload = {
+      audiobookId: currentBook._id,
+      episodeId: currentEpisode?._id,
+      duration,
+      completionRate: duration / (currentEpisode?.duration || currentBook.duration)
+    };
+
     try {
-      await authApiHelper.post('/listening-sessions', {
-        audiobookId: currentBook._id,
-        episodeId: currentEpisode?._id,
-        duration,
-        completionRate: duration / (currentEpisode?.duration || currentBook.duration)
-      });
+      // Store locally first
+      await idb.recordPlaybackSession(payload);
       
-      // Update local state if needed
+      // Try to sync if online
+      if (!offlineState.isOffline) {
+        await authApiHelper.post('/listening-sessions', payload);
+      } else {
+        addToOfflineQueue({
+          action: 'recordPlaybackSession',
+          payload,
+          timestamp: Date.now()
+        });
+      }
+      
+      // Update local state
       if (currentEpisode) {
         setCurrentEpisode(prev => ({
           ...prev!,
@@ -124,13 +222,25 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Helper function to update listen history
   const updateListenHistory = async (bookId: string, progress: number, episodeId?: string) => {
     try {
-      await authApiHelper.patch(`/books/${bookId}/listen`, {
-        progress,
-        episodeId
-      });
+      // First try to update locally
+      await idb.updateListenHistory(bookId, progress, episodeId);
+      
+      // Then try to sync with server if online
+      if (!offlineState.isOffline) {
+        await authApiHelper.patch(`/books/${bookId}/listen`, {
+          progress,
+          episodeId
+        });
+      } else {
+        // Queue for later if offline
+        addToOfflineQueue({
+          action: 'updateListenHistory',
+          payload: { bookId, progress, episodeId },
+          timestamp: Date.now()
+        });
+      }
     } catch (err) {
       console.error('Failed to update listen history:', err);
     }
@@ -159,30 +269,54 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   );
 
   // Memoize fetchBooks to prevent unnecessary changes
+
   const fetchBooks = useCallback(async () => {
     setLoading(true);
     setError(null);
+    
     try {
-      const response = await authApiHelper.get('/books');
-      if (!response?.ok) throw new Error(`HTTP error! status: ${response?.status}`);
-  
-      const data = await response.json();
-      setAllBooks(data.books);
-  
-      // Only update currentBook if it's found
-      setCurrentBook(prev => {
-        if (!prev) return prev;
-        const updatedBook: Book | undefined = data.books.find((b: Book) => b._id === prev._id);
-        return updatedBook || prev;
-      });
-  
+      // First try to fetch from network
+      if (!offlineState.isOffline) {
+        const response = await authApiHelper.get('/books');
+        if (!response?.ok) throw new Error(`HTTP error! status: ${response?.status}`);
+        
+        const data = await response.json();
+        setAllBooks(data.books);
+        await idb.cacheBooks(data.books); // Cache the fresh data
+        
+        // Update current book if needed
+        setCurrentBook(prev => {
+          if (!prev) return prev;
+          const updatedBook = data.books.find((b: Book) => b._id === prev._id);
+          return updatedBook || prev;
+        });
+      } else {
+        // Fallback to cached data when offline
+        const cachedBooks = await idb.getAllBooks();
+        setAllBooks(cachedBooks);
+        
+        // Update current book from cache if needed
+        if (currentBook) {
+          const updatedBook = cachedBooks.find((b: Book) => b._id === currentBook._id);
+          if (updatedBook) setCurrentBook(updatedBook);
+        }
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch books');
-      console.error('Error fetching books:', err);
+      // If online fetch fails, try cache
+      if (!offlineState.isOffline) {
+        try {
+          const cachedBooks = await idb.getAllBooks();
+          setAllBooks(cachedBooks);
+        } catch (cacheErr) {
+          setError(err instanceof Error ? err.message : 'Failed to fetch books');
+        }
+      } else {
+        setError('Offline - showing cached content');
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [offlineState.isOffline]);
   
   // Update current episode when books are refreshed
   useEffect(() => {
@@ -413,7 +547,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   // Initial fetch of books
   useEffect(() => {
     fetchBooks();
-  }, [fetchBooks]);
+  }, []);
 
   const cancelPrefetch = () => {
     // Find and remove any prefetch links
@@ -518,6 +652,16 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
         setError('No episode available to play');
         return;
       }
+
+      // Check if audio is available offline
+      const isAvailableOffline = await idb.isEpisodeAvailableOffline(playEpisode._id);
+      let audioSource = playEpisode.audioFile;
+
+      if (isAvailableOffline) {
+        audioSource = await idb.getOfflineAudioUrl(playEpisode._id);
+      } else if (offlineState.isOffline) {
+        throw new Error('Episode not available offline');
+      }
   
       // Update state
     console.log("Updating current book and episode");
@@ -527,8 +671,8 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     // Set audio source
     console.log("Setting audio source:", playEpisode.audioFile);
     audio.currentTime = 0;
-    audio.src = playEpisode.audioFile;
-    audioSourceRef.current = playEpisode.audioFile;
+    audio.src = audioSource;
+    audioSourceRef.current = audioSource
     
     // Update listen history
     console.log("Updating listen history");
@@ -542,7 +686,9 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       
     } catch (err) {
       console.error('Playback failed:', err);
-      setError('Failed to start playback');
+      setError(offlineState.isOffline 
+        ? 'Cannot play - content not available offline'
+        : 'Failed to start playback');
       setIsPlaying(false);
     } finally {
       setIsTransitioning(false);
@@ -642,31 +788,40 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     await fetchBooks();
   };
 
+  const contextValue = useMemo(() => ({
+    allBooks,
+    currentBook,
+    currentEpisode,
+    isPlaying,
+    progress,
+    volume,
+    playbackSpeed,
+    loading,
+    error,
+    play,
+    togglePlay,
+    seek,
+    setVolume: handleVolumeChange,
+    nextTrack,
+    previousTrack,
+    setPlaybackSpeed,
+    setCurrentBook,
+    refreshLibrary,
+    recordPlaybackSession,
+    isTransitioning,
+    downloadForOffline,
+    isOffline: offlineState.isOffline,
+    queuedActions: offlineState.queuedActions,
+    retryQueuedActions,
+  }), [
+    allBooks, currentBook, currentEpisode, isPlaying, progress, 
+    volume, playbackSpeed, loading, error, isTransitioning,
+    offlineState.isOffline, offlineState.queuedActions
+  ]);
+
   return (
     <PlayerContext.Provider
-      value={{
-        allBooks,
-        currentBook,
-        currentEpisode,
-        isPlaying,
-        progress,
-        volume,
-        playbackSpeed,
-        loading,
-        error,
-        play,
-        togglePlay,
-        seek,
-        setVolume: handleVolumeChange,
-        nextTrack,
-        previousTrack,
-        setPlaybackSpeed,
-        setCurrentBook,
-        refreshLibrary,
-        recordPlaybackSession,
-        isTransitioning,
-        downloadForOffline
-      }}
+      value={contextValue}
     >
       {children}
     </PlayerContext.Provider>

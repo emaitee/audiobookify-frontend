@@ -6,12 +6,30 @@ import { MiniPlayer } from './MiniPlayer';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import './wrapper.css'
+import idb from '@/lib/idb';
 
 function AppWrapper({ children }: React.PropsWithChildren<{}>) {
     const {theme} = useTheme()
     const pathname = usePathname();
-  const isNowPlayingPage = pathname.includes('/playing');
-  const [isMobile, setIsMobile] = useState(true);
+    const isNowPlayingPage = pathname.includes('/playing');
+    const [isMobile, setIsMobile] = useState(true);
+
+    const checkAndMigrateDB = async () => {
+    try {
+      const db = await idb.ready();
+      if (!db.objectStoreNames.contains('audiobookLists')) {
+        // Force upgrade by reopening with higher version
+        await idb.resetDatabase();
+      }
+    } catch (error) {
+      console.error('Database migration check failed:', error);
+    }
+  };
+
+  useEffect(() => {
+    checkAndMigrateDB();
+  }
+  , []);
   
   // Check if we're on the client side and detect screen size
   useEffect(() => {
@@ -28,8 +46,7 @@ function AppWrapper({ children }: React.PropsWithChildren<{}>) {
     // Clean up
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
-
-
+  
   return (
 
         <div className={`flex-1 flex flex-col ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>

@@ -18,6 +18,8 @@ import IOSInstallHint from "@/components/IOSInstallHint";
 import { ThemeProvider } from 'next-themes';
 import LanguageSelectionModal from '@/components/LanguageSelectionModal';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import { OfflineProvider } from '@/components/OfflineProvider';
+import OfflineManager from '@/components/offline-manager';
 
 type Props = {
   children: ReactNode;
@@ -37,14 +39,14 @@ export async function generateMetadata(props: Omit<Props, 'children'>) {
     title: t('title'),
     description:  t('description'),
     manifest: '/manifest.json',
-    themeColor: '#400AB9',
+    // themeColor: '#400AB9',
     appleWebApp: {
       capable: true,
       title: t('title'),
       statusBarStyle: 'black-translucent',
     },
     // Optional: Add more PWA-related metadata
-    viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
+    // viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
     icons: {
       icon: '/icons/icon-192x192.png',
       apple: '/icons/icon-192x192.png',
@@ -102,6 +104,7 @@ export default async function RootLocaleLayout({
         <meta name="apple-mobile-web-app-title" content="Your App Name" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <GoogleAnalytics />
+        <OfflineManager/>
         <ThemeProvider>
           <NextIntlClientProvider>
             <ClientAuthProvider>
@@ -114,7 +117,9 @@ export default async function RootLocaleLayout({
                     
                     {/* Main Content Wrapper - adjusts based on screen size */}
                     <AppWrapper>
+                      {/* <OfflineProvider> */}
                     {children}
+                    {/* </OfflineProvider> */}
                     </AppWrapper>
                     <PWAInstallPrompt />
                     <IOSInstallHint />
