@@ -131,38 +131,42 @@ export default function BookView() {
         }
   
         play({
-                          _id: book._id,
-                          episodeId: episodeToPlay._id,
-                          slug: book.slug,
-                          title: `${book.title} - ${episodeToPlay.title}`,
-                          author: book.author,
-                          coverImage: book.coverImage,
-                          audioFile: episodeToPlay.audioFile,
-                          duration: episodeToPlay.duration,
-                          isSeries: true,
-                          episodeNumber: episodeToPlay.episodeNumber,
-                          narrator: book.narrator,
-                          averageRating: book.averageRating,
-                          narrationLanguage: book.narrationLanguage,
-                          ratings: book.ratings,
-                          bookmarks: book.bookmarks || [] // Ensure bookmarks are included
-                        }, episodeToPlay);
+            _id: book._id,
+            episodeId: episodeToPlay._id,
+            slug: book.slug,
+            title: `${book.title} - ${episodeToPlay.title}`,
+            author: book.author,
+            coverImage: book.coverImage,
+            audioFile: episodeToPlay.audioFile,
+            duration: episodeToPlay.duration,
+            isSeries: true,
+            episodeNumber: episodeToPlay.episodeNumber,
+            narrator: book.narrator,
+            averageRating: book.averageRating,
+            narrationLanguage: book.narrationLanguage,
+            ratings: book.ratings,
+            bookmarks: book.bookmarks || [], // Ensure bookmarks are included
+            status: book.status, // Add missing property
+            updatedAt: book.updatedAt // Add missing property
+        }, episodeToPlay);
       } else {
         // Handle single audiobook
         play({
           _id: book._id,
           title: book.title,
-                  slug: book.slug,
-                  author: book.author,
+          slug: book.slug,
+          author: book.author,
           coverImage: book.coverImage,
           audioFile: book.episodes?.[0]?.audioFile || '', // Assuming single books have one episode
           duration: book.episodes?.[0]?.duration || 0,
-          narrator: book.narrator || 'Unknown',
+          narrator: book.narrator || {},
           isSeries: book.isSeries || false,
           averageRating: book.averageRating || 0,
           narrationLanguage: book.narrationLanguage || 'Unknown',
           ratings: book.ratings || [],
-          bookmarks: book.bookmarks || [] // Ensure bookmarks are included
+          bookmarks: book.bookmarks || [], // Ensure bookmarks are included
+          status: book.status, // Add missing property
+        updatedAt: book.updatedAt // Add missing property
         });
       }
     };
