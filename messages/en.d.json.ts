@@ -53,7 +53,7 @@ declare const messages: {
           "curatedCollections": "Curated Collections",
           "continueListening": "Continue Listening",
           "browseCategories": "Browse Categories",
-          "authorSpotlight": "Authoer Spotlight",
+          "authorSpotlight": "Author Spotlight",
           "narratorSpotlight": "Narrator Spotlight",
           "recommendedForYou": "Recommended for You",
           "trendingNow": "Trending Now"
