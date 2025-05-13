@@ -57,7 +57,7 @@ interface Book {
   [key: string]: any; // Add this if the Book type is dynamic
 }
 
-export const StarRating = ({ 
+ const StarRating = ({ 
   rating, 
   setRating = undefined, 
   size = 20, 
