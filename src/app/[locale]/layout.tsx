@@ -20,6 +20,7 @@ import LanguageSelectionModal from '@/components/LanguageSelectionModal';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { OfflineProvider } from '@/components/OfflineProvider';
 import OfflineManager from '@/components/offline-manager';
+import NextTopLoader from 'nextjs-toploader';
 
 type Props = {
   children: ReactNode;
@@ -110,6 +111,17 @@ export default async function RootLocaleLayout({
             <ClientAuthProvider>
               <ProfileProvider>
                 <PlayerProvider>
+                  <NextTopLoader
+                    color="rgb(65, 17, 197)"
+                    initialPosition={0.08}
+                    crawlSpeed={200}
+                    height={3}
+                    crawl={true}
+                    showSpinner={false}
+                    easing="ease"
+                    speed={200}
+                    shadow="0 0 10px rgb(65, 17, 197),0 0 5px rgb(65, 17, 197)"
+                  />
                   <div className="bg-gray-900 relative text-black flex">
                   <LanguageSelectionModal />
                     {/* Responsive Navigation */}

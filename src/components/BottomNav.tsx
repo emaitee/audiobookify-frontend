@@ -240,10 +240,28 @@ function ResponsiveNav() {
       <div className="p-4 border-t border-gray-200 dark:border-gray-800">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-            <User size={16} />
+            {/* <User size={16} /> */}
+            {user?.profilePicture ? (
+              <Image
+                src={user.profilePicture}
+                alt="Profile Picture"
+                className="w-full h-full rounded-full"
+                width={32}
+                height={32}
+              />
+            ) : (
+              <svg
+                className="w-6 h-6 text-gray-500 dark:text-gray-400"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-3.31 0-10 1.67-10 5v2h20v-2c0-3.33-6.69-5-10-5z" />
+              </svg>
+            )}
           </div>
           <div>
-            <p className="text-sm font-medium">{user?.name || 'User'}</p>
+            <p className="text-sm text-white font-medium">{user?.name || 'User'}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {user?.role === 'admin' ? 'Administrator' : 'Member'}
             </p>

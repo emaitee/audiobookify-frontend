@@ -375,7 +375,7 @@ export const idb = {
     await db.put('explorePageCache', {
       ...data,
       timestamp: Date.now()
-    });
+    }, 3);
   },
   
   async getExplorePageData() {

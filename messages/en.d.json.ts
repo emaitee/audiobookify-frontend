@@ -37,7 +37,10 @@ declare const messages: {
           "explore": "Explore",
           "history": "History",
           "viewList": "View List",
-          "viewMore": "View More"
+          "viewMore": "View More",
+          "seeAll":"See All",
+          "listens": "Listens",
+          "noBioAvailable": "No biography available"
         },
         "featured": {
           "label": "FEATURED",
@@ -49,7 +52,11 @@ declare const messages: {
           "newReleases": "New Releases",
           "curatedCollections": "Curated Collections",
           "continueListening": "Continue Listening",
-          "browseCategories": "Browse Categories"
+          "browseCategories": "Browse Categories",
+          "authorSpotlight": "Authoer Spotlight",
+          "narratorSpotlight": "Narrator Spotlight",
+          "recommendedForYou": "Recommended for You",
+          "trendingNow": "Trending Now"
         },
         "collections": {
           "bestOfTheYear": "Best of 2025",

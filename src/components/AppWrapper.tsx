@@ -48,22 +48,20 @@ function AppWrapper({ children }: React.PropsWithChildren<{}>) {
   }, []);
   
   return (
-
-        <div className={`flex-1 flex flex-col ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
-                  {/* Header - only on mobile or conditionally positioned on desktop */}
-                  {isMobile && <Header />}
-                  
-                  {/* Main Content with proper padding */}
-                  <main className="p-4 flex-1">
-                  <AnimatePresence mode="wait">
-                    {children}
-                    </AnimatePresence>
-                    <AnimatePresence>
-                      {!isNowPlayingPage && <MiniPlayer />}
-                    </AnimatePresence>
-                  </main>
-                </div>
-
+    <div className={`flex-1 flex flex-col ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
+      {/* Header - only on mobile or conditionally positioned on desktop */}
+      {isMobile && <Header />}
+      
+      {/* Main Content with proper padding */}
+      <main className="p-4 flex-1">
+      <AnimatePresence mode="wait">
+        {children}
+        </AnimatePresence>
+        <AnimatePresence>
+          {!isNowPlayingPage && <MiniPlayer />}
+        </AnimatePresence>
+      </main>
+    </div>
   )
 }
 

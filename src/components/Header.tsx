@@ -141,7 +141,7 @@ const handleSearchInput = (e: SearchInputEvent): void => {
               onClick={toggleTheme}
               className={`p-1 rounded-full ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`}
             >
-              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+              {theme === 'dark' ? <SunIcon size={18} /> : <MoonIcon size={18} />}
             </button>
     </header>
   )};

@@ -38,6 +38,16 @@ const withPWA = require('next-pwa')({
 const nextConfig: NextConfig = withPWA({
   /* config options here */
   reactStrictMode: true,
+  images: { 
+    domains: [
+      'lh3.googleusercontent.com',
+      'localhost'
+    ], 
+    // formats: [
+    //   'image/avif', 
+    //   'image/webp'
+    // ]
+  }
 });
 
 export default withNextIntl(nextConfig);

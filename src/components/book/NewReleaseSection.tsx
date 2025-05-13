@@ -4,6 +4,7 @@ import { AlertCircle, AlertTriangle, ChevronLeft, ChevronRight, Clock, Play, Sta
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React from 'react'
 
 interface NewReleaseSectionProps {
@@ -21,6 +22,7 @@ interface NewReleaseSectionProps {
 function NewReleaseSection({loading, error, newReleases, handlePlay, isOffline}: NewReleaseSectionProps) {
     const t = useTranslations('HomePage')
     const { theme } = useTheme()
+    const router = useRouter()
 
   return (
     <section className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} `}>
@@ -78,10 +80,9 @@ function NewReleaseSection({loading, error, newReleases, handlePlay, isOffline}:
           <div 
             key={book?._id} 
             className={`group rounded-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-white hover:shadow-md'} transition-all duration-300 py-2 cursor-pointer`}
-            onClick={() => handlePlay(book)}
           >
             {/* Square covers instead of rectangular */}
-            <div className="relative aspect-square rounded-lg overflow-hidden mb-3">
+            <div className="relative aspect-square rounded-lg overflow-hidden mb-3" onClick={() => handlePlay(book)}>
               <img 
                 src={book.coverImage} 
                 alt={book.title} 
@@ -115,7 +116,7 @@ function NewReleaseSection({loading, error, newReleases, handlePlay, isOffline}:
             </div>
             
             {/* Book info with added details */}
-            <div className="px-1">
+            <div className="px-1" onClick={() => router.push(`/book/${book.slug}`)}>
               <h3 className="font-semibold text-xs md:text-sm line-clamp-1">{book.title}</h3>
               <p className={`text-[10px] md:text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} line-clamp-1 mb-1`}>
                 {book.author.name}

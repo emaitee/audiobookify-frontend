@@ -11,7 +11,7 @@ function CuratedCollections() {
 <section className="md:px-4 pb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">{t('sections.curatedCollections')}</h2>
-          <Link href={"/view-list?currated"} className={`text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+          <Link href={"/view-list?type=currated"} className={`text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
             {t('common.explore')} <ChevronRight size={16} />
           </Link>
         </div>

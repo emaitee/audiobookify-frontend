@@ -10,6 +10,8 @@ import {
   MessageCircleHeart
 } from "lucide-react";
 import { Episode } from "../page";
+import NewReviewSection from "@/components/book/NewReviewSection";
+import { useAuth } from "@/context/AuthContext";
 
 function formatTime(seconds: number, fullFormat = false): string {
   if (!seconds) return '00:00';
@@ -55,7 +57,7 @@ interface Book {
   [key: string]: any; // Add this if the Book type is dynamic
 }
 
-const StarRating = ({ 
+export const StarRating = ({ 
   rating, 
   setRating = undefined, 
   size = 20, 
@@ -142,6 +144,8 @@ export default function NowPlaying() {
   const [reviewCount, setReviewCount] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const {user} = useAuth()
 
   const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
@@ -804,69 +808,7 @@ export default function NowPlaying() {
             )}
             
             {activeTab === "reviews" && (
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold hidden md:block">Reviews & Comments</h3>
-                  <button className="text-indigo-600 text-sm font-medium hover:text-indigo-800 hidden md:block">
-                    Write a Review
-                  </button>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg border border-gray-100 mb-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-baseline">
-                      <span className="text-2xl md:text-3xl font-bold">{currentBook.averageRating || 0}</span>
-                      <span className="text-gray-500 ml-1">/ 5</span>
-                    </div>
-                    <div className="flex">
-                      <StarRating rating={currentBook.averageRating || 0} size={20} />
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">Based on {reviewCount} reviews</p>
-                </div>
-                
-                <div className="space-y-4">
-                  {currentBook.reviews?.slice(0, showMoreReviews ? currentBook.reviews.length : 2).map((review, i) => (
-                    <div key={i} className="bg-white p-3 md:p-4 rounded-lg border border-gray-100">
-                      <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center">
-                          <img 
-                            src={review.user.avatar} 
-                            alt={review.user.name} 
-                            className="w-8 h-8 rounded-full mr-2"
-                          />
-                          <span className="font-medium">{review.user.name}</span>
-                        </div>
-                        <span className="text-gray-500 text-xs md:text-sm">
-                          {formatRelativeTime(review.createdAt)}
-                        </span>
-                      </div>
-                      <div className="flex mb-2">
-                        <StarRating rating={review.rating} size={14} />
-                      </div>
-                      <p className="text-gray-700 text-sm">{review.comment}</p>
-                    </div>
-                  ))}
-                </div>
-                {(currentBook.reviews?.length ?? 0) > 2 && (
-                  <button 
-                    className="mt-4 text-indigo-600 flex items-center hover:text-indigo-800"
-                    onClick={() => setShowMoreReviews(!showMoreReviews)}
-                  >
-                    {showMoreReviews ? (
-                      <>
-                        <ChevronUp size={16} className="mr-1" />
-                        Show less reviews
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown size={16} className="mr-1" />
-                        Show all {(currentBook.reviews ?? []).length} reviews
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
+              <NewReviewSection bookId={currentBook._id} currentUser={user || undefined} />
             )}
           </div>
         </div>

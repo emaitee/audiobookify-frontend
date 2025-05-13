@@ -2,7 +2,7 @@
 
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { API_BASE_URL } from '@/app/utils/api';
+import { API_BASE_URL, apiHelper, authApiHelper } from '@/app/utils/api';
 
 type User = {
   _id: string;
@@ -34,16 +34,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const loadUser = () => {
+    const loadUser = async () => {
       try {
         const token = localStorage.getItem('token');
-        const userData = localStorage.getItem('user');
         
-        if (token && userData) {
-          setUser(JSON.parse(userData));
+        if (token) {
+          // Verify token is valid by making a request to the server
+          const response = await authApiHelper.get(`/auth/me`);
+          
+          if (response?.ok) {
+            const userData = await response.json();
+            const userState = {
+              _id: userData._id,
+              email: userData.email,
+              name: userData.name,
+              token: token,
+              role: userData.role,
+              profilePicture: userData.profilePicture
+            };
+            setUser(userState);
+            localStorage.setItem('user', JSON.stringify(userState));
+          } else {
+            // Token is invalid, clear localStorage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          }
         }
       } catch (err) {
         console.error('Failed to load user', err);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       } finally {
         setIsLoading(false);
       }
@@ -53,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Handle callback from OAuth providers
-  useEffect(() => {
+useEffect(() => {
     const handleOAuthCallback = async () => {
       // Only run this in the browser
       if (typeof window === 'undefined') return;
@@ -69,36 +89,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (token) {
         try {
-          // Verify the token and get user data
-          const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
+          localStorage.setItem('token', token);
+          
+          // Use token to fetch user data
+          const response = await authApiHelper.get(`/auth/me`);
 
-          if (response.ok) {
-            const data = await response.json();
-            const userData = {
-              _id: data.user._id,
-              email: data.user.email,
-              name: data.user.name,
+          if (response?.ok) {
+            const userData = await response.json();
+            const userState = {
+              _id: userData._id,
+              email: userData.email,
+              name: userData.name,
               token: token,
-              role: data.user.role,
-              profilePicture: data.user.profilePicture
+              role: userData.role,
+              profilePicture: userData.profilePicture
             };
 
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(userData));
-            setUser(userData);
+            localStorage.setItem('user', JSON.stringify(userState));
+            setUser(userState);
 
             // Clean up URL
             window.history.replaceState({}, document.title, window.location.pathname);
             router.push('/');
+          } else {
+            throw new Error('Failed to fetch user data');
           }
         } catch (err) {
           console.error('OAuth callback error', err);
           setError('Failed to authenticate with provider');
+          localStorage.removeItem('token');
         }
       }
     };
@@ -111,14 +130,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
     
     try {
-      const response = await fetch(API_BASE_URL + '/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+      const response = await apiHelper.post(`/auth/login`, { email, password })
 
       if (!response?.ok) {
-        const errorData = await response.json();
+        const errorData = await response?.json();
         throw new Error(errorData.message || 'Login failed');
       }
 
@@ -149,14 +164,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password })
-      });
+      const response = await apiHelper.post(`/auth/register`, { name, email, password })
 
       if (!response?.ok) {
-        const errorData = await response.json();
+        const errorData = await response?.json();
         throw new Error(errorData.message || 'Registration failed');
       }
 

@@ -23,6 +23,8 @@ import {
 import { authApiHelper } from '../../../utils/api';
 import { Book } from '../../page';
 import { usePlayer } from '@/context/PlayerContext';
+import NewReviewSection from '@/components/book/NewReviewSection';
+import { useAuth } from '@/context/AuthContext';
 
 interface Rating {
     user: string,
@@ -36,6 +38,7 @@ export default function BookView() {
     const params = useParams()
     const router = useRouter();
     const { currentBook, play, setCurrentBook, togglePlay } = usePlayer()
+    const { user } = useAuth()
     const [book, setBook] = useState<Book | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -405,19 +408,19 @@ export default function BookView() {
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div className={`p-4 rounded-xl shadow-sm border ${
                                     theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
-                                }`}>
+                                }`} onClick={() => router.push('/narrator/'+book.narrator.slug)}>
                                     <p className={`text-sm ${
                                         theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                                    }`}>Publisher</p>
-                                    <p className="font-medium">{book.publisher}</p>
+                                    }`}>Narrator</p>
+                                    <p className="font-medium">{book.narrator.name}</p>
                                 </div>
                                 <div className={`p-4 rounded-xl shadow-sm border ${
                                     theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
                                 }`}>
                                     <p className={`text-sm ${
                                         theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                                    }`}>Release Date</p>
-                                    <p className="font-medium">{book.releaseDate ? new Date(book.releaseDate).toLocaleDateString() : 'Unknown'}</p>
+                                    }`}>Date Uploaded</p>
+                                    <p className="font-medium">{book.createdAt ? new Date(book.createdAt).toLocaleDateString() : 'Unknown'}</p>
                                 </div>
                             </div>
                             
@@ -507,6 +510,20 @@ export default function BookView() {
                         </button>
                         <button 
                             className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${
+                                activeTab === 'reviews' 
+                                    ? theme === 'dark' 
+                                        ? 'border-indigo-500 text-indigo-400' 
+                                        : 'border-indigo-600 text-indigo-600' 
+                                    : theme === 'dark' 
+                                        ? 'border-transparent text-gray-400 hover:text-gray-300' 
+                                        : 'border-transparent text-gray-600 hover:text-gray-800'
+                            }`}
+                            onClick={() => setActiveTab('reviews')}
+                        >
+                            Reviews ({book.ratingsCount})
+                        </button>
+                        <button 
+                            className={`pb-3 px-4 text-sm font-medium border-b-2 transition-colors ${
                                 activeTab === 'ratings' 
                                     ? theme === 'dark' 
                                         ? 'border-indigo-500 text-indigo-400' 
@@ -581,8 +598,8 @@ export default function BookView() {
                                             { label: "Title:", value: book.title },
                                             { label: "Author:", value: book.author.name },
                                             { label: "Narrator:", value: book.narrator.name },
-                                            { label: "Publisher:", value: book.publisher },
-                                            { label: "Release Date:", value: book.releaseDate ? new Date(book.releaseDate).toLocaleDateString() : 'Unknown' },
+                                            // { label: "Publisher:", value: book.publisher },
+                                            { label: "Date Uploaded:", value: book.createdAt ? new Date(book.createdAt).toLocaleDateString() : 'Unknown' },
                                             { label: "Language:", value: book.narrationLanguage }
                                         ].map((item) => (
                                             <div className="flex justify-between" key={item.label}>
@@ -652,7 +669,7 @@ export default function BookView() {
                                 <div className="md:w-2/3">
                                     {[5, 4, 3, 2, 1].map((stars) => {
                                         const count = book.ratings.filter(rating => rating.rating === stars).length;
-                                        const percentage = (count / book.ratings.length) * 100;
+                                        const percentage = (count / (book.ratings.length === 0 ? 1 : book.ratings.length)) * 100;
 
                                         return (
                                             <div key={stars} className="flex items-center mb-2">
@@ -681,6 +698,11 @@ export default function BookView() {
                                 </div>
                             </div>
                         </div>
+                    )}
+
+                    {/* Reviews tab */}
+                    {activeTab === 'reviews' && (
+                            <NewReviewSection currentUser={user ?? undefined} bookId={book._id}  />
                     )}
                 </div>
             </section>

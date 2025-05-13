@@ -1,4 +1,4 @@
-export const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://192.168.0.138:8081/api' : 'https://server.brainstorm.ng/old-psn-server/api';
+export const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:8081/api' : 'https://server.brainstorm.ng/old-psn-server/api';
 
 // Normal Fetch Helpers (unauthenticated)
 export const apiHelper = {

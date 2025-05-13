@@ -15,18 +15,30 @@ import idb from '@/lib/idb';
 import NewReleaseSection from '@/components/book/NewReleaseSection';
 import CuratedCollections from '@/components/book/CuratedCollections';
 import FeaturedBooks from '@/components/book/FeaturedBooks';
+import AuthorSpotlight from '@/components/book/AuthorSpotlight';
+import NarratorSpotlight from '@/components/book/NarratorSpotlight';
+import TrendingNow from '@/components/book/TrendingNow';
+import RecommendedForYou from '@/components/book/RecommendedForYou';
+import ContinueListening from '@/components/book/ContinueListening';
 
 export interface Author {
   _id?: string;
   name: string;
   slug: string;
   bio?: string;
+  profileImage?: string;
+  books?: Book[];
+  totalBooks?: number;
 }
 export interface Narrator {
   _id?: string;
   name: string;
   slug: string;
   bio?: string;
+  profileImage?: string;
+  voiceStyles?: string[];
+  books?: Book[];
+  totalBooks?: number;
 }
 interface Rating {
   user: string;
@@ -86,6 +98,7 @@ export interface Book {
   tags?: string[];
   bookmarks: BookmarkType[],
   updatedAt: string;
+  ratingsCount?: number;
 }
 
 export default function AlternativeAudiobookExplorePage() {
@@ -244,76 +257,25 @@ export default function AlternativeAudiobookExplorePage() {
 )}
     <FeaturedBooks featuredBooks={featuredBooks} handlePlay={handlePlay} />
 
-      {/* New Releases - Fixed Horizontal Scrolling */}
-      <NewReleaseSection 
+    {/* New Releases - Fixed Horizontal Scrolling */}
+    <NewReleaseSection 
       loading={loading} 
-        error={error} 
-        newReleases={newReleases} 
-        handlePlay={handlePlay} 
-        isOffline={isOffline} 
-        />
+      error={error} 
+      newReleases={newReleases} 
+      handlePlay={handlePlay} 
+      isOffline={isOffline} 
+    />
       
-      {/* Collections */}
-      <CuratedCollections />
+    {/* Collections */}
+    <CuratedCollections />
+
+      <RecommendedForYou />
+      <AuthorSpotlight />
+      <NarratorSpotlight />
+      <TrendingNow />
       
       {/* Continue Listening */}
-      {!user ? null : <section className="md:px-4 pb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold">{t('sections.continueListening')}</h2>
-          <Link href={"/history"} className={`text-sm flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
-            {t('common.history')} <ChevronRight size={16} />
-          </Link>
-        </div>
-        
-        { loading.continue ? (
-          <div className="space-y-3">
-            {[...Array(2)].map((_, i) => (
-              <div key={i} className={`flex items-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} rounded-lg p-3 shadow-lg animate-pulse`}>
-                <div className={`w-12 h-16 rounded overflow-hidden mr-3 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
-                <div className="flex-1">
-                  <div className={`h-4 w-3/4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'} rounded mb-2`}></div>
-                  <div className={`h-3 w-1/2 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'} rounded mb-3`}></div>
-                  <div className={`w-full ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'} rounded-full h-1.5 mb-1`}></div>
-                  <div className={`h-3 w-1/4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'} rounded`}></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : error.continue ? (
-          <div className={`p-3 rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-red-400' : 'bg-red-50 text-red-600'} text-sm`}>
-            {error.continue}
-          </div>
-        ) : continueListening.length > 0 ? (
-          <div className="space-y-3">
-            {continueListening.map((book) => (
-              <div key={book._id} className={`flex items-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg p-3 shadow-lg`}>
-                <div className="w-12 h-16 rounded overflow-hidden mr-3 flex-shrink-0">
-                  <img src={book.coverImage} alt={book.title} className="object-cover w-full h-full" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-sm mb-1">{book.title}</h3>
-                  <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mb-2`}>{book.author.name}</p>
-                  <div className={`w-full ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-1.5 mb-1`}>
-                    <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${book.progress}%` }}></div>
-                  </div>
-                  <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>{book.progress}{t('continueListening.completed')}</p>
-                </div>
-                <button 
-                  onClick={() => handlePlay(book)}
-                  className={`ml-3 h-10 w-10 rounded-full ${theme === 'dark' ? 'bg-purple-500' : 'bg-purple-600'} flex items-center justify-center`}
-                >
-                  <Play size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} text-center`}>
-            <Headphones size={24} className={`mx-auto mb-2 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
-            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{t('continueListening.noListens')}</p>
-          </div>
-        )}
-      </section>}
+      {!user ? null : <ContinueListening handlePlay={handlePlay} error={error} loading={loading} continueListening={continueListening} /> }
       
       {/* Categories Shelf */}
       <section className="pd:px-4 pb-8">

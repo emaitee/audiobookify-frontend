@@ -335,7 +335,7 @@ const LibraryView = () => {
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                   }`}>{book.author}</p>
                   
-                  {book.progress && book.progress > 0 && (
+                  {book.progress && book.progress > 0 ? (
                     <div className="mt-1 sm:mt-2">
                       <div className={`w-full h-1 rounded-full ${
                         theme === 'dark' ? 'bg-gray-600' : 'bg-gray-200'
@@ -351,7 +351,7 @@ const LibraryView = () => {
                         {book.progress}% complete
                       </p>
                     </div>
-                  )}
+                  ):null}
                 </div>
                 <button 
                   className={`p-1 hover:text-red-500 ${
