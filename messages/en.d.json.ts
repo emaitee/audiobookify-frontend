@@ -86,7 +86,8 @@ declare const messages: {
           "failedToLoadNewReleases": "Failed to load new releases",
           "failedToLoadFeatured": "Failed to load featured books",
           "failedToLoadContinue": "Failed to load continue listening",
-          "offlineNoData": "Offline - No cached data available"
+          "offlineNoData": "Offline - No cached data available",
+          "noNewReleases": "No new releases"
         },
         "offline": {
           "message": "You are currently offline",

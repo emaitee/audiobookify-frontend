@@ -1,105 +1,104 @@
-import { Book } from "@/app/[locale]/page";
-import { usePlayer } from "@/context/PlayerContext";
-import { Clock, Star, Headphones, BookOpen, Pause } from "lucide-react";
-import { useState } from "react";
+import { useTheme } from 'next-themes';
+import { Play, Clock, Star } from 'lucide-react';
+import { Book } from '@/app/[locale]/page-old';
+import { formatTime } from '@/app/utils/helpers';
 
-export default function BookCard({ book }: { book: Book }) {
-  const {play,togglePlay, currentBook} = usePlayer()
-  const [expanded, setExpanded] = useState(false);
+interface BookCardProps {
+  book: Book;
+  onPlay: (book: Book) => void;
+  onClick?: (book: Book) => void;
+  aspectRatio?: 'square' | 'portrait';
+}
+
+const BookCard = ({ 
+  book, 
+  onPlay, 
+  onClick, 
+  aspectRatio = 'square'
+}: BookCardProps) => {
+  const { theme } = useTheme();
+
+  const handleCardClick = () => {
+    if (onClick) onClick(book);
+  };
+
+  const aspectClass = aspectRatio === 'square' ? 'aspect-square' : 'aspect-[2/3]';
   
-  // Helper function to format duration (assuming this exists in the original code)
-  const formatDuration = (duration:number) => {
-    const hours = Math.floor(duration / 3600);
-    const minutes = Math.floor((duration % 3600) / 60);
-    return `${hours}h ${minutes}m`;
-  };
-  
-  // Translation function (assuming this exists in the original code)
-  const t = (key: 'bookItem.coverAlt' | 'bookItem.narratedBy' | 'bookItem.noRating', params?: { title: string }) => {
-    const translations = {
-      'bookItem.coverAlt': `Cover for `,
-      'bookItem.narratedBy': 'Narrated by',
-      'bookItem.noRating': 'N/A'
-    };
-    return translations[key] || key;
-  };
-
-  const isPlaying = currentBook?._id === book._id;
-
-  const handlePlay = () => {
-    if (isPlaying) {
-        togglePlay();
-      } else {
-play(book);
-      }
-  };
-
   return (
-    <div className="bg-white border border-gray-100 rounded-lg overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md">
-      {/* Mobile-first horizontal layout */}
-      <div className="flex flex-row p-2 sm:p-3">
-        {/* Book cover - smaller on mobile, proportionally sized */}
-        <div className="relative w-24 h-32 sm:w-28 sm:h-40 flex-shrink-0 rounded-md overflow-hidden">
-          <img 
-            src={book.coverImage || '/api/placeholder/250/400'} 
-            alt={t('bookItem.coverAlt', { title: book.title })} 
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          
-          {/* Rating badge */}
-          <div className="absolute top-0 right-0 bg-black/70 px-1.5 py-0.5 rounded-bl-md flex items-center">
-            <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-            <span className="text-xs text-white font-medium ml-0.5">
-              {Number(book.averageRating)?.toFixed(1) || '-'}
-            </span>
-          </div>
+    <div className={`group rounded-lg ${
+      theme === 'dark' ? 'hover:bg-gray-800/70' : 'hover:bg-white hover:shadow-lg'
+    } transition-all duration-300 py-2 cursor-pointer`}>
+      {/* Cover image with play overlay */}
+      <div 
+        className={`relative ${aspectClass} rounded-lg overflow-hidden mb-3`} 
+        onClick={() => onPlay(book)}
+      >
+        <img 
+          src={book.coverImage} 
+          alt={book.title} 
+          className="object-cover w-full h-full" 
+          loading="lazy"
+        />
+        
+        {/* Play button overlay */}
+        <div className={`absolute inset-0 ${
+          theme === 'dark' ? 'bg-black/40' : 'bg-gray-900/30'
+        } flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300`}>
+          <button 
+            className={`h-10 w-10 md:h-12 md:w-12 flex items-center justify-center rounded-full ${
+              theme === 'dark' ? 'bg-purple-600 text-white' : 'bg-white text-purple-600'
+            } shadow-lg transform transition-transform group-hover:scale-110`}
+            aria-label={`Play ${book.title}`}
+          >
+            <Play size={16} className="ml-0.5" fill="currentColor" />
+          </button>
         </div>
         
-        {/* Book info - flexible width */}
-        <div className="ml-3 sm:ml-4 flex flex-col flex-grow justify-between">
-          <div>
-            {/* Title and toggle button */}
-            <div className="flex justify-between items-start">
-              <h3 className="font-semibold text-gray-900 text-sm sm:text-base line-clamp-2">{book.title}</h3>
-              <button 
-                onClick={() => setExpanded(!expanded)}
-                className="ml-2 flex-shrink-0 text-gray-400 hover:text-gray-600"
-              >
-                <BookOpen className="h-4 w-4" />
-              </button>
-            </div>
-            
-            {/* Author */}
-            <p className="text-xs sm:text-sm text-gray-700 mt-0.5 line-clamp-1">{book.author.name}</p>
-            
-            {/* Duration */}
-            <div className="flex items-center mt-1.5 text-gray-500 text-xs">
-              <Clock className="h-3 w-3 mr-1" />
-              <span>{formatDuration(book.duration || 0)}</span>
-            </div>
+        {/* Duration tag */}
+        {book.duration && (
+          <div className={`absolute bottom-2 right-2 px-2 py-1 rounded-full text-[10px] md:text-xs ${
+            theme === 'dark' ? 'bg-black/70 text-white' : 'bg-white/80 text-gray-800'
+          } flex items-center`}>
+            <Clock size={10} className="mr-1" /> 
+            {formatTime(book.duration)}
           </div>
-          
-          {/* Action button */}
-          <div className="mt-2 sm:mt-3">
-            <button onClick={handlePlay} className="bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center px-3 py-1.5 rounded-md text-xs font-medium w-full transition-colors">
-             {isPlaying ? <Pause className="h-3.5 w-3.5 mr-1.5" /> : <Headphones className="h-3.5 w-3.5 mr-1.5" />}
-              {isPlaying ? "Pause" : "Listen Now"}
-            </button>
-          </div>
-        </div>
+        )}
       </div>
       
-      {/* Expandable section with narrator and description */}
-      <div className={`overflow-hidden transition-all duration-300 bg-gray-50 ${expanded ? 'max-h-32' : 'max-h-0'}`}>
-        <div className="p-3 text-xs sm:text-sm">
-          <p className="text-gray-600">
-            <span className="font-medium">{t('bookItem.narratedBy')}:</span> {book.narrator.name}
-          </p>
-          {book.description && (
-            <p className="mt-1 text-gray-700 line-clamp-3">{book.description}</p>
-          )}
-        </div>
+      {/* Book info */}
+      <div className="px-1" onClick={handleCardClick}>
+        <h3 className="font-semibold text-xs md:text-sm line-clamp-1">{book.title}</h3>
+        <p className={`text-[10px] md:text-xs ${
+          theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+        } line-clamp-1 mb-1`}>
+          {book.author.name}
+        </p>
+        
+        {/* Rating */}
+        {book.averageRating > 0 && (
+          <div className="flex items-center">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i} 
+                size={10} 
+                className={`${
+                  i < Math.round(book.averageRating) 
+                    ? (theme === 'dark' ? 'text-amber-400' : 'text-amber-500') 
+                    : 'text-gray-400'
+                } ${i > 0 ? '-ml-0.5' : ''}`}
+                fill={i < Math.round(book.averageRating) ? 'currentColor' : 'none'}
+              />
+            ))}
+            <span className={`text-[9px] md:text-[10px] ml-1 ${
+              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+            }`}>
+              {book.averageRating.toFixed(1)}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
-}
+};
+
+export default BookCard;

@@ -1,20 +1,23 @@
 'use client'
 import { useState, useEffect, Suspense, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Filter, ChevronDown, ChevronUp, Clock, Star, BookOpen } from 'lucide-react';
-import { Book } from '../page';
+import { Book } from '../page-old';
 import { authApiHelper } from '@/app/utils/api';
 import { useTranslations } from 'next-intl'; // Import useTranslations hook
 import BookCard from '@/components/book/BookCard';
 import idb, { FilterOptions } from '@/lib/idb';
 import { useTheme } from 'next-themes';
 import FilterPanel from '@/components/FilterPanel';
+import { usePlayer } from '@/context/PlayerContext';
 
 const ViewListContent = () => {
   // Initialize translations
   const t = useTranslations("ListViewPage");
   const {theme} = useTheme()
   const searchParams = useSearchParams();
+  const { play } = usePlayer()
+  const router = useRouter()
   
   const [isOffline, setIsOffline] = useState(false);
   const [sortOrder, setSortOrder] = useState('newest');
@@ -527,7 +530,7 @@ const handleDateFilterChange = (filter: string) => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {audiobooks.map((book, index:number) => (
-              <BookCard key={index} book={book} />
+              <BookCard key={index} book={book} onPlay={(book:Book) => play(book)} onClick={book => router.push('/book/'+book.slug)} />
             ))}
           </div>
         )}

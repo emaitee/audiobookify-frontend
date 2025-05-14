@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Clock, Play, Calendar, Book, Search, ChevronDown, Filter, List, Grid } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { authApiHelper } from '@/app/utils/api';
-import { Book as BookType } from '../page';
+import { Book as BookType } from '../page-old';
 
 interface HistoryItem {
   _id: string;

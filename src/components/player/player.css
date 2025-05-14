@@ -1,0 +1,18 @@
+.transition-width {
+  transition-property: width;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vinyl-spinning {
+  animation: spin 20s linear infinite;
+  animation-play-state: paused;
+}
+
+.vinyl-spinning.playing {
+  animation-play-state: running;
+}

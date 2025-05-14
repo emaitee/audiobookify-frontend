@@ -1,3 +1,4 @@
+'use client';
 import { useState, useEffect } from 'react';
 import { Star, StarHalf, ChevronUp, ChevronDown, MessageSquare, ThumbsUp, Edit, Trash2, X, Moon, Sun } from 'lucide-react';
 import { authApiHelper } from '@/app/utils/api';

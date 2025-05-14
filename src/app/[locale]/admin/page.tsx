@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect, JSX } from 'react';
 import { Plus, Upload, X, PlayCircle, Check, AlertTriangle, BarChart2, FileText, Download } from 'lucide-react';
 import { API_BASE_URL, authApiHelper } from '@/app/utils/api';
-import { Author, Book, Episode, Narrator } from '../page';
+import { Author, Book, Episode, Narrator } from '../page-old';
 import EpisodesModal from '@/components/dashboard-contents/EpisodeModal';
 import UploadModal from '@/components/dashboard-contents/UploadModal';
 

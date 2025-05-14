@@ -1,4 +1,4 @@
-import { Book, Episode } from '@/app/[locale]/page';
+import { Book, Episode } from '@/app/[locale]/page-old';
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
 export interface FilterOptions {

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/context/AuthContext';
-import { Book } from '@/app/[locale]/page';
+import { Book } from '@/app/[locale]/page-old';
 import { authApiHelper } from '@/app/utils/api';
 import { useRouter } from 'next/navigation';
 

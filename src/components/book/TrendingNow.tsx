@@ -1,10 +1,11 @@
+'use client'
 import { TrendingUp, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { authApiHelper } from '@/app/utils/api';
-import { Book } from '@/app/[locale]/page';
+import { Book } from '@/app/[locale]/page-old';
 import { useRouter } from 'next/navigation';
 
 const TrendingNow = () => {

@@ -3,7 +3,7 @@ import { Mic } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { authApiHelper } from '@/app/utils/api';
-import { Narrator } from '@/app/[locale]/page';
+import { Narrator } from '@/app/[locale]/page-old';
 import { useTranslations } from 'next-intl';
 
 const NarratorSpotlight = () => {
