@@ -21,7 +21,7 @@ import {
   Settings
 } from 'lucide-react';
 import { authApiHelper } from '../../../utils/api';
-import { Book } from '../../page-old';
+import { Book } from '../../page';
 import { usePlayer } from '@/context/PlayerContext';
 import NewReviewSection from '@/components/book/NewReviewSection';
 import { useAuth } from '@/context/AuthContext';
