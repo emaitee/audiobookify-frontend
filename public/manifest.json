@@ -67,5 +67,6 @@
     "display_override": ["window-controls-overlay"],
     "launch_handler": {
       "client_mode": "focus-existing"
-    }
+    },
+    "gcm_sender_id": "103953800507"
   }

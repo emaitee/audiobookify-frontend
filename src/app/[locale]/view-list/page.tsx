@@ -2,14 +2,15 @@
 import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Filter, ChevronDown, ChevronUp, Clock, Star, BookOpen } from 'lucide-react';
-import { Book } from '../page-old';
+// import { Book } from '../page-old';
 import { authApiHelper } from '@/app/utils/api';
 import { useTranslations } from 'next-intl'; // Import useTranslations hook
 import BookCard from '@/components/book/BookCard';
-import idb, { FilterOptions } from '@/lib/idb';
+import { FilterOptions } from '@/lib/idb';
 import { useTheme } from 'next-themes';
 import FilterPanel from '@/components/FilterPanel';
 import { usePlayer } from '@/context/PlayerContext';
+import { Book } from '../page';
 
 const ViewListContent = () => {
   // Initialize translations
@@ -95,12 +96,12 @@ const ViewListContent = () => {
 const initFilterOptions = async () => {
   try {
     // Try to load from cache
-    const cachedOptions = await idb.getCachedFilterOptions()
-    if (cachedOptions) {
-      setFilterOptions(cachedOptions)
-      setGenres([t('allGenres'), ...(cachedOptions.genres || [])])
-      setNarrators([t('allNarrators'), ...(cachedOptions.narrators || [])])
-    }
+    // const cachedOptions = await idb.getCachedFilterOptions()
+    // if (cachedOptions) {
+    //   setFilterOptions(cachedOptions)
+    //   setGenres([t('allGenres'), ...(cachedOptions.genres || [])])
+    //   setNarrators([t('allNarrators'), ...(cachedOptions.narrators || [])])
+    // }
 
     // Fetch fresh options if online
     if (!isOffline) {
@@ -119,7 +120,7 @@ const initFilterOptions = async () => {
         setGenres([t('allGenres'), ...updatedOptions.genres])
         setNarrators([t('allNarrators'), ...updatedOptions.narrators])
         
-        await idb.cacheFilterOptions(updatedOptions)
+        // await idb.cacheFilterOptions(updatedOptions)
       }
     }
   } catch (err) {
@@ -158,20 +159,20 @@ const handleDateFilterChange = (filter: string) => {
       const cacheKey = generateCacheKey();
 
       // First try to load from cache
-      let cachedData = null;
-      try {
-        cachedData = await idb.getCachedAudiobookList(cacheKey);
-      } catch (cacheError) {
-        console.log('Cache access error:', cacheError);
-      }
-      if (cachedData && isOffline) {
-        setAudiobooks(cachedData.books);
-        setTotalBooks(cachedData.total);
-        return;
-      }
+      // let cachedData = null;
+      // try {
+      //   // cachedData = await idb.getCachedAudiobookList(cacheKey);
+      // } catch (cacheError) {
+      //   console.log('Cache access error:', cacheError);
+      // }
+      // if (cachedData && isOffline) {
+      //   setAudiobooks(cachedData.books);
+      //   setTotalBooks(cachedData.total);
+      //   return;
+      // }
 
       // Try to fetch fresh data if online
-      if (!isOffline) {
+      // if (!isOffline) {
         let endpoint = '';
         let queryParams = `page=${currentPage}&limit=8&includeDetails=true`;
 
@@ -229,31 +230,31 @@ const handleDateFilterChange = (filter: string) => {
         setTotalBooks(total);
 
         // Cache the data
-        try {
-          await idb.cacheAudiobookList(cacheKey, {
-            books,
-            total
-          });
-        } catch (cacheError) {
-          console.error('Failed to cache audiobook list:', cacheError);
-        }
-      } else if (!cachedData) {
-        // No cached data available offline
-        setError(t('errors.offlineNoData'));
-        setAudiobooks([]);
-        setTotalBooks(0);
-      }
+        // try {
+        //   await idb.cacheAudiobookList(cacheKey, {
+        //     books,
+        //     total
+        //   });
+        // } catch (cacheError) {
+        //   console.error('Failed to cache audiobook list:', cacheError);
+        // }
+      // } else if (!cachedData) {
+      //   // No cached data available offline
+      //   setError(t('errors.offlineNoData'));
+      //   setAudiobooks([]);
+      //   setTotalBooks(0);
+      // }
     } catch (err) {
       console.error('Error fetching audiobooks:', err);
       setError(err instanceof Error ? err.message : t('errors.loadFailed'));
       
       // Try to load from cache even if error occurred
-      const cacheKey = generateCacheKey();
-      const cachedData = await idb.getCachedAudiobookList(cacheKey);
-      if (cachedData) {
-        setAudiobooks(cachedData.books);
-        setTotalBooks(cachedData.total);
-      }
+      // const cacheKey = generateCacheKey();
+      // const cachedData = await idb.getCachedAudiobookList(cacheKey);
+      // if (cachedData) {
+      //   setAudiobooks(cachedData.books);
+      //   setTotalBooks(cachedData.total);
+      // }
     } finally {
       setLoading(false);
     }

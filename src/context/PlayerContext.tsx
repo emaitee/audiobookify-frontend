@@ -2,9 +2,9 @@
 import { createContext, useContext, useState, useRef, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApiHelper } from '@/app/utils/api';
-import { Book, Episode } from '@/app/[locale]/page-old';
+import { Book, Episode } from '@/app/[locale]/page';
 import { useDebounceFn } from '@/hooks/useDebounce';
-import idb from '@/lib/idb';
+// import idb from '@/lib/idb';
 
 interface OfflineQueueItem {
   action: 'updateListenHistory' | 'recordPlaybackSession';
@@ -197,18 +197,18 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       // Store locally first
-      await idb.recordPlaybackSession(payload);
+      // await idb.recordPlaybackSession(payload);
       
       // Try to sync if online
-      if (!offlineState.isOffline) {
+      // if (!offlineState.isOffline) {
         await authApiHelper.post('/listening-sessions', payload);
-      } else {
-        addToOfflineQueue({
-          action: 'recordPlaybackSession',
-          payload,
-          timestamp: Date.now()
-        });
-      }
+      // } else {
+      //   addToOfflineQueue({
+      //     action: 'recordPlaybackSession',
+      //     payload,
+      //     timestamp: Date.now()
+      //   });
+      // }
       
       // Update local state
       if (currentEpisode) {
@@ -225,7 +225,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   const updateListenHistory = async (bookId: string, progress: number, episodeId?: string) => {
     try {
       // First try to update locally
-      await idb.updateListenHistory(bookId, progress, episodeId);
+      // await idb.updateListenHistory(bookId, progress, episodeId);
       
       // Then try to sync with server if online
       if (!offlineState.isOffline) {
@@ -276,13 +276,13 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     
     try {
       // First try to fetch from network
-      if (!offlineState.isOffline) {
+      // if (!offlineState.isOffline) {
         const response = await authApiHelper.get('/books');
         if (!response?.ok) throw new Error(`HTTP error! status: ${response?.status}`);
         
         const data = await response.json();
         setAllBooks(data.books);
-        await idb.cacheBooks(data.books); // Cache the fresh data
+        // await idb.cacheBooks(data.books); // Cache the fresh data
         
         // Update current book if needed
         setCurrentBook(prev => {
@@ -290,29 +290,29 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
           const updatedBook = data.books.find((b: Book) => b._id === prev._id);
           return updatedBook || prev;
         });
-      } else {
-        // Fallback to cached data when offline
-        const cachedBooks = await idb.getAllBooks();
-        setAllBooks(cachedBooks);
+      // } else {
+      //   // Fallback to cached data when offline
+      //   const cachedBooks = await idb.getAllBooks();
+      //   setAllBooks(cachedBooks);
         
-        // Update current book from cache if needed
-        if (currentBook) {
-          const updatedBook = cachedBooks.find((b: Book) => b._id === currentBook._id);
-          if (updatedBook) setCurrentBook(updatedBook);
-        }
-      }
+      //   // Update current book from cache if needed
+      //   if (currentBook) {
+      //     const updatedBook = cachedBooks.find((b: Book) => b._id === currentBook._id);
+      //     if (updatedBook) setCurrentBook(updatedBook);
+      //   }
+      // }
     } catch (err) {
       // If online fetch fails, try cache
-      if (!offlineState.isOffline) {
-        try {
-          const cachedBooks = await idb.getAllBooks();
-          setAllBooks(cachedBooks);
-        } catch (cacheErr) {
-          setError(err instanceof Error ? err.message : 'Failed to fetch books');
-        }
-      } else {
-        setError('Offline - showing cached content');
-      }
+      // if (!offlineState.isOffline) {
+      //   try {
+      //     const cachedBooks = await idb.getAllBooks();
+      //     setAllBooks(cachedBooks);
+      //   } catch (cacheErr) {
+      //     setError(err instanceof Error ? err.message : 'Failed to fetch books');
+      //   }
+      // } else {
+      //   setError('Offline - showing cached content');
+      // }
     } finally {
       setLoading(false);
     }
@@ -654,14 +654,14 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Check if audio is available offline
-      const isAvailableOffline = await idb.isEpisodeAvailableOffline(playEpisode._id);
+      // const isAvailableOffline = await idb.isEpisodeAvailableOffline(playEpisode._id);
       let audioSource = playEpisode.audioFile;
 
-      if (isAvailableOffline) {
-        audioSource = await idb.getOfflineAudioUrl(playEpisode._id);
-      } else if (offlineState.isOffline) {
-        throw new Error('Episode not available offline');
-      }
+      // if (isAvailableOffline) {
+      //   audioSource = await idb.getOfflineAudioUrl(playEpisode._id);
+      // } else if (offlineState.isOffline) {
+      //   throw new Error('Episode not available offline');
+      // }
   
       // Update state
     console.log("Updating current book and episode");

@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes';
 import { useAuth } from '@/context/AuthContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { authApiHelper } from '../utils/api';
-import idb from '@/lib/idb';
+// import idb from '@/lib/idb';
 
 import { getPlayableContent } from '../utils/book-utils';
 
@@ -63,14 +63,16 @@ export interface Episode {
 
 export interface Review {
   _id: string;
-  createdAt: string;
   user: {
+    _id: string;
     name: string;
     avatar?: string;
   };
   rating: number;
   comment: string;
-  date: string;
+  createdAt: string;
+  likes?: number;
+  isLiked?: boolean;
 }
 
 export interface BookmarkType {
@@ -155,16 +157,16 @@ export default function AudiobookExplorePage() {
       setLoading(prev => ({...prev, newReleases: true, featured: true, continue: true}));
       
       // First try to load from cache
-      const cachedData = await idb.getExplorePageData();
-      if (cachedData && isOffline) {
-        setNewReleases(cachedData.newReleases || []);
-        setFeaturedBooks(cachedData.featuredBooks || []);
-        setContinueListening(cachedData.continueListening || []);
-        return;
-      }
+      // const cachedData = await idb.getExplorePageData();
+      // if (cachedData && isOffline) {
+      //   setNewReleases(cachedData.newReleases || []);
+      //   setFeaturedBooks(cachedData.featuredBooks || []);
+      //   setContinueListening(cachedData.continueListening || []);
+      //   return;
+      // }
   
       // Try to fetch fresh data if online
-      if (!isOffline) {
+      // if (!isOffline) {
         const [newReleasesRes, featuredRes, continueRes] = await Promise.all([
           authApiHelper.get('/books-info/new-releases'),
           authApiHelper.get('/books-info/featured'),
@@ -181,27 +183,27 @@ export default function AudiobookExplorePage() {
         setContinueListening(continueData?.books || []);
   
         // Cache the data
-        await idb.cacheExplorePageData({
-          newReleases: newReleasesData?.books || [],
-          featuredBooks: featuredData?.books || [],
-          continueListening: continueData?.books || []
-        });
-      }
+        // await idb.cacheExplorePageData({
+        //   newReleases: newReleasesData?.books || [],
+        //   featuredBooks: featuredData?.books || [],
+        //   continueListening: continueData?.books || []
+        // });
+      // }
     } catch (err) {
       console.error('Fetch error:', err);
       // Try to load from cache even if error occurred
-      const cachedData = await idb.getExplorePageData();
-      if (cachedData) {
-        setNewReleases(cachedData.newReleases || []);
-        setFeaturedBooks(cachedData.featuredBooks || []);
-        setContinueListening(cachedData.continueListening || []);
-      } else {
-        setError({
-          newReleases: isOffline ? t('errors.offlineNoData') : t('errors.failedToLoadNewReleases'),
-          featured: isOffline ? t('errors.offlineNoData') : t('errors.failedToLoadFeatured'),
-          continue: isOffline ? t('errors.offlineNoData') : t('errors.failedToLoadContinue')
-        });
-      }
+      // const cachedData = await idb.getExplorePageData();
+      // if (cachedData) {
+      //   setNewReleases(cachedData.newReleases || []);
+      //   setFeaturedBooks(cachedData.featuredBooks || []);
+      //   setContinueListening(cachedData.continueListening || []);
+      // } else {
+      //   setError({
+      //     newReleases: isOffline ? t('errors.offlineNoData') : t('errors.failedToLoadNewReleases'),
+      //     featured: isOffline ? t('errors.offlineNoData') : t('errors.failedToLoadFeatured'),
+      //     continue: isOffline ? t('errors.offlineNoData') : t('errors.failedToLoadContinue')
+      //   });
+      // }
     } finally {
       setLoading({
         newReleases: false,
@@ -209,7 +211,7 @@ export default function AudiobookExplorePage() {
         continue: false
       });
     }
-  }, [t, user, isOffline]);
+  }, [t, user]);
 
   useEffect(() => {
     fetchData();
@@ -234,17 +236,31 @@ export default function AudiobookExplorePage() {
   return (
     <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'} pb-20`}>
       {/* Offline Banner */}
-      <OfflineBanner isOffline={isOffline} />
+      {/* <OfflineBanner isOffline={isOffline} /> */}
       
       {/* Featured Books */}
-      <FeaturedBooks featuredBooks={featuredBooks} handlePlay={handlePlay} />
+      <FeaturedBooks
+        featuredBooks={featuredBooks.map(book => ({
+          ...book,
+          bookmarks: (book.bookmarks || []).map(b => ({
+            timestamp: b.position ?? 0,
+            chapter: b.chapter ?? '',
+            note: b.note ?? ''
+          })) as {
+            timestamp: number;
+            chapter: string;
+            note: string;
+          }[]
+        }))}
+        handlePlay={handlePlay}
+      />
 
       {/* New Releases */}
       <NewReleaseSection 
         loading={loading} 
         error={error} 
-        newReleases={newReleases} 
-        handlePlay={handlePlay} 
+        newReleases={newReleases}
+        handlePlay={handlePlay as (book: any) => void} 
         isOffline={isOffline} 
       />
       

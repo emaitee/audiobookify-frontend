@@ -1,4 +1,4 @@
-import { Book } from "../[locale]/page-old";
+import { Book } from "../[locale]/page";
 
 
 

@@ -154,3 +154,58 @@ workbox.routing.registerRoute(
     ]
   })
 );
+
+
+
+// push notification implementation
+
+self.addEventListener('push', (event) => {
+  const data = event.data?.json();
+  const title = data?.title || 'New update available';
+  const options = {
+    body: data?.body || 'Click to see what\'s new',
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/icon-96x96.png',
+    data: data?.data || {},
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+      .then(() => {
+        // Send message to all clients
+        self.clients.matchAll().then((clients) => {
+          clients.forEach((client) => {
+            client.postMessage({
+              type: 'NOTIFICATION',
+              notification: data,
+            });
+          });
+        });
+      })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  const urlToOpen = event.notification.data?.url || '/';
+  
+  event.waitUntil(
+    self.clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true,
+    }).then((clientList) => {
+      // Check if there's already a window/tab open with the target URL
+      for (const client of clientList) {
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      
+      // If not, open a new window/tab
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(urlToOpen);
+      }
+    })
+  );
+});

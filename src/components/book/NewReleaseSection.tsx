@@ -1,5 +1,5 @@
 
-import { Book } from '@/app/[locale]/page-old';
+import { Book } from '@/app/[locale]/page';
 import BookShelf from './BookShelf';
 import { Music } from 'lucide-react';
 import { useTranslations } from 'next-intl';

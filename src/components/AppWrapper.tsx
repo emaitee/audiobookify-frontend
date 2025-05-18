@@ -6,7 +6,7 @@ import { MiniPlayer } from './MiniPlayer';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import './wrapper.css'
-import idb from '@/lib/idb';
+// import idb from '@/lib/idb';
 
 function AppWrapper({ children }: React.PropsWithChildren<{}>) {
     const {theme} = useTheme()
@@ -14,22 +14,22 @@ function AppWrapper({ children }: React.PropsWithChildren<{}>) {
     const isNowPlayingPage = pathname.includes('/playing');
     const [isMobile, setIsMobile] = useState(true);
 
-    const checkAndMigrateDB = async () => {
-    try {
-      const db = await idb.ready();
-      if (!db.objectStoreNames.contains('audiobookLists')) {
-        // Force upgrade by reopening with higher version
-        await idb.resetDatabase();
-      }
-    } catch (error) {
-      console.error('Database migration check failed:', error);
-    }
-  };
+  //   const checkAndMigrateDB = async () => {
+  //   try {
+  //     const db = await idb.ready();
+  //     if (!db.objectStoreNames.contains('audiobookLists')) {
+  //       // Force upgrade by reopening with higher version
+  //       await idb.resetDatabase();
+  //     }
+  //   } catch (error) {
+  //     console.error('Database migration check failed:', error);
+  //   }
+  // };
 
-  useEffect(() => {
-    checkAndMigrateDB();
-  }
-  , []);
+  // useEffect(() => {
+  //   checkAndMigrateDB();
+  // }
+  // , []);
   
   // Check if we're on the client side and detect screen size
   useEffect(() => {

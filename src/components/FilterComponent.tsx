@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import idb from '@/lib/idb'
+// import idb from '@/lib/idb'
 
 export default function FilterComponent() {
   const t = useTranslations("Filters")
@@ -24,24 +24,24 @@ export default function FilterComponent() {
     
     try {
       // 1. Try loading from IndexedDB cache first
-      const cached = await idb.getFilterOptions()
+      // const cached = await idb.getFilterOptions()
       
-      if (cached) {
-        // Apply cached filters to state
-        setAvailableGenres([t('allGenres'), ...cached.genres])
-        setAvailableNarrators([t('allNarrators'), ...cached.narrators])
-        setDateFilters(cached.dateFilters)
-        setSortOptions(cached.sortOptions)
+      // if (cached) {
+      //   // Apply cached filters to state
+      //   setAvailableGenres([t('allGenres'), ...cached.genres])
+      //   setAvailableNarrators([t('allNarrators'), ...cached.narrators])
+      //   setDateFilters(cached.dateFilters)
+      //   setSortOptions(cached.sortOptions)
         
-        // Set default selections
-        setSelectedGenre(cached.defaults.genre)
-        setSelectedNarrator(cached.defaults.narrator)
-        setSelectedDateFilter(cached.defaults.dateFilter)
-        setSelectedSort(cached.defaults.sortOrder)
-      }
+      //   // Set default selections
+      //   setSelectedGenre(cached.defaults.genre)
+      //   setSelectedNarrator(cached.defaults.narrator)
+      //   setSelectedDateFilter(cached.defaults.dateFilter)
+      //   setSelectedSort(cached.defaults.sortOrder)
+      // }
 
       // 2. Fetch fresh data if online
-      if (navigator.onLine) {
+      // if (navigator.onLine) {
         try {
           const response = await fetch('/books-info/filter-options')
           
@@ -71,15 +71,15 @@ export default function FilterComponent() {
           setSortOptions(freshOptions.sortOptions)
 
           // Cache the fresh data
-          await idb.cacheFilterOptions(freshOptions)
+          // await idb.cacheFilterOptions(freshOptions)
           
         } catch (fetchError) {
           console.error('Failed to fetch fresh filters:', fetchError)
-          if (!cached) {
-            setError(t('errors.loadFailed'))
-          }
+          // if (!cached) {
+          //   setError(t('errors.loadFailed'))
+          // }
         }
-      }
+      // }
     } catch (error) {
       console.error('Error loading filters:', error)
       setError(t('errors.loadFailed'))

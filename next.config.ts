@@ -1,3 +1,4 @@
+import webpack from 'webpack';
 import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
 
@@ -35,18 +36,62 @@ const withPWA = require('next-pwa')({
 })
 
 
+interface ImageConfig {
+  domains: string[];
+  // formats?: string[];
+}
+
+interface WebpackConfig {
+  plugins: webpack.WebpackPluginInstance[];
+}
+
+interface RuntimeCachingOptions {
+  cacheName: string;
+  expiration: {
+    maxEntries: number;
+    maxAgeSeconds: number;
+  };
+  cacheableResponse: {
+    statuses: number[];
+  };
+  rangeRequests: boolean;
+}
+
+interface RuntimeCaching {
+  urlPattern: RegExp;
+  handler: string;
+  options: RuntimeCachingOptions;
+}
+
+interface PWAConfig {
+  dest: string;
+  disable: boolean;
+  register: boolean;
+  skipWaiting: boolean;
+  scope: string;
+  sw: string;
+  runtimeCaching: RuntimeCaching[];
+}
+
 const nextConfig: NextConfig = withPWA({
-  /* config options here */
   reactStrictMode: true,
-  images: { 
+  images: {
     domains: [
       'lh3.googleusercontent.com',
       'localhost'
-    ], 
+    ],
     // formats: [
     //   'image/avif', 
     //   'image/webp'
     // ]
+  } as ImageConfig,
+  webpack: (config: WebpackConfig) => {
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        'process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY': JSON.stringify(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY),
+      })
+    );
+    return config;
   }
 });
 

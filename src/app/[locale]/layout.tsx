@@ -18,9 +18,12 @@ import IOSInstallHint from "@/components/IOSInstallHint";
 import { ThemeProvider } from 'next-themes';
 import LanguageSelectionModal from '@/components/LanguageSelectionModal';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
-import { OfflineProvider } from '@/components/OfflineProvider';
-import OfflineManager from '@/components/offline-manager';
+// import { OfflineProvider } from '@/components/OfflineProvider';
+// import OfflineManager from '@/components/offline-manager';
 import NextTopLoader from 'nextjs-toploader';
+import NotificationDisplay from '@/components/NotificationDisplay';
+import { NotificationProvider } from '@/context/NotificationContext';
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
 type Props = {
   children: ReactNode;
@@ -105,7 +108,7 @@ export default async function RootLocaleLayout({
         <meta name="apple-mobile-web-app-title" content="SautiBox: African Voices, Endless Stories" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <GoogleAnalytics />
-        <OfflineManager/>
+        {/* <OfflineManager/> */}
         <ThemeProvider>
           <NextIntlClientProvider>
             <ClientAuthProvider>
@@ -130,9 +133,14 @@ export default async function RootLocaleLayout({
                     {/* Main Content Wrapper - adjusts based on screen size */}
                     <AppWrapper>
                       {/* <OfflineProvider> */}
+                       <NotificationProvider>
                     {children}
+                    <NotificationDisplay />
+                    <ServiceWorkerRegister />
+                    </NotificationProvider>
                     {/* </OfflineProvider> */}
                     </AppWrapper>
+
                     <PWAInstallPrompt />
                     <IOSInstallHint />
                   </div>
