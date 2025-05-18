@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
-import { Author } from '@/app/[locale]/page-old';
+import { Author } from '@/app/[locale]/page';
 import { authApiHelper } from '@/app/utils/api';
 import { useTranslations } from 'next-intl';
 

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import BookCard from './BookCard';
 import Skeleton from '../shared/Skeleton';
 import SectionHeader from '../shared/SectionHeader';
-import { Book } from '@/app/[locale]/page-old';
+import { Book } from '@/app/[locale]/page';
 
 interface BookShelfProps {
   title: string;

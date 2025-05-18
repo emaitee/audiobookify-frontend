@@ -1,7 +1,7 @@
 'use client'
 import { Edit, Heart, MessageCircleWarning, Star, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
-import { Book } from '@/app/[locale]/page-old';
+import { Book } from '@/app/[locale]/page';
 import { useAuth } from '@/context/AuthContext';
 import { apiHelper, authApiHelper } from '@/app/utils/api';
 

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { authApiHelper } from '@/app/utils/api';
-import { Book } from '@/app/[locale]/page-old';
+import { Book } from '@/app/[locale]/page';
 import { useRouter } from 'next/navigation';
 
 const TrendingNow = () => {

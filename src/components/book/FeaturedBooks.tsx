@@ -1,5 +1,5 @@
 'use client'
-import { Book } from '@/app/[locale]/page-old';
+import { Book } from '@/app/[locale]/page';
 import { formatTime } from '@/app/utils/helpers';
 import { Bookmark, ChevronLeft, ChevronRight, Clock, Play, Star } from 'lucide-react';
 import { useTranslations } from 'next-intl';

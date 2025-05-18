@@ -6,7 +6,7 @@ import SectionHeader from '../shared/SectionHeader';
 import Skeleton from '../shared/Skeleton';
 import { useTranslations } from 'next-intl';
 import { calculateProgress } from '@/app/utils/book-utils';
-import { Book } from '@/app/[locale]/page-old';
+import { Book } from '@/app/[locale]/page';
 
 
 interface ContinueListeningProps {

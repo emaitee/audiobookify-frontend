@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import UploadModal from "./UploadModal";
 import EpisodesModal from "./EpisodeModal";
 import { AnalyticsData, ApprovedItem, BookMetadata, RecentUpload, Stats } from "@/app/[locale]/admin/page";
-import { Book as BookType, Episode } from "@/app/[locale]/page-old";
+import { Book as BookType, Episode } from "@/app/[locale]/page";
 import { API_BASE_URL } from "@/app/utils/api";
 
 export default function ContentManagement() {

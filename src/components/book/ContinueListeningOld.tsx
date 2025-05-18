@@ -3,7 +3,7 @@ import { ChevronRight, Play, Headphones } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
-import { Book } from '@/app/[locale]/page-old';
+import { Book } from '@/app/[locale]/page';
 
 interface ContinueListeningType {
     error: { 

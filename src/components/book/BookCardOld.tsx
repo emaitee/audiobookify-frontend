@@ -1,4 +1,4 @@
-import { Book } from "@/app/[locale]/page-old";
+import { Book } from "@/app/[locale]/page";
 import { usePlayer } from "@/context/PlayerContext";
 import { Clock, Star, Headphones, BookOpen, Pause } from "lucide-react";
 import { useState } from "react";

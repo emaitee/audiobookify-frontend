@@ -1,6 +1,6 @@
 import { useTheme } from 'next-themes';
 import { Play, Clock, Star } from 'lucide-react';
-import { Book } from '@/app/[locale]/page-old';
+import { Book } from '@/app/[locale]/page';
 import { formatTime } from '@/app/utils/helpers';
 
 interface BookCardProps {
