@@ -405,73 +405,74 @@ const AdminView = () => {
   };
 
   const uploadAudiobook = async () => {
-    // if (!uploadingFile) return;
+    if (typeof window === 'undefined') return;
+    if (!uploadingFile) return;
     
-    // setUploadProgress(0);
-    // setUploadStep(3);
+    setUploadProgress(0);
+    setUploadStep(3);
     
-    // // Create FormData to send files and metadata
-    // const formData = new FormData();
-    // formData.append('audioFile', uploadingFile);
-    // if (coverFile) {
-    //   formData.append('coverImage', coverFile);
-    // }
+    // Create FormData to send files and metadata
+    const formData = new FormData();
+    formData.append('audioFile', uploadingFile);
+    if (coverFile) {
+      formData.append('coverImage', coverFile);
+    }
     
-    // // Add metadata
-    // formData.append('title', bookMetadata.title);
-    // formData.append('author', bookMetadata.author);
-    // formData.append('narrator', bookMetadata.narrator);
-    // formData.append('category', bookMetadata.category);
-    // formData.append('description', bookMetadata.description);
-    // formData.append('narrationLanguage', bookMetadata.narrationLanguage);
-    // formData.append('isSeries', String(bookMetadata.isSeries));
+    // Add metadata
+    formData.append('title', bookMetadata.title);
+    formData.append('author', bookMetadata.author);
+    formData.append('narrator', bookMetadata.narrator);
+    formData.append('category', bookMetadata.category);
+    formData.append('description', bookMetadata.description);
+    formData.append('narrationLanguage', bookMetadata.narrationLanguage);
+    formData.append('isSeries', String(bookMetadata.isSeries));
     
-    // if (bookMetadata.isSeries) {
-    //   formData.append('episodeTitle', bookMetadata.seriesInfo.episodeTitle);
-    //   formData.append('episodeNumber', String(bookMetadata.seriesInfo.currentEpisode));
-    //   formData.append('totalEpisodes', String(bookMetadata.seriesInfo.totalEpisodes));
-    // }
+    if (bookMetadata.isSeries) {
+      formData.append('episodeTitle', bookMetadata.seriesInfo.episodeTitle);
+      formData.append('episodeNumber', String(bookMetadata.seriesInfo.currentEpisode));
+      formData.append('totalEpisodes', String(bookMetadata.seriesInfo.totalEpisodes));
+    }
     
-    // try {
-    //   const xhr = new XMLHttpRequest();
+    try {
+      const xhr = new XMLHttpRequest();
       
-    //   xhr.upload.addEventListener('progress', (event) => {
-    //     if (event.lengthComputable) {
-    //       const progressPercent = Math.round((event.loaded / event.total) * 100);
-    //       setUploadProgress(progressPercent);
-    //     }
-    //   });
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const progressPercent = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(progressPercent);
+        }
+      });
       
-    //   xhr.addEventListener('load', () => {
-    //     if (xhr.status >= 200 && xhr.status < 300) {
-    //       fetchRecentUploads()
-    //       fetchStats();
-    //       setUploadStep(4);
-    //     } else {
-    //       throw new Error('Upload failed');
-    //     }
-    //   });
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          fetchRecentUploads()
+          fetchStats();
+          setUploadStep(4);
+        } else {
+          throw new Error('Upload failed');
+        }
+      });
       
-    //   xhr.addEventListener('error', () => {
-    //     throw new Error('Network error during upload');
-    //   });
+      xhr.addEventListener('error', () => {
+        throw new Error('Network error during upload');
+      });
       
-    //   xhr.open('POST', `${API_BASE_URL}/books/upload`);
-    //   const token = localStorage.getItem('token') || "";
+      xhr.open('POST', `${API_BASE_URL}/books/upload`);
+      const token = localStorage.getItem('token') || "";
 
-    //   if (token) {
-    //     xhr.setRequestHeader('x-auth-token', token);
-    //   } else {
-    //     throw new Error('Authentication token is missing');
-    //   }
+      if (token) {
+        xhr.setRequestHeader('x-auth-token', token);
+      } else {
+        throw new Error('Authentication token is missing');
+      }
 
-    //   xhr.send(formData);
+      xhr.send(formData);
       
-    // } catch (error: any) {
-    //   console.error('Error uploading audiobook:', error);
-    //   alert(`Upload failed: ${error.message}`);
-    //   setUploadStep(2);
-    // }
+    } catch (error: any) {
+      console.error('Error uploading audiobook:', error);
+      alert(`Upload failed: ${error.message}`);
+      setUploadStep(2);
+    }
   };
 
   const uploadNewEpisode = async (bookId: string, file: File): Promise<{ success: boolean; id: string; message: string }> => {

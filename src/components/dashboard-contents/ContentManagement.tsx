@@ -192,6 +192,7 @@ export default function ContentManagement() {
         };
       
         const uploadAudiobook = async () => {
+          if (typeof window === 'undefined') return;
           if (!uploadingFile) return;
           
           setUploadProgress(0);
