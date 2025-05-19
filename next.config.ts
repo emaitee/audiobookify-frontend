@@ -88,7 +88,7 @@ const nextConfig: NextConfig = withPWA({
   webpack: (config: WebpackConfig) => {
     config.plugins.push(
       new webpack.DefinePlugin({
-        'process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY': JSON.stringify(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY),
+        'process.env.VAPID_PUBLIC_KEY': JSON.stringify(process.env.VAPID_PUBLIC_KEY),
       })
     );
     return config;

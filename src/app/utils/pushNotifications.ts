@@ -11,7 +11,7 @@ export async function subscribeToPushNotifications(userId: string): Promise<Push
   const registration = await navigator.serviceWorker.ready;
   const rawSubscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    applicationServerKey: process.env.VAPID_PUBLIC_KEY,
   });
 
   const subscription: PushSubscription = {

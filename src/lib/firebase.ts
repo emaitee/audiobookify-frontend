@@ -17,7 +17,7 @@ const messaging = getMessaging(app);
 export const requestFcmToken = async () => {
   try {
     const currentToken = await getToken(messaging, { 
-      vapidKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY 
+      vapidKey: process.env.VAPID_PUBLIC_KEY 
     });
     return currentToken;
   } catch (error) {
