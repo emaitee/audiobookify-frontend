@@ -240,18 +240,7 @@ export default function AudiobookExplorePage() {
       
       {/* Featured Books */}
       <FeaturedBooks
-        featuredBooks={featuredBooks.map(book => ({
-          ...book,
-          bookmarks: (book.bookmarks || []).map(b => ({
-            timestamp: b.position ?? 0,
-            chapter: b.chapter ?? '',
-            note: b.note ?? ''
-          })) as {
-            timestamp: number;
-            chapter: string;
-            note: string;
-          }[]
-        }))}
+        featuredBooks={featuredBooks}
         handlePlay={handlePlay}
       />
 
