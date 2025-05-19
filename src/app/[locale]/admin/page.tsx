@@ -268,6 +268,12 @@ const AdminView = () => {
     analytics: null,
     episodes: null
   });
+
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   // Fetch data when component mounts
   useEffect(() => {
@@ -405,8 +411,7 @@ const AdminView = () => {
   };
 
   const uploadAudiobook = async () => {
-    if (typeof window === 'undefined') return;
-    if (!uploadingFile) return;
+    if (!isClient || !uploadingFile || typeof window === 'undefined') return;
     
     setUploadProgress(0);
     setUploadStep(3);

@@ -78,6 +78,12 @@ export default function ContentManagement() {
           episodes: null
         });
 
+        const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
         const fetchEpisodes = async (bookId: string): Promise<void> => {
             setIsLoading(prev => ({ ...prev, episodes: true }));
             setErrors(prev => ({ ...prev, episodes: null }));
@@ -192,8 +198,7 @@ export default function ContentManagement() {
         };
       
         const uploadAudiobook = async () => {
-          if (typeof window === 'undefined') return;
-          if (!uploadingFile) return;
+         if (!isClient || !uploadingFile || typeof window === 'undefined') return;
           
           setUploadProgress(0);
           setUploadStep(3);
