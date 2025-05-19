@@ -51,7 +51,7 @@ export default function NowPlaying() {
   } = usePlayer();
 
   const router = useRouter();
-  const progressContainerRef = useRef<React.RefObject<HTMLDivElement>>(null);
+  const progressContainerRef = useRef<HTMLDivElement>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
   const [expandedDescription, setExpandedDescription] = useState(false);
@@ -71,7 +71,9 @@ export default function NowPlaying() {
 
   const updateProgress = (e: React.MouseEvent) => {
     if (progressContainerRef.current && currentEpisode) {
-      const rect = progressContainerRef.current.getBoundingClientRect();
+      const container = progressContainerRef.current;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
       const clickPosition = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
       const percentage = (clickPosition / rect.width) * 100;
       seek(percentage);

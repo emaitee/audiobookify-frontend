@@ -13,7 +13,7 @@ interface FullscreenPlayerProps {
   isLiked: boolean;
   currentTime: string;
   remainingTime: string;
-  progressContainerRef: React.RefObject<HTMLDivElement>;
+  progressContainerRef: React.RefObject<HTMLDivElement | null>;
   isDragging: boolean;
   togglePlay: () => void;
   previousTrack: () => void;
