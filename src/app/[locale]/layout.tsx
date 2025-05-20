@@ -21,7 +21,7 @@ import GoogleAnalytics from '@/components/GoogleAnalytics';
 // import { OfflineProvider } from '@/components/OfflineProvider';
 // import OfflineManager from '@/components/offline-manager';
 import NextTopLoader from 'nextjs-toploader';
-import NotificationDisplay from '@/components/NotificationDisplay';
+// import NotificationDisplay from '@/components/NotificationDisplay';
 // import { NotificationProvider } from '@/context/NotificationContext';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
@@ -135,7 +135,7 @@ export default async function RootLocaleLayout({
                       {/* <OfflineProvider> */}
                        {/* <NotificationProvider> */}
                     {children}
-                    <NotificationDisplay />
+                    {/* <NotificationDisplay /> */}
                     <ServiceWorkerRegister />
                     {/* </NotificationProvider> */}
                     {/* </OfflineProvider> */}
