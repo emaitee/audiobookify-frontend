@@ -1,4 +1,5 @@
 // import AdminPage from '@/components/dashboard-contents/AdminPage'
+'use client'
 import React from 'react'
 
 import dynamic from 'next/dynamic'
