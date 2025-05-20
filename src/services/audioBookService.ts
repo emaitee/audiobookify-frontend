@@ -1,4 +1,4 @@
-import { ApprovedItem, RecentUpload, Stats } from "@/app/[locale]/admin/page";
+import { ApprovedItem, RecentUpload, Stats } from "../components/dashboard-contents/AdminPage";
 import { Book, Episode } from "@/app/[locale]/page";
 import { API_BASE_URL, authApiHelper } from "@/app/utils/api";
 
