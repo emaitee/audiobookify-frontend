@@ -1,30 +1,52 @@
 'use client'
 import { useState, useEffect, useTransition } from 'react';
 import { Globe } from 'lucide-react';
-import { useRouter} from '@/i18n/navigation';
-import {Locale} from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
+import { Locale } from 'next-intl';
 import { useParams, usePathname } from 'next/navigation';
 
 export default function LanguageSelectionModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const pathname = usePathname()
-  const params = useParams()
+  const pathname = usePathname();
+  const params = useParams();
   
+  // Check if locale is in params (route)
+  const currentLocale = params?.locale as Locale | undefined;
+
   useEffect(() => {
-    // Check if user has already selected a language
-    const hasSelectedLanguage = localStorage.getItem('selectedLanguage');
-    
-    if (!hasSelectedLanguage) {
-      setIsOpen(true);
+    if (currentLocale) {
+      // If locale is in route, set it to localStorage if not already set
+      const storedLocale = localStorage.getItem('selectedLanguage');
+      if (!storedLocale || storedLocale !== currentLocale) {
+        localStorage.setItem('selectedLanguage', currentLocale);
+      }
+      setIsOpen(false);
+    } else {
+      // If no locale in route, check localStorage
+      const storedLocale = localStorage.getItem('selectedLanguage');
+      if (!storedLocale) {
+        setIsOpen(true);
+      } else {
+        // If locale exists in localStorage but not in route, redirect
+        startTransition(() => {
+          router.replace(
+            // @ts-expect-error -- TypeScript will validate that only known `params`
+            // are used in combination with a given `pathname`. Since the two will
+            // always match for the current route, we can skip runtime checks.
+            { pathname, params },
+            { locale: storedLocale as Locale }
+          );
+        });
+      }
     }
-  }, []);
+  }, [currentLocale, pathname, params, router]);
   
   const languages = [
     { code: 'en', name: 'English', flag: '🇬🇧' },
     { code: 'ha', name: 'Hausa', flag: '🇳🇬' },
-    { code: 'yo', name: 'Yoruba', flag: '🇳🇬' },
+    { code: 'fr', name: 'French', flag: '🇫🇷' },
   ];
   
   interface Language {
@@ -37,14 +59,11 @@ export default function LanguageSelectionModal() {
     const nextLocale = languageCode as Locale;
     localStorage.setItem('selectedLanguage', languageCode);
     setIsOpen(false);
-    // Here you would also set the language in your app's state/context
     startTransition(() => {
       router.replace(
-        // @ts-expect-error -- TypeScript will validate that only known `params`
-        // are used in combination with a given `pathname`. Since the two will
-        // always match for the current route, we can skip runtime checks.
-        {pathname, params},
-        {locale: nextLocale}
+        // @ts-expect-error
+        { pathname, params },
+        { locale: nextLocale }
       );
     });
   };

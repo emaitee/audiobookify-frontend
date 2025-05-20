@@ -1,0 +1,214 @@
+{
+    "Error": {
+      "description": "<p>We've unfortunately encountered an error.</p><p>You can try to <retry>reload the page</retry> you were visiting.</p>",
+      "title": "Something went wrong!"
+    },
+    "LocaleLayout": {
+        "title": "SautiBox: African Voices, Endless Stories",
+        "description": "Listen to stories in your local dialect!"
+    },
+    "LocaleSwitcher": {
+      "label": "Change language",
+      "locale": "{locale, select, ha {🇳🇬 Hausa} en {🇺🇸 English} other {Unknown}}"
+    },
+    "Manifest": {
+      "title": "SautiBox: African Voices, Endless Stories",
+    "description": "Listen to stories in your local dialect!"
+    },
+    "Navigation": {
+      "home": "Home",
+      "library": "Library",
+      "search": "Search",
+      "profile": "Profile",
+      "analytics": "Analytics",
+      "content": "Content",
+      "admin": "Admin"
+    },
+    "NotFoundPage": {
+      "description": "Please double-check the browser address bar or use the navigation to go to a known page.",
+      "title": "Page not found"
+    },
+    "HomePage": {
+        "common": {
+          "viewAll": "View All",
+          "explore": "Explore",
+          "history": "History",
+          "viewList": "View List",
+          "viewMore": "View More",
+          "seeAll":"See All",
+          "listens": "Listens",
+          "noBioAvailable": "No biography available"
+        },
+        "featured": {
+          "label": "FEATURED",
+          "listenNow": "Listen Now",
+          "reviews": "Reviews",
+          "sectionTitle": "Featured Audiobooks"
+        },
+        "sections": {
+          "newReleases": "New Releases",
+          "curatedCollections": "Curated Collections",
+          "continueListening": "Continue Listening",
+          "browseCategories": "Browse Categories",
+          "authorSpotlight": "Author Spotlight",
+          "narratorSpotlight": "Narrator Spotlight",
+          "recommendedForYou": "Recommended for You",
+          "trendingNow": "Trending Now"
+        },
+        "collections": {
+          "bestOfTheYear": "Best of 2025",
+          "bestOfTheYearDesc": "Top-rated titles this year",
+          "staffPicks": "Staff Picks",
+          "staffPicksDesc": "Curated by our editors",
+          "awardWinners": "Award Winners",
+          "awardWinnersDesc": "Recognized excellence",
+          "hiddenGems": "Hidden Gems",
+          "hiddenGemsDesc": "Undiscovered treasures"
+        },
+        "continueListening": {
+          "completed": "% completed",
+          "noListens": "No recent listens"
+        },
+        "categories": {
+          "fiction": "Fiction",
+          "mystery": "Mystery",
+          "romance": "Romance",
+          "history": "History",
+          "business": "Business",
+          "fantasy": "Fantasy",
+          "horror": "Horror",
+          "comedy": "Comedy"
+        },
+        "errors": {
+          "failedToLoadNewReleases": "Failed to load new releases",
+          "failedToLoadFeatured": "Failed to load featured books",
+          "failedToLoadContinue": "Failed to load continue listening",
+          "offlineNoData": "Offline - No cached data available",
+          "noNewReleases": "No new releases"
+        },
+        "offline": {
+          "message": "You are currently offline",
+          "showingCachedData": "Showing last cached data"
+        }
+
+      },
+      "ListViewPage": {
+          "allGenres": "All Genres",
+          "allNarrators": "All Narrators",
+          "discover": "Discover our audiobook collection",
+          "searchPlaceholder": "Search by title, author, or narrator",
+          "genres": {
+            "fiction": "Fiction",
+            "nonFiction": "Non-Fiction",
+            "thriller": "Thriller",
+            "sciFi": "Sci-Fi",
+            "selfHelp": "Self-Help",
+            "memoir": "Memoir",
+            "historicalFiction": "Historical Fiction",
+            "finance": "Finance"
+          },
+          "collectionTitles": {
+            "recentlyAdded": "Recently Added",
+            "mostPopular": "Most Popular",
+            "topRated": "Top Rated",
+            "categoryAudiobooks": "{category} Audiobooks",
+            "newReleases": "New Releases",
+            "featuredAudiobooks": "Featured Audiobooks",
+            "bestOfYear": "Best of {year}",
+            "staffPicks": "Staff Picks",
+            "awardWinners": "Award Winners",
+            "hiddenGems": "Hidden Gems",
+            "default": "Audiobook Collection"
+          },
+          "buttons": {
+            "back": "Back",
+            "retry": "Retry"
+          },
+          "sort": {
+            "sortBy": "Sort by"
+          },
+          "filter": {
+            "filterLabel": "Filter",
+            "genre": "Genre",
+            "narrator": "Narrator",
+            "releaseDate": "Release date",
+            "dateOptions": {
+              "any": "Any time",
+              "lastWeek": "Last week",
+              "lastMonth": "Last month",
+              "lastThreeMonths": "Last 3 months",
+              "lastYear": "Last year"
+            }
+          },
+          "results": {
+            "audiobook": "audiobook",
+            "audiobooks": "audiobooks",
+            "found": "found",
+            "in": "in"
+          },
+          "noResults": {
+            "title": "No audiobooks found",
+            "message": "Try adjusting your search or filters to find what you're looking for."
+          },
+          "bookItem": {
+            "coverAlt": "book cover",
+            "narratedBy": "Narrated by",
+            "noRating": "N/A"
+          },
+          "pagination": {
+            "previous": "Previous",
+            "next": "Next"
+          },
+          "errors": {
+            "fetchFailed": "Failed to fetch audiobooks",
+            "loadFailed": "Failed to load audiobooks",
+            "errorLoadingContent": "Error Loading Content",
+            "offlineNoData": "Offline - No cached data available for this view"
+          },
+          "offline": {
+            "message": "You are currently offline",
+            "showingCachedData": "Showing last cached data"
+          }
+      },
+    "Filters": {
+      "genre": "Genre",
+      "narrator": "Narrator",
+      "dateRange": "Date Range",
+      "sortBy": "Sort By",
+      "anyTime": "Any Time",
+      "retry": "Try Again",
+      "allGenres": "All Genres",
+      "allNarrators": "All Narrators",
+      "errors": {
+        "loadFailed": "Failed to load filters. Please check your connection."
+      }
+    },
+    "SearchPage": {
+        "searchPlaceholder": "Search by title, author, or narrator",
+        "noResults": {
+          "title": "No results found",
+          "message": "Try adjusting your search or filters to find what you're looking for."
+        },
+        "results": {
+          "audiobook": "audiobook",
+          "audiobooks": "audiobooks",
+          "found": "found",
+          "in": "in"
+        },
+        "bookItem": {
+          "coverAlt": "book cover",
+          "narratedBy": "Narrated by",
+          "noRating": "N/A"
+        },
+        "errors": {
+          "fetchFailed": "Failed to fetch audiobooks",
+          "loadFailed": "Failed to load audiobooks",
+          "errorLoadingContent": "Error Loading Content",
+          "offlineNoData": "Offline - No cached data available for this view"
+        },
+        "offline": {
+          "message": "You are currently offline",
+          "showingCachedData": "Showing last cached data"
+        }
+    }
+  }

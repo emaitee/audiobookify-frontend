@@ -1,7 +1,7 @@
 'use client'
 
-import { BookMetadata } from '@/app/[locale]/admin/page';
 import {  Upload, X, Check,  FileText } from 'lucide-react';
+import { BookMetadata } from './AdminPage';
 
 const narrationLanguages = ["English", "Hausa", "Yoruba"]
 
