@@ -22,7 +22,7 @@ import GoogleAnalytics from '@/components/GoogleAnalytics';
 // import OfflineManager from '@/components/offline-manager';
 import NextTopLoader from 'nextjs-toploader';
 import NotificationDisplay from '@/components/NotificationDisplay';
-import { NotificationProvider } from '@/context/NotificationContext';
+// import { NotificationProvider } from '@/context/NotificationContext';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
 type Props = {
@@ -133,11 +133,11 @@ export default async function RootLocaleLayout({
                     {/* Main Content Wrapper - adjusts based on screen size */}
                     <AppWrapper>
                       {/* <OfflineProvider> */}
-                       <NotificationProvider>
+                       {/* <NotificationProvider> */}
                     {children}
                     <NotificationDisplay />
                     <ServiceWorkerRegister />
-                    </NotificationProvider>
+                    {/* </NotificationProvider> */}
                     {/* </OfflineProvider> */}
                     </AppWrapper>
 
