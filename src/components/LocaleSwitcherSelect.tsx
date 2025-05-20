@@ -3,7 +3,7 @@
 import clsx from 'clsx';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Locale } from 'next-intl';
-import { ChangeEvent, ReactNode, useTransition } from 'react';
+import { ChangeEvent, ReactNode, Suspense, useTransition } from 'react';
 import { usePathname, useRouter } from '@/i18n/navigation';
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
   label: string;
 };
 
-export default function LocaleSwitcherSelect({
+function Component({
   children,
   defaultValue,
   label
@@ -59,4 +59,16 @@ export default function LocaleSwitcherSelect({
       <span className="pointer-events-none absolute right-2 top-[8px]">⌄</span>
     </label>
   );
+}
+
+export default function LocaleSwitcherSelect ({
+  children,
+  defaultValue,
+  label
+}: Props) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Component children={children} defaultValue={defaultValue} label={label}  />
+    </Suspense>
+  )
 }
