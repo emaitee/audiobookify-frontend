@@ -1,9 +1,16 @@
-import AdminPage from '@/components/dashboard-contents/AdminPage'
+// import AdminPage from '@/components/dashboard-contents/AdminPage'
 import React from 'react'
+
+import dynamic from 'next/dynamic'
+ 
+const DynamicAdminPageWithNoSSR = dynamic(
+  () => import('../../../components/dashboard-contents/AdminPage'),
+  { ssr: false }
+)
 
 function AdminView() {
   return (
-    <AdminPage />
+    <DynamicAdminPageWithNoSSR />
   )
 }
 
